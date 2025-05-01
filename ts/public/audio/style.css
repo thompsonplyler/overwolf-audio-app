@@ -1,0 +1,12 @@
+.hidden-video {
+    display: none
+}
+
+.shown-video {
+    display:flex;
+    position: relative;
+    bottom: 0px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
