@@ -14,6 +14,11 @@ const PURCHASE_REMINDER_DELAY_SECONDS_CONFIG = 30; // 30 seconds (Original)
 const TEST_REMINDER_DELAY_SECONDS = 30; // 5 seconds for testing (longer than 2 to avoid rapid fire)
 const CURRENT_REMINDER_DELAY_SECONDS = TEST_REMINDER_DELAY_SECONDS; // Use this constant
 
+// --- High Gold Constants ---
+const HIGH_GOLD_THRESHOLD = 3000;
+const HIGH_GOLD_INTERVAL_SECONDS = 60;
+const HIGH_GOLD_AUDIO_FILE = 'icarus_song_001.mp3';
+
 // --- Item Definitions (Based on user input/logic) ---
 const PRICE = {
   lichbane: 3200,
@@ -123,6 +128,10 @@ class InGame extends AppWindow {
   private _currentTargetItemId: number | null = null;
   // Game time when the current target was first suggested
   private _currentTargetSuggestionTime: number | null = null;
+
+  // --- High Gold State ---
+  // Game time when the high gold cue was last played
+  private _lastHighGoldCueTime: number | null = null;
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -259,9 +268,29 @@ class InGame extends AppWindow {
       }
     }
 
-    // --- Call Single Target Check Function --- 
+    // --- 3. Call Audio Cue Checks --- 
     if (this._playerState.summonerName && this._playerState.items && this._playerState.gold >= 0 && this._playerState.gameTime > 0) {
-      this.checkTargetItem();
+
+      // Check high gold condition first
+      const isHighGoldActive = this.checkHighGold();
+      console.log(`[AudioCheck Pre-Cond] isHighGoldActive: ${isHighGoldActive}`); // Log result
+
+      // Only check for item targets if high gold cue IS NOT active
+      if (!isHighGoldActive) {
+        console.log("[AudioCheck Pre-Cond] High gold NOT active, checking target item...");
+        this.checkTargetItem();
+      } else {
+        console.log("[AudioCheck Pre-Cond] High gold IS active, skipping target item check.");
+        // Clear any existing item target if high gold takes priority
+        if (this._currentTargetItemId !== null) {
+          console.log("[AudioCheck Pre-Cond] Clearing existing item target due to high gold.");
+          this._currentTargetItemId = null;
+          this._currentTargetSuggestionTime = null;
+        }
+      }
+
+      // NOTE: Ward checks would go here and run regardless of isHighGoldActive
+      // this.checkWardStatus(); 
     }
   }
 
@@ -500,6 +529,45 @@ class InGame extends AppWindow {
       console.error(`Error playing audio ${fileName} (${audioPath}):`, e);
     });
     // No need to manage this audio object further, let garbage collection handle it.
+  }
+
+  // --- High Gold Check Logic --- 
+  /**
+   * Checks if gold is above threshold and plays audio cue periodically.
+   * @returns true if gold is high (regardless of whether audio played due to cooldown), false otherwise.
+   */
+  private checkHighGold(): boolean {
+    if (!this._playerState || this._playerState.gold < 0 || this._playerState.gameTime <= 0) {
+      return false; // Not enough state info yet
+    }
+
+    const playerGold = this._playerState.gold;
+    const currentGameTime = this._playerState.gameTime;
+    const isCurrentlyHighGold = playerGold > HIGH_GOLD_THRESHOLD;
+
+    if (isCurrentlyHighGold) {
+      console.log(`[HighGold] Gold (${playerGold}) is above threshold (${HIGH_GOLD_THRESHOLD}).`);
+      // Check if it's the first time or if interval has passed
+      const timeCheckPassed =
+        this._lastHighGoldCueTime === null ||
+        currentGameTime >= (this._lastHighGoldCueTime + HIGH_GOLD_INTERVAL_SECONDS);
+
+      console.log(`[HighGold] TimeCheck: ${currentGameTime} >= (${this._lastHighGoldCueTime} + ${HIGH_GOLD_INTERVAL_SECONDS}) -> ${timeCheckPassed}`);
+
+      if (timeCheckPassed) {
+        console.log(`[HighGold] >>> PLAYING HIGH GOLD CUE <<<`);
+        this.playAudio(HIGH_GOLD_AUDIO_FILE);
+        this._lastHighGoldCueTime = currentGameTime; // Update last played time
+      }
+      return true; // Return true because gold IS high
+    } else {
+      // Gold is below threshold
+      if (this._lastHighGoldCueTime !== null) {
+        console.log(`[HighGold] Gold dropped below threshold. Resetting timer.`);
+        this._lastHighGoldCueTime = null; // Reset timer if gold drops
+      }
+      return false; // Return false because gold is NOT high
+    }
   }
 }
 
