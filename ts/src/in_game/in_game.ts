@@ -19,6 +19,11 @@ const HIGH_GOLD_THRESHOLD = 3000;
 const HIGH_GOLD_INTERVAL_SECONDS = 60;
 const HIGH_GOLD_AUDIO_FILE = 'icarus_song_001.mp3';
 
+// --- Ward Constants ---
+const CONTROL_WARD_ID = 2055;
+const ENEMY_WARD_PURCHASED_AUDIO = '<champion_name>_ward_purchased.mp3'; // Placeholder template
+const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholder template
+
 // --- Item Definitions (Based on user input/logic) ---
 const PRICE = {
   lichbane: 3200,
@@ -28,7 +33,7 @@ const PRICE = {
   armguard: 1600,
   jewel: 1100,
   wand: 850,
-  rod: 1250,
+  rod: 1200,
   sheen: 900,
   wisp: 850,
   alt: 1100,
@@ -118,8 +123,8 @@ class InGame extends AppWindow {
   private _infoLog: HTMLElement;
 
   // --- State Variables ---
-  private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number } =
-    { gold: 0, items: [], summonerName: null, gameTime: 0 };
+  private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null } =
+    { gold: 0, items: [], summonerName: null, gameTime: 0, teamId: null };
   private _lastLoggedInventoryString: string = '';
   private _lastLoggedGold: number = -1;
 
@@ -132,6 +137,14 @@ class InGame extends AppWindow {
   // --- High Gold State ---
   // Game time when the high gold cue was last played
   private _lastHighGoldCueTime: number | null = null;
+
+  // State for all players' data
+  private _allPlayersState: any[] = [];
+  private _lastLoggedAllPlayersString: string = ''; // Track changes to this array
+
+  // --- Enemy Ward State ---
+  // Stores previous ward count for each enemy champion
+  private _enemyWardCounts: Record<string, number> = {}; // Key: ChampionName, Value: Count
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -172,6 +185,8 @@ class InGame extends AppWindow {
     let goldChanged = false;
     let itemsChanged = false;
     let nameFound = false;
+    let allPlayersChanged = false; // Flag for the *entire* all_players array
+    let teamFound = false; // Flag for initial team discovery
 
     // --- 1. Update State from Parsed Nested JSON --- 
     try {
@@ -207,16 +222,49 @@ class InGame extends AppWindow {
 
       // --- Process all_players --- 
       if (this._playerState.summonerName && liveClientData && typeof liveClientData.all_players === 'string') {
-        // ... (Parsing logic for allPlayersArray) ...
         try {
           const allPlayersArray = JSON.parse(liveClientData.all_players);
           if (Array.isArray(allPlayersArray)) {
-            const playerData = allPlayersArray.find(p => p.summonerName === this._playerState.summonerName);
-            if (playerData && Array.isArray(playerData.items)) {
-              const currentItemsString = JSON.stringify(playerData.items);
-              if (currentItemsString !== JSON.stringify(this._playerState.items)) {
-                this._playerState.items = playerData.items;
-                itemsChanged = true;
+            // Store the whole array
+            const currentAllPlayersString = JSON.stringify(allPlayersArray);
+            if (currentAllPlayersString !== this._lastLoggedAllPlayersString) {
+              this._allPlayersState = allPlayersArray; // Update state
+              this._lastLoggedAllPlayersString = currentAllPlayersString; // Update tracker
+              allPlayersChanged = true; // Mark change
+              console.log("Updated _allPlayersState");
+            }
+
+            // Also update the *player's specific* items if needed
+            if (this._playerState.summonerName) {
+              const playerData = allPlayersArray.find(p => p.summonerName === this._playerState.summonerName);
+              if (playerData && Array.isArray(playerData.items)) {
+                const currentItemsString = JSON.stringify(playerData.items);
+                if (currentItemsString !== JSON.stringify(this._playerState.items)) {
+                  this._playerState.items = playerData.items;
+                  itemsChanged = true;
+                  // console.log("Updated items from parsed all_players:", currentItemsString);
+                }
+              }
+            }
+
+            // Find player data to update specific items and teamId
+            if (this._playerState.summonerName) {
+              const playerData = allPlayersArray.find(p => p.summonerName === this._playerState.summonerName);
+              if (playerData) {
+                // Update items
+                if (Array.isArray(playerData.items)) {
+                  const currentItemsString = JSON.stringify(playerData.items);
+                  if (currentItemsString !== JSON.stringify(this._playerState.items)) {
+                    this._playerState.items = playerData.items;
+                    itemsChanged = true;
+                  }
+                }
+                // Update teamId if not known or changed
+                if (playerData.team && playerData.team !== this._playerState.teamId) {
+                  this._playerState.teamId = playerData.team;
+                  teamFound = true; // Mark change for potential UI update
+                  console.log(`Player team ID set to: ${this._playerState.teamId}`);
+                }
               }
             }
           }
@@ -251,18 +299,20 @@ class InGame extends AppWindow {
 
     // --- 2. Update UI Log --- 
     const goldChangedForUI = this._playerState.gold !== this._lastLoggedGold;
-    const itemsStringForUI = JSON.stringify(this._playerState.items);
-    const itemsChangedForUI = itemsStringForUI !== this._lastLoggedInventoryString;
-
-    const shouldUpdateUI = goldChangedForUI || itemsChangedForUI || nameFound;
+    const itemsChangedForUI = JSON.stringify(this._playerState.items) !== this._lastLoggedInventoryString;
+    const shouldUpdateUI = goldChangedForUI || itemsChangedForUI || nameFound || allPlayersChanged || teamFound;
 
     if (shouldUpdateUI) {
       if (goldChangedForUI) this._lastLoggedGold = this._playerState.gold;
-      if (itemsChangedForUI) this._lastLoggedInventoryString = itemsStringForUI;
+      if (itemsChangedForUI) this._lastLoggedInventoryString = JSON.stringify(this._playerState.items);
 
       if (this._infoLog) {
         this._infoLog.innerHTML = '';
-        this.logLine(this._infoLog, this._playerState.items, false);
+        // Filter _allPlayersState before logging
+        const enemyPlayers = this._allPlayersState.filter(p =>
+          p.team && this._playerState.teamId && p.team !== this._playerState.teamId
+        );
+        this.logLine(this._infoLog, enemyPlayers, false); // Log only enemies
         this.logLine(this._infoLog, `Gold: ${this._playerState.gold}`, false);
         this.logLine(this._infoLog, `GameTime: ${this._playerState.gameTime}s`, false);
       }
@@ -291,6 +341,7 @@ class InGame extends AppWindow {
 
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
       // this.checkWardStatus(); 
+      this.checkEnemyWardChanges(); // Call the new ward check function
     }
   }
 
@@ -520,15 +571,16 @@ class InGame extends AppWindow {
     const audioPath = `../../audio/${fileName}`;
     console.log(`Attempting to play audio: ${audioPath}`);
 
-    // Create a NEW Audio object each time
     const audio = new Audio(audioPath);
 
-    // Play and handle errors locally
     audio.play().catch(e => {
-      // Log errors without stopping execution
-      console.error(`Error playing audio ${fileName} (${audioPath}):`, e);
+      // Make error more prominent
+      console.error(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+      console.error(`!!! ERROR PLAYING AUDIO FILE: ${fileName} !!!`);
+      console.error(`Path: ${audioPath}`);
+      console.error(`Error Details:`, e);
+      console.error(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
     });
-    // No need to manage this audio object further, let garbage collection handle it.
   }
 
   // --- High Gold Check Logic --- 
@@ -537,16 +589,20 @@ class InGame extends AppWindow {
    * @returns true if gold is high (regardless of whether audio played due to cooldown), false otherwise.
    */
   private checkHighGold(): boolean {
+    // Re-add entry log
+    console.log("[HighGold] Running check...");
+
     if (!this._playerState || this._playerState.gold < 0 || this._playerState.gameTime <= 0) {
-      return false; // Not enough state info yet
+      console.log("[HighGold] Invalid state, skipping.");
+      return false;
     }
 
     const playerGold = this._playerState.gold;
     const currentGameTime = this._playerState.gameTime;
     const isCurrentlyHighGold = playerGold > HIGH_GOLD_THRESHOLD;
+    console.log(`[HighGold] Current Gold: ${playerGold}, Threshold: ${HIGH_GOLD_THRESHOLD}, Is High: ${isCurrentlyHighGold}`); // Log current state
 
     if (isCurrentlyHighGold) {
-      console.log(`[HighGold] Gold (${playerGold}) is above threshold (${HIGH_GOLD_THRESHOLD}).`);
       // Check if it's the first time or if interval has passed
       const timeCheckPassed =
         this._lastHighGoldCueTime === null ||
@@ -555,19 +611,75 @@ class InGame extends AppWindow {
       console.log(`[HighGold] TimeCheck: ${currentGameTime} >= (${this._lastHighGoldCueTime} + ${HIGH_GOLD_INTERVAL_SECONDS}) -> ${timeCheckPassed}`);
 
       if (timeCheckPassed) {
-        console.log(`[HighGold] >>> PLAYING HIGH GOLD CUE <<<`);
+        console.log(`[HighGold] >>> PLAYING HIGH GOLD CUE <<< (Time check passed)`); // Add reason
         this.playAudio(HIGH_GOLD_AUDIO_FILE);
-        this._lastHighGoldCueTime = currentGameTime; // Update last played time
+        this._lastHighGoldCueTime = currentGameTime;
+      } else {
+        console.log("[HighGold] Time check failed (on cooldown)."); // Log cooldown state
       }
-      return true; // Return true because gold IS high
+      return true;
     } else {
       // Gold is below threshold
       if (this._lastHighGoldCueTime !== null) {
         console.log(`[HighGold] Gold dropped below threshold. Resetting timer.`);
         this._lastHighGoldCueTime = null; // Reset timer if gold drops
       }
-      return false; // Return false because gold is NOT high
+      return false;
     }
+  }
+
+  // --- Enemy Ward Check Logic --- 
+  private checkEnemyWardChanges(): void {
+    if (!this._playerState?.teamId || !this._allPlayersState || this._allPlayersState.length === 0) {
+      // console.log("[WardCheck] Skipping: Missing player team or allPlayers data.");
+      return; // Need team ID and player data
+    }
+
+    console.log("[WardCheck] Running check...");
+    const currentEnemyWards: Record<string, number> = {};
+
+    // Calculate current ward counts for all enemies
+    for (const player of this._allPlayersState) {
+      // Check if enemy and has needed data
+      if (player.team && player.team !== this._playerState.teamId && player.championName) {
+        const champName = player.championName;
+        let currentWardCount = 0;
+        if (Array.isArray(player.items)) {
+          const wardItem = player.items.find(item => item.itemID === CONTROL_WARD_ID);
+          currentWardCount = wardItem ? wardItem.count : 0;
+        }
+        currentEnemyWards[champName] = currentWardCount;
+      }
+    }
+
+    // Compare current counts with previous counts
+    for (const champName in currentEnemyWards) {
+      const currentCount = currentEnemyWards[champName];
+      const previousCount = this._enemyWardCounts[champName] ?? 0; // Default to 0 if new enemy
+
+      console.log(`[WardCheck] ${champName}: Prev=${previousCount}, Curr=${currentCount}`);
+
+      if (currentCount > previousCount) {
+        console.log(`[WardCheck] >>> ${champName} PURCHASED/GAINED WARD <<<`);
+        const audioFile = ENEMY_WARD_PURCHASED_AUDIO.replace('<champion_name>', champName);
+        this.playAudio(audioFile);
+      } else if (currentCount < previousCount) {
+        console.log(`[WardCheck] >>> ${champName} PLACED/LOST WARD <<<`);
+        const audioFile = ENEMY_WARD_PLACED_AUDIO.replace('<champion_name>', champName);
+        this.playAudio(audioFile);
+      }
+
+      // Update the stored count for the next check
+      this._enemyWardCounts[champName] = currentCount;
+    }
+
+    // Optional: Clean up enemies no longer in the game? (More complex state management)
+    // for (const champName in this._enemyWardCounts) {
+    //     if (!currentEnemyWards.hasOwnProperty(champName)) {
+    //         delete this._enemyWardCounts[champName];
+    //     }
+    // }
+    console.log("[WardCheck] Finished check.");
   }
 }
 
