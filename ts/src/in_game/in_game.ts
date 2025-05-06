@@ -206,14 +206,18 @@ class InGame extends AppWindow {
       if (liveClientData && typeof liveClientData.active_player === 'string') {
         try {
           const activePlayerData = JSON.parse(liveClientData.active_player);
-          // ... (Update summonerName, gold) ...
+          // Update Summoner Name (only if currently null)
           if (!this._playerState.summonerName && activePlayerData.summonerName) {
             this._playerState.summonerName = activePlayerData.summonerName;
             nameFound = true;
           }
-          if (activePlayerData.currentGold !== undefined && activePlayerData.currentGold !== this._playerState.gold) {
-            this._playerState.gold = activePlayerData.currentGold;
-            goldChanged = true;
+          // Update Gold (check for NaN)
+          if (activePlayerData.currentGold !== undefined) {
+            const currentGoldNum = Number(activePlayerData.currentGold); // Convert safely
+            if (!isNaN(currentGoldNum) && currentGoldNum !== this._playerState.gold) {
+              this._playerState.gold = currentGoldNum;
+              goldChanged = true;
+            }
           }
         } catch (parseError) {
           console.error("[active_player check] Failed to parse active_player JSON string:", parseError); // Simplified error
@@ -236,36 +240,39 @@ class InGame extends AppWindow {
 
             // Also update the *player's specific* items if needed
             if (this._playerState.summonerName) {
+              console.log(`[ItemUpdate] Trying to find player data for summoner: ${this._playerState.summonerName}`);
               const playerData = allPlayersArray.find(p => p.summonerName === this._playerState.summonerName);
-              if (playerData && Array.isArray(playerData.items)) {
-                const currentItemsString = JSON.stringify(playerData.items);
-                if (currentItemsString !== JSON.stringify(this._playerState.items)) {
-                  this._playerState.items = playerData.items;
-                  itemsChanged = true;
-                  // console.log("Updated items from parsed all_players:", currentItemsString);
-                }
-              }
-            }
+              console.log("[ItemUpdate] Player data found in all_players:", playerData); // Log found player data
 
-            // Find player data to update specific items and teamId
-            if (this._playerState.summonerName) {
-              const playerData = allPlayersArray.find(p => p.summonerName === this._playerState.summonerName);
               if (playerData) {
-                // Update items
+                console.log("[ItemUpdate] Checking playerData.items...");
                 if (Array.isArray(playerData.items)) {
+                  console.log("[ItemUpdate] playerData.items IS an array. Comparing strings...");
                   const currentItemsString = JSON.stringify(playerData.items);
-                  if (currentItemsString !== JSON.stringify(this._playerState.items)) {
+                  const previousItemsString = JSON.stringify(this._playerState.items);
+                  console.log(`[ItemUpdate] Previous items string: ${previousItemsString}`);
+                  console.log(`[ItemUpdate] Current items string: ${currentItemsString}`);
+                  if (currentItemsString !== previousItemsString) {
+                    console.log("[ItemUpdate] Item strings DIFFER. Updating _playerState.items.");
                     this._playerState.items = playerData.items;
                     itemsChanged = true;
+                  } else {
+                    console.log("[ItemUpdate] Item strings are the SAME. No update needed.");
                   }
+                } else {
+                  console.warn("[ItemUpdate] playerData.items is NOT an array:", playerData.items);
                 }
-                // Update teamId if not known or changed
-                if (playerData.team && playerData.team !== this._playerState.teamId) {
+                // Update teamId (check for valid string)
+                if (playerData && typeof playerData.team === 'string' && playerData.team && playerData.team !== this._playerState.teamId) {
                   this._playerState.teamId = playerData.team;
-                  teamFound = true; // Mark change for potential UI update
+                  teamFound = true;
                   console.log(`Player team ID set to: ${this._playerState.teamId}`);
                 }
+              } else {
+                console.warn("[ItemUpdate] Player data NOT found in all_players array for name:", this._playerState.summonerName);
               }
+            } else {
+              console.warn("[ItemUpdate] Cannot update player items because summonerName is still null.");
             }
           }
         } catch (parseError) {
@@ -282,8 +289,8 @@ class InGame extends AppWindow {
             const innerGoldData = JSON.parse(gameInfoGoldString);
             const currentGoldString = innerGoldData?.gold;
             if (currentGoldString !== undefined) {
-              const currentGold = parseInt(currentGoldString) || 0;
-              if (currentGold !== this._playerState.gold) {
+              const currentGold = parseInt(currentGoldString); // parseInt handles potential non-numbers
+              if (!isNaN(currentGold) && currentGold !== this._playerState.gold) { // Check isNaN
                 this._playerState.gold = currentGold;
                 goldChanged = true;
                 console.log("Updated gold from game_info:", this._playerState.gold);
@@ -319,8 +326,14 @@ class InGame extends AppWindow {
     }
 
     // --- 3. Call Audio Cue Checks --- 
-    if (this._playerState.summonerName && this._playerState.items && this._playerState.gold >= 0 && this._playerState.gameTime > 0) {
+    // Add more robust check
+    const canRunAudioChecks =
+      this._playerState.summonerName &&
+      this._playerState.items &&
+      !isNaN(this._playerState.gold) && this._playerState.gold >= 0 &&
+      !isNaN(this._playerState.gameTime) && this._playerState.gameTime > 0;
 
+    if (canRunAudioChecks) {
       // Check high gold condition first
       const isHighGoldActive = this.checkHighGold();
       console.log(`[AudioCheck Pre-Cond] isHighGoldActive: ${isHighGoldActive}`); // Log result
@@ -342,6 +355,8 @@ class InGame extends AppWindow {
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
       // this.checkWardStatus(); 
       this.checkEnemyWardChanges(); // Call the new ward check function
+    } else {
+      console.log("[AudioCheck Pre-Cond] SKIPPING audio checks due to invalid state:", JSON.stringify(this._playerState));
     }
   }
 
@@ -353,11 +368,9 @@ class InGame extends AppWindow {
         if (event.name === 'match_clock') {
           try {
             const newGameTime = parseInt(event.data);
-            if (!isNaN(newGameTime) && newGameTime !== this._playerState.gameTime) {
-              // console.log(`[onNewEvents] Updating gameTime to ${newGameTime} from match_clock`); // Optional log
+            // Add isNaN check here too
+            if (!isNaN(newGameTime) && newGameTime >= 0 && newGameTime !== this._playerState.gameTime) {
               this._playerState.gameTime = newGameTime;
-              // We could potentially trigger a UI update here too if needed,
-              // but let's rely on gold/item changes for now to avoid too much flicker.
             }
           } catch (err) {
             console.error("Error parsing match_clock data:", event.data, err);
@@ -445,7 +458,11 @@ class InGame extends AppWindow {
 
   // --- NEW Single Target Check Logic --- 
   private checkTargetItem(): void {
-    if (!this._playerState || !this._playerState.items) return;
+    // Add validation at the start
+    if (!this._playerState || isNaN(this._playerState.gold) || isNaN(this._playerState.gameTime) || !Array.isArray(this._playerState.items)) {
+      console.warn("[TargetCheck] Invalid state detected, skipping check.", this._playerState);
+      return;
+    }
 
     const playerGold = this._playerState.gold;
     const currentGameTime = this._playerState.gameTime;
@@ -589,13 +606,14 @@ class InGame extends AppWindow {
    * @returns true if gold is high (regardless of whether audio played due to cooldown), false otherwise.
    */
   private checkHighGold(): boolean {
-    // Re-add entry log
-    console.log("[HighGold] Running check...");
-
-    if (!this._playerState || this._playerState.gold < 0 || this._playerState.gameTime <= 0) {
-      console.log("[HighGold] Invalid state, skipping.");
+    // Add validation at the start
+    if (!this._playerState || isNaN(this._playerState.gold) || isNaN(this._playerState.gameTime) || this._playerState.gameTime <= 0) {
+      console.warn("[HighGold] Invalid state detected, skipping check.", this._playerState);
       return false;
     }
+
+    // Re-add entry log
+    console.log("[HighGold] Running check...");
 
     const playerGold = this._playerState.gold;
     const currentGameTime = this._playerState.gameTime;
@@ -630,9 +648,10 @@ class InGame extends AppWindow {
 
   // --- Enemy Ward Check Logic --- 
   private checkEnemyWardChanges(): void {
-    if (!this._playerState?.teamId || !this._allPlayersState || this._allPlayersState.length === 0) {
-      // console.log("[WardCheck] Skipping: Missing player team or allPlayers data.");
-      return; // Need team ID and player data
+    // Add validation at the start
+    if (!this._playerState?.teamId || !this._allPlayersState || this._allPlayersState.length === 0 || !this._playerState.summonerName) {
+      console.warn("[WardCheck] Invalid state detected (teamId, allPlayers, name), skipping check.", this._playerState, this._allPlayersState);
+      return;
     }
 
     console.log("[WardCheck] Running check...");
