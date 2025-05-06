@@ -1,0 +1,1 @@
+- Get a copy of the full game object for players' inventories. We had a lot of difficulty finding it, and I want to make sure it's explicit and clear for future instances of AI-assisted coding.

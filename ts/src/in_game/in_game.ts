@@ -202,7 +202,7 @@ class InGame extends AppWindow {
       }
       // --- End high-level logging ---
 
-      // --- Process active_player --- 
+      // --- Process active_player (stringified JSON) --- 
       if (liveClientData && typeof liveClientData.active_player === 'string') {
         try {
           const activePlayerData = JSON.parse(liveClientData.active_player);
@@ -220,11 +220,12 @@ class InGame extends AppWindow {
             }
           }
         } catch (parseError) {
-          console.error("[active_player check] Failed to parse active_player JSON string:", parseError); // Simplified error
+          // Log the string that failed parsing
+          console.error("[active_player parse ERROR] Failed to parse string:", liveClientData.active_player, "Error:", parseError);
         }
       }
 
-      // --- Process all_players --- 
+      // --- Process all_players (stringified JSON Array) --- 
       if (this._playerState.summonerName && liveClientData && typeof liveClientData.all_players === 'string') {
         try {
           const allPlayersArray = JSON.parse(liveClientData.all_players);
@@ -276,13 +277,14 @@ class InGame extends AppWindow {
             }
           }
         } catch (parseError) {
-          console.error("[all_players check] Failed to parse all_players JSON string:", parseError); // Simplified error
+          // Log the string that failed parsing
+          console.error("[all_players parse ERROR] Failed to parse string:", liveClientData.all_players, "Error:", parseError);
         }
       }
 
       // --- Fallback Gold Check (game_info) --- 
       if (!goldChanged) {
-        // ... (Existing game_info.gold parsing logic, setting goldChanged) ...
+        // ... (get gameInfoGoldString) ...
         const gameInfoGoldString = info?.game_info?.gold;
         if (typeof gameInfoGoldString === 'string') {
           try {
@@ -296,7 +298,10 @@ class InGame extends AppWindow {
                 console.log("Updated gold from game_info:", this._playerState.gold);
               }
             }
-          } catch (parseError) { /* Ignore */ }
+          } catch (parseError) {
+            // Log the string that failed parsing
+            console.error("[game_info gold parse ERROR] Failed to parse string:", gameInfoGoldString, "Error:", parseError);
+          }
         }
       }
 
@@ -314,19 +319,17 @@ class InGame extends AppWindow {
       if (itemsChangedForUI) this._lastLoggedInventoryString = JSON.stringify(this._playerState.items);
 
       if (this._infoLog) {
-        this._infoLog.innerHTML = '';
-        // Filter _allPlayersState before logging
-        const enemyPlayers = this._allPlayersState.filter(p =>
-          p.team && this._playerState.teamId && p.team !== this._playerState.teamId
-        );
-        this.logLine(this._infoLog, enemyPlayers, false); // Log only enemies
+        this._infoLog.innerHTML = ''; // Clear log panel *once*
+        // Log the full all_players array again
+        this.logLine(this._infoLog, this._allPlayersState, false);
+
+        // Log Gold and GameTime below it
         this.logLine(this._infoLog, `Gold: ${this._playerState.gold}`, false);
         this.logLine(this._infoLog, `GameTime: ${this._playerState.gameTime}s`, false);
       }
     }
 
     // --- 3. Call Audio Cue Checks --- 
-    // Add more robust check
     const canRunAudioChecks =
       this._playerState.summonerName &&
       this._playerState.items &&
@@ -356,7 +359,13 @@ class InGame extends AppWindow {
       // this.checkWardStatus(); 
       this.checkEnemyWardChanges(); // Call the new ward check function
     } else {
-      console.log("[AudioCheck Pre-Cond] SKIPPING audio checks due to invalid state:", JSON.stringify(this._playerState));
+      // Log specific reasons for skipping
+      let skipReason = "SKIPPING audio checks due to invalid state: ";
+      if (!this._playerState.summonerName) skipReason += " summonerName missing;";
+      if (!this._playerState.items) skipReason += " items missing;"; // Should be initialized, but check anyway
+      if (isNaN(this._playerState.gold) || this._playerState.gold < 0) skipReason += ` invalid gold (${this._playerState.gold});`;
+      if (isNaN(this._playerState.gameTime) || this._playerState.gameTime <= 0) skipReason += ` invalid gameTime (${this._playerState.gameTime});`;
+      console.log("[AudioCheck Pre-Cond]", skipReason, JSON.stringify(this._playerState));
     }
   }
 
@@ -368,15 +377,17 @@ class InGame extends AppWindow {
         if (event.name === 'match_clock') {
           try {
             const newGameTime = parseInt(event.data);
-            // Add isNaN check here too
             if (!isNaN(newGameTime) && newGameTime >= 0 && newGameTime !== this._playerState.gameTime) {
+              // Log periodically to confirm time updates are still happening
+              if (newGameTime % 60 === 0) { // Log every minute
+                console.log(`[onNewEvents] GameTime updated via match_clock: ${newGameTime}`);
+              }
               this._playerState.gameTime = newGameTime;
             }
           } catch (err) {
             console.error("Error parsing match_clock data:", event.data, err);
           }
-          // No need to process other events in this loop for now
-          break; // Assuming only one match_clock event per batch
+          break;
         }
       }
     }
@@ -571,13 +582,13 @@ class InGame extends AppWindow {
     } else {
       // No potential target found in the loop
       if (this._currentTargetItemId !== null) {
-        // We HAD a target, but now can't afford/don't have components for it
-        console.log(`[TargetCheck] No potential target found. Clearing previous target (${this._currentTargetItemId}).`);
+        // We HAD a target, but now none meet criteria (afford/component/etc.)
+        console.log(`[TargetCheck] Conditions no longer met for any item. Clearing previous target (${this._currentTargetItemId}).`);
         this._currentTargetItemId = null;
         this._currentTargetSuggestionTime = null;
       } else {
         // No potential target, and no previous target. Do nothing.
-        console.log("[TargetCheck] No current or potential target. Doing nothing.");
+        // console.log("[TargetCheck] No current or potential target. Doing nothing.");
       }
     }
   }
@@ -585,7 +596,7 @@ class InGame extends AppWindow {
   // Modify playAudio function
   private playAudio(fileName: string): void {
     // Construct the path relative to the in_game.html file
-    const audioPath = `../../audio/${fileName}`;
+    const audioPath = `audio/${fileName}`;
     console.log(`Attempting to play audio: ${audioPath}`);
 
     const audio = new Audio(audioPath);
