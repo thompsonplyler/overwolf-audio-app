@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="../../css/general.css" />
@@ -8,9 +9,10 @@
   <link rel="stylesheet" href="../../css/modal.css" />
   <title>Overwolf Sample App - In-Game page</title>
 </head>
+
 <body class="in-game">
   <!-- -------------------------------- Header ------------------------------- -->
-
+  <h1>Just some words.</h1>
   <header id="header" class="app-header">
     <img src="../../img/header_icon.svg" />
     <h1>Sample App / in-game window</h1>
@@ -18,6 +20,7 @@
       Show/Hide Hotkey:
       <kbd id="hotkey"></kbd>
     </h1>
+    <button id="toggleLogsDisplayBtn" style="margin-left: 10px; padding: 5px;">Hide Logs</button>
     <div class="window-controls-group">
       <button id="minimizeButton" class="window-control window-control-minimize" />
       <button id="maximizeButton" class="window-control window-control-maximize" />
@@ -48,6 +51,7 @@
         logged to the developers console.
       </p>
     </div>
+
   </main>
 
   <script>
@@ -69,4 +73,5 @@
     ga('send', 'pageview', '/in_game.html');
   </script>
 </body>
+
 </html>

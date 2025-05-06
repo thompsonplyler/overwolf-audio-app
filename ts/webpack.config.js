@@ -9,7 +9,8 @@ module.exports = env => ({
     entry: {
         background: './src/background/background.ts',
         desktop: './src/desktop/desktop.ts',
-        in_game: './src/in_game/in_game.ts'
+        in_game: './src/in_game/in_game.ts',
+        toggler_button: './src/toggler_button/toggler_button.ts'
     },
     devtool: 'inline-source-map',
     module: {
@@ -25,13 +26,15 @@ module.exports = env => ({
         extensions: ['.ts', '.js']
     },
     output: {
-      path: path.resolve(__dirname, 'dist/'),
-      filename: 'js/[name].js'
+        path: path.resolve(__dirname, 'dist/'),
+        filename: 'js/[name].js'
     },
     plugins: [
         new CleanWebpackPlugin,
         new CopyPlugin({
-            patterns: [ { from: "public", to: "./" } ],
+            patterns: [
+                { from: "public", to: "./", globOptions: { ignore: ["**/toggler_button.html"] } }
+            ],
         }),
         new HtmlWebpackPlugin({
             template: './src/background/background.html',
@@ -47,6 +50,11 @@ module.exports = env => ({
             template: './src/in_game/in_game.html',
             filename: path.resolve(__dirname, './dist/in_game.html'),
             chunks: ['in_game']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/toggler_button/toggler_button.html',
+            filename: path.resolve(__dirname, './dist/toggler_button.html'),
+            chunks: ['toggler_button']
         }),
         new OverwolfPlugin(env)
     ]

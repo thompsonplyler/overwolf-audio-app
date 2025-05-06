@@ -121,6 +121,9 @@ class InGame extends AppWindow {
   private _gameEventsListener: OWGamesEvents;
   private _eventsLog: HTMLElement;
   private _infoLog: HTMLElement;
+  private _logsContainer: HTMLElement;
+  private _toggleLogsDisplayBtn: HTMLButtonElement;
+  private _areLogsVisible: boolean = true;
 
   // --- State Variables ---
   private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null } =
@@ -151,8 +154,13 @@ class InGame extends AppWindow {
     this._eventsLog = document.getElementById('eventsLog');
     this._infoLog = document.getElementById('infoLog');
     if (this._infoLog) this._infoLog.innerHTML = ''; // Clear log initially
+
+    this._logsContainer = document.getElementById('logs');
+    this._toggleLogsDisplayBtn = document.getElementById('toggleLogsDisplayBtn') as HTMLButtonElement;
+
     this.setToggleHotkeyBehavior();
     this.setToggleHotkeyText();
+    this.setupToggleLogsDisplay();
   }
 
   public static instance() {
@@ -710,6 +718,24 @@ class InGame extends AppWindow {
     //     }
     // }
     console.log("[WardCheck] Finished check.");
+  }
+
+  private setupToggleLogsDisplay(): void {
+    if (this._toggleLogsDisplayBtn && this._logsContainer) {
+      this._toggleLogsDisplayBtn.addEventListener('click', () => {
+        this._areLogsVisible = !this._areLogsVisible;
+        if (this._areLogsVisible) {
+          this._logsContainer.style.display = ''; // Or 'flex', depending on original display style
+          this._toggleLogsDisplayBtn.innerText = 'Hide Logs';
+        } else {
+          this._logsContainer.style.display = 'none';
+          this._toggleLogsDisplayBtn.innerText = 'Show Logs';
+        }
+      });
+    } else {
+      if (!this._toggleLogsDisplayBtn) console.error("toggleLogsDisplayBtn not found");
+      if (!this._logsContainer) console.error("logs container not found");
+    }
   }
 }
 

@@ -1,0 +1,1080 @@
+﻿2025-05-06 13:56:57,345 (INFO) ================== new session ==================
+2025-05-06 13:56:57,346 (INFO) </js/in_game.js> (:142) - [ow-game-events] START
+2025-05-06 13:56:57,363 (INFO) </js/in_game.js> (:123) - setRequiredFeatures(): success: {
+  "success": true,
+  "status": "success",
+  "supportedFeatures": [
+    "summoner_info",
+    "gameMode",
+    "matchState",
+    "teams",
+    "kill",
+    "assist",
+    "gold",
+    "minions",
+    "abilities",
+    "level",
+    "announcer",
+    "death",
+    "respawn",
+    "heal",
+    "damage",
+    "counters",
+    "match_info",
+    "live_client_data"
+  ]
+}
+2025-05-06 13:56:57,371 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:56:57,372 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:56:57,373 (INFO) </js/in_game.js> (:892) - Type of all_players: string
+2025-05-06 13:56:57,373 (INFO) </js/in_game.js> (:925) - Updated _allPlayersState
+2025-05-06 13:56:57,374 (INFO) </js/in_game.js> (:928) - [ItemUpdate] Trying to find player data for summoner: ClimateChange#1DAY
+2025-05-06 13:56:57,374 (INFO) </js/in_game.js> (:930) - [ItemUpdate] Player data found in all_players: [object Object]
+2025-05-06 13:56:57,375 (INFO) </js/in_game.js> (:932) - [ItemUpdate] Checking playerData.items...
+2025-05-06 13:56:57,375 (INFO) </js/in_game.js> (:934) - [ItemUpdate] playerData.items IS an array. Comparing strings...
+2025-05-06 13:56:57,376 (INFO) </js/in_game.js> (:937) - [ItemUpdate] Previous items string: []
+2025-05-06 13:56:57,377 (INFO) </js/in_game.js> (:938) - [ItemUpdate] Current items string: []
+2025-05-06 13:56:57,377 (INFO) </js/in_game.js> (:945) - [ItemUpdate] Item strings are the SAME. No update needed.
+2025-05-06 13:56:57,378 (INFO) </js/in_game.js> (:954) - Player team ID set to: ORDER
+2025-05-06 13:56:57,390 (INFO) </js/in_game.js> (:1040) - [AudioCheck Pre-Cond] SKIPPING audio checks due to invalid state:  invalid gameTime (0); {"gold":1472.0782470703125,"items":[],"summonerName":"ClimateChange#1DAY","gameTime":0,"teamId":"ORDER"}
+2025-05-06 13:56:57,796 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:56:57,797 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:57,797 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1472.0782470703125, Threshold: 3000, Is High: false
+2025-05-06 13:56:57,798 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:57,798 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:57,799 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:57,799 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:57,800 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:57,800 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:57,801 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:57,801 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:57,801 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:57,802 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:57,803 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:57,803 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:57,803 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:57,804 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:57,804 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:57,805 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:57,805 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:57,806 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:57,807 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:57,807 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:57,808 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:57,808 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:57,856 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:56:57,857 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1474
+2025-05-06 13:56:57,863 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:57,863 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1474, Threshold: 3000, Is High: false
+2025-05-06 13:56:57,864 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:57,865 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:57,865 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:57,866 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:57,866 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:57,867 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:57,867 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:57,868 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:57,869 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:57,869 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:57,870 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:57,871 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:57,871 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:57,872 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:57,872 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:57,873 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:57,873 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:57,874 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:57,874 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:57,875 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:57,875 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:57,876 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:58,099 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:56:58,100 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:56:58,100 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:56:58,104 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:58,105 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1474.1182861328125, Threshold: 3000, Is High: false
+2025-05-06 13:56:58,106 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:58,106 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:58,107 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:58,107 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:58,107 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:58,108 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:58,108 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:58,109 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:58,109 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:58,109 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:58,110 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:58,110 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:58,110 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:58,111 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:58,111 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:58,112 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:58,112 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:58,113 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:58,113 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:58,114 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:58,114 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:58,115 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:58,115 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:56:58,116 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:56:58,116 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:56:58,117 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:58,117 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1474.1182861328125, Threshold: 3000, Is High: false
+2025-05-06 13:56:58,117 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:58,118 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:58,118 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:58,118 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:58,119 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:58,119 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:58,120 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:58,120 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:58,120 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:58,121 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:58,121 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:58,121 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:58,122 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:58,122 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:58,122 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:58,122 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:58,123 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:58,123 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:58,123 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:58,124 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:58,124 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:58,124 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:58,869 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:56:58,870 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1476
+2025-05-06 13:56:58,873 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:58,873 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1476, Threshold: 3000, Is High: false
+2025-05-06 13:56:58,874 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:58,874 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:58,874 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:58,875 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:58,875 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:58,875 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:58,876 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:58,876 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:58,876 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:58,877 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:58,877 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:58,877 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:58,878 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:58,878 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:58,879 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:58,879 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:58,880 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:58,880 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:58,880 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:58,881 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:58,881 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:58,882 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:59,130 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:56:59,131 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:56:59,132 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:56:59,135 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:59,136 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1476.1583251953125, Threshold: 3000, Is High: false
+2025-05-06 13:56:59,136 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:59,137 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:59,137 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:59,138 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:59,138 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:59,138 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:59,139 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:59,139 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:59,139 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:59,140 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:59,140 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:59,140 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:59,141 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:59,141 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:59,141 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:59,141 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:59,142 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:59,142 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:59,142 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:59,143 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:59,143 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:59,143 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:59,143 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:56:59,144 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:56:59,144 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:56:59,144 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:59,145 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1476.1583251953125, Threshold: 3000, Is High: false
+2025-05-06 13:56:59,145 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:59,145 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:59,145 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:59,146 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:59,146 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:59,146 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:59,147 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:59,147 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:59,147 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:59,148 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:59,148 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:59,149 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:59,149 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:59,149 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:59,150 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:59,150 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:59,151 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:59,152 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:59,152 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:59,153 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:59,154 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:59,154 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:56:59,886 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:56:59,886 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1478
+2025-05-06 13:56:59,888 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:56:59,889 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1478, Threshold: 3000, Is High: false
+2025-05-06 13:56:59,889 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:56:59,890 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:56:59,890 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:56:59,891 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:56:59,891 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:56:59,891 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:56:59,891 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:56:59,892 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:56:59,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:56:59,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:56:59,895 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:56:59,896 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:56:59,896 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:56:59,896 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:56:59,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:56:59,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:56:59,898 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:00,145 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:00,146 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:00,146 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:00,149 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:00,149 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1478.1983642578125, Threshold: 3000, Is High: false
+2025-05-06 13:57:00,150 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:00,150 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:00,150 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:00,150 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:00,151 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:00,151 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:00,151 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:00,152 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:00,152 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:00,152 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:00,152 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:00,153 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:00,154 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:00,154 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:00,154 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:00,155 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:00,155 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:00,156 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:00,156 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:00,156 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:00,156 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:00,157 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:00,157 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:00,157 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:00,157 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:00,158 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:00,158 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1478.1983642578125, Threshold: 3000, Is High: false
+2025-05-06 13:57:00,158 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:00,159 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:00,159 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:00,159 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:00,159 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:00,160 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:00,160 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:00,160 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:00,161 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:00,161 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:00,161 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:00,161 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:00,162 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:00,162 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:00,162 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:00,162 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:00,163 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:00,163 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:00,163 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:00,164 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:00,164 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:00,164 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:00,821 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:00,821 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:00,822 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1478.1983642578125, Threshold: 3000, Is High: false
+2025-05-06 13:57:00,822 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:00,822 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:00,823 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:00,823 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:00,823 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:00,824 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:00,824 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:00,824 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:00,825 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:00,825 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:00,826 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:00,826 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:00,826 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:00,826 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:00,827 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:00,827 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:00,827 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:00,828 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:00,828 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:00,828 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:00,828 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:00,829 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:00,890 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:00,891 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1480
+2025-05-06 13:57:00,895 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:00,896 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1480, Threshold: 3000, Is High: false
+2025-05-06 13:57:00,896 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:00,896 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:00,897 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:00,897 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:00,898 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:00,899 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:00,900 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:00,900 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:00,901 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:00,902 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:00,902 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:00,903 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:00,903 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:00,904 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:00,904 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:00,904 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:00,905 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:00,905 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:00,906 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:00,906 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:00,906 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:00,907 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:01,163 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:01,164 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:01,164 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:01,168 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:01,168 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1480.2384033203125, Threshold: 3000, Is High: false
+2025-05-06 13:57:01,169 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:01,169 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:01,170 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:01,170 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:01,170 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:01,171 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:01,171 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:01,172 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:01,172 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:01,172 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:01,173 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:01,173 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:01,173 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:01,174 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:01,174 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:01,175 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:01,175 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:01,175 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:01,176 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:01,176 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:01,176 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:01,177 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:01,177 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:01,177 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:01,178 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:01,178 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:01,178 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1480.2384033203125, Threshold: 3000, Is High: false
+2025-05-06 13:57:01,179 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:01,179 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:01,180 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:01,180 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:01,180 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:01,181 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:01,181 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:01,182 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:01,183 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:01,183 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:01,183 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:01,184 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:01,184 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:01,185 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:01,185 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:01,186 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:01,186 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:01,186 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:01,187 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:01,187 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:01,187 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:01,188 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:01,188 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:01,188 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:01,189 (INFO) </js/in_game.js> (:892) - Type of all_players: string
+2025-05-06 13:57:01,189 (INFO) </js/in_game.js> (:925) - Updated _allPlayersState
+2025-05-06 13:57:01,189 (INFO) </js/in_game.js> (:928) - [ItemUpdate] Trying to find player data for summoner: ClimateChange#1DAY
+2025-05-06 13:57:01,190 (INFO) </js/in_game.js> (:930) - [ItemUpdate] Player data found in all_players: [object Object]
+2025-05-06 13:57:01,190 (INFO) </js/in_game.js> (:932) - [ItemUpdate] Checking playerData.items...
+2025-05-06 13:57:01,190 (INFO) </js/in_game.js> (:934) - [ItemUpdate] playerData.items IS an array. Comparing strings...
+2025-05-06 13:57:01,191 (INFO) </js/in_game.js> (:937) - [ItemUpdate] Previous items string: []
+2025-05-06 13:57:01,191 (INFO) </js/in_game.js> (:938) - [ItemUpdate] Current items string: []
+2025-05-06 13:57:01,192 (INFO) </js/in_game.js> (:945) - [ItemUpdate] Item strings are the SAME. No update needed.
+2025-05-06 13:57:01,192 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:01,192 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1480.2384033203125, Threshold: 3000, Is High: false
+2025-05-06 13:57:01,193 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:01,193 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:01,193 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:01,194 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:01,194 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:01,194 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:01,195 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:01,195 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:01,196 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:01,196 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:01,197 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:01,197 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:01,197 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:01,198 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:01,198 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:01,199 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:01,199 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:01,200 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:01,200 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:01,200 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:01,201 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:01,201 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:01,884 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:01,884 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1482
+2025-05-06 13:57:01,887 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:01,888 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1482, Threshold: 3000, Is High: false
+2025-05-06 13:57:01,889 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:01,889 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:01,889 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:01,890 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:01,890 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:01,891 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:01,891 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:01,891 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:01,892 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:01,893 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:01,893 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:01,893 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:01,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:01,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:01,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:01,895 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:01,895 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:01,896 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:01,896 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:01,896 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:01,896 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:01,897 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:02,187 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:02,187 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:02,188 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:02,192 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:02,193 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1482.2784423828125, Threshold: 3000, Is High: false
+2025-05-06 13:57:02,193 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:02,193 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:02,194 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:02,194 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:02,195 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:02,195 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:02,195 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:02,196 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:02,196 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:02,196 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:02,197 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:02,197 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:02,198 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:02,198 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:02,199 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:02,199 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:02,199 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:02,200 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:02,200 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:02,201 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:02,201 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:02,202 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:02,202 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:02,203 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:02,203 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:02,203 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:02,204 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1482.2784423828125, Threshold: 3000, Is High: false
+2025-05-06 13:57:02,204 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:02,204 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:02,205 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:02,205 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:02,205 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:02,206 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:02,206 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:02,206 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:02,207 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:02,207 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:02,207 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:02,208 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:02,208 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:02,208 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:02,209 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:02,209 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:02,209 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:02,210 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:02,210 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:02,210 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:02,211 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:02,211 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:02,890 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:02,891 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1484
+2025-05-06 13:57:02,896 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:02,896 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1484, Threshold: 3000, Is High: false
+2025-05-06 13:57:02,897 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:02,898 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:02,898 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:02,899 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:02,899 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:02,900 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:02,901 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:02,902 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:02,902 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:02,903 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:02,903 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:02,904 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:02,904 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:02,905 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:02,905 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:02,905 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:02,906 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:02,906 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:02,908 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:02,908 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:02,908 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:02,908 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:03,214 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:03,215 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:03,215 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:03,221 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:03,221 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1485.3385009765625, Threshold: 3000, Is High: false
+2025-05-06 13:57:03,222 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:03,222 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:03,223 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:03,223 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:03,223 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:03,224 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:03,224 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:03,224 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:03,225 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:03,225 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:03,225 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:03,226 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:03,226 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:03,227 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:03,227 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:03,227 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:03,227 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:03,228 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:03,228 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:03,228 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:03,229 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:03,229 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:03,230 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:03,231 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:03,231 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:03,231 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:03,232 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1485.3385009765625, Threshold: 3000, Is High: false
+2025-05-06 13:57:03,232 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:03,232 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:03,233 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:03,233 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:03,234 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:03,234 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:03,234 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:03,235 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:03,235 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:03,236 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:03,236 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:03,237 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:03,237 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:03,238 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:03,238 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:03,245 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:03,246 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:03,247 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:03,247 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:03,247 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:03,248 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:03,248 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:03,827 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:03,828 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:03,828 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1485.3385009765625, Threshold: 3000, Is High: false
+2025-05-06 13:57:03,829 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:03,829 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:03,830 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:03,830 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:03,831 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:03,831 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:03,832 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:03,832 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:03,833 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:03,833 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:03,834 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:03,834 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:03,835 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:03,835 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:03,835 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:03,836 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:03,836 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:03,837 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:03,837 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:03,838 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:03,838 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:03,839 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:03,888 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:03,889 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1486
+2025-05-06 13:57:03,893 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:03,893 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1486, Threshold: 3000, Is High: false
+2025-05-06 13:57:03,894 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:03,894 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:03,895 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:03,895 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:03,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:03,896 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:03,896 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:03,897 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:03,897 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:03,897 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:03,898 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:03,898 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:03,899 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:03,899 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:03,900 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:03,900 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:03,900 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:03,901 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:03,901 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:03,901 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:03,902 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:03,902 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:04,238 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:04,239 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:04,239 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:04,243 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:04,243 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1487.3785400390625, Threshold: 3000, Is High: false
+2025-05-06 13:57:04,244 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:04,244 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:04,245 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:04,245 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:04,245 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:04,246 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:04,246 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:04,247 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:04,247 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:04,248 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:04,248 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:04,249 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:04,249 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:04,249 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:04,250 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:04,250 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:04,251 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:04,251 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:04,251 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:04,252 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:04,252 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:04,253 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:04,253 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:04,253 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:04,254 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:04,254 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:04,255 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1487.3785400390625, Threshold: 3000, Is High: false
+2025-05-06 13:57:04,255 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:04,256 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:04,256 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:04,256 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:04,257 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:04,257 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:04,257 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:04,258 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:04,258 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:04,258 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:04,259 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:04,259 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:04,259 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:04,260 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:04,260 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:04,261 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:04,261 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:04,261 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:04,262 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:04,262 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:04,262 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:04,263 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:04,885 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:04,886 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1488
+2025-05-06 13:57:04,889 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:04,890 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1488, Threshold: 3000, Is High: false
+2025-05-06 13:57:04,890 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:04,891 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:04,891 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:04,891 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:04,892 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:04,892 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:04,893 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:04,893 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:04,893 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:04,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:04,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:04,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:04,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:04,895 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:04,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:04,896 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:04,896 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:04,896 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:04,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:04,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:04,898 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:04,898 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:05,281 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:05,281 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:05,282 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:05,284 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:05,285 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1489.4185791015625, Threshold: 3000, Is High: false
+2025-05-06 13:57:05,285 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:05,285 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:05,286 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:05,286 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:05,286 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:05,286 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:05,287 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:05,287 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:05,287 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:05,287 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:05,288 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:05,288 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:05,288 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:05,289 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:05,289 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:05,289 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:05,290 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:05,290 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:05,290 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:05,291 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:05,291 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:05,291 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:05,292 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:05,292 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:05,292 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:05,293 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:05,293 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1489.4185791015625, Threshold: 3000, Is High: false
+2025-05-06 13:57:05,294 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:05,294 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:05,294 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:05,295 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:05,295 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:05,295 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:05,296 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:05,296 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:05,296 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:05,297 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:05,297 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:05,298 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:05,298 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:05,298 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:05,299 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:05,299 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:05,299 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:05,300 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:05,300 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:05,301 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:05,301 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:05,301 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:05,889 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:05,890 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1490
+2025-05-06 13:57:05,896 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:05,898 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1490, Threshold: 3000, Is High: false
+2025-05-06 13:57:05,898 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:05,899 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:05,900 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:05,900 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:05,901 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:05,901 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:05,902 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:05,902 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:05,903 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:05,903 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:05,904 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:05,904 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:05,905 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:05,905 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:05,906 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:05,906 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:05,907 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:05,907 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:05,907 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:05,908 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:05,908 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:05,909 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:06,301 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:06,302 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:06,303 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:06,303 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:06,304 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1490, Threshold: 3000, Is High: false
+2025-05-06 13:57:06,304 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:06,304 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:06,305 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:06,305 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:06,306 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:06,306 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:06,307 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:06,307 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:06,307 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:06,308 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:06,308 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:06,309 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:06,309 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:06,310 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:06,310 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:06,311 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:06,311 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:06,312 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:06,312 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:06,312 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:06,313 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:06,313 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:06,314 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:06,314 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:06,314 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:06,316 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:06,317 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1491.4586181640625, Threshold: 3000, Is High: false
+2025-05-06 13:57:06,317 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:06,318 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:06,318 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:06,319 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:06,319 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:06,320 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:06,321 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:06,321 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:06,321 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:06,322 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:06,322 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:06,323 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:06,323 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:06,324 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:06,324 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:06,325 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:06,325 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:06,330 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:06,330 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:06,331 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:06,331 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:06,332 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:06,820 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:06,821 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:06,821 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1491.4586181640625, Threshold: 3000, Is High: false
+2025-05-06 13:57:06,821 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:06,822 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:06,822 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:06,822 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:06,823 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:06,823 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:06,824 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:06,824 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:06,824 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:06,825 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:06,825 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:06,826 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:06,826 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:06,827 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:06,827 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:06,827 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:06,828 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:06,828 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:06,829 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:06,829 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:06,829 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:06,830 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:06,891 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:06,891 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1492
+2025-05-06 13:57:06,895 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:06,896 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1492, Threshold: 3000, Is High: false
+2025-05-06 13:57:06,896 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:06,897 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:06,897 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:06,897 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:06,898 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:06,898 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:06,898 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:06,899 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:06,899 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:06,900 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:06,900 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:06,900 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:06,901 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:06,901 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:06,902 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:06,902 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:06,903 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:06,903 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:06,903 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:06,904 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:06,904 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:06,904 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:07,314 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:07,314 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:07,315 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:07,318 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:07,318 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1493.4986572265625, Threshold: 3000, Is High: false
+2025-05-06 13:57:07,318 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:07,319 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:07,319 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:07,319 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:07,320 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:07,320 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:07,320 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:07,320 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:07,321 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:07,321 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:07,321 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:07,322 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:07,322 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:07,322 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:07,322 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:07,323 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:07,323 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:07,323 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:07,324 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:07,324 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:07,324 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:07,325 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:07,325 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:07,325 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:07,326 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:07,326 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:07,327 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1493.4986572265625, Threshold: 3000, Is High: false
+2025-05-06 13:57:07,327 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:07,327 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:07,327 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:07,328 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:07,328 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:07,328 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:07,329 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:07,329 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:07,329 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:07,329 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:07,330 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:07,330 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:07,330 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:07,331 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:07,331 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:07,331 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:07,332 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:07,332 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:07,333 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:07,333 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:07,334 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:07,334 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:07,886 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:07,886 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1494
+2025-05-06 13:57:07,890 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:07,891 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1494, Threshold: 3000, Is High: false
+2025-05-06 13:57:07,891 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:07,892 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:07,892 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:07,893 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:07,893 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:07,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:07,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:07,895 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:07,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:07,895 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:07,896 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:07,896 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:07,896 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:07,897 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:07,897 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:07,898 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:07,898 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:07,898 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:07,899 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:07,899 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:07,900 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:07,901 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:08,356 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:08,357 (INFO) </js/in_game.js> (:891) - Type of active_player: string
+2025-05-06 13:57:08,357 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:08,360 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:08,361 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1495.5386962890625, Threshold: 3000, Is High: false
+2025-05-06 13:57:08,361 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:08,362 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:08,362 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:08,362 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:08,363 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:08,363 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:08,363 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:08,364 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:08,364 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:08,364 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:08,365 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:08,365 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:08,366 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:08,366 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:08,366 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:08,367 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:08,367 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:08,367 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:08,368 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:08,368 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:08,368 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:08,369 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:08,369 (INFO) </js/in_game.js> (:890) - Found liveClientData object.
+2025-05-06 13:57:08,369 (INFO) </js/in_game.js> (:891) - Type of active_player: undefined
+2025-05-06 13:57:08,370 (INFO) </js/in_game.js> (:892) - Type of all_players: undefined
+2025-05-06 13:57:08,371 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:08,371 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1495.5386962890625, Threshold: 3000, Is High: false
+2025-05-06 13:57:08,371 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:08,372 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:08,372 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:08,372 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:08,373 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:08,373 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:08,373 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:08,374 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:08,374 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:08,374 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:08,374 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:08,375 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:08,375 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:08,375 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:08,376 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:08,376 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:08,376 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:08,376 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:08,377 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:08,377 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:08,377 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:08,377 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.
+2025-05-06 13:57:08,885 (INFO) </js/in_game.js> (:895) - liveClientData object NOT found in this update.
+2025-05-06 13:57:08,885 (INFO) </js/in_game.js> (:981) - Updated gold from game_info: 1496
+2025-05-06 13:57:08,889 (INFO) </js/in_game.js> (:1237) - [HighGold] Running check...
+2025-05-06 13:57:08,889 (INFO) </js/in_game.js> (:1241) - [HighGold] Current Gold: 1496, Threshold: 3000, Is High: false
+2025-05-06 13:57:08,890 (INFO) </js/in_game.js> (:1015) - [AudioCheck Pre-Cond] isHighGoldActive: false
+2025-05-06 13:57:08,890 (INFO) </js/in_game.js> (:1017) - [AudioCheck Pre-Cond] High gold NOT active, checking target item...
+2025-05-06 13:57:08,890 (INFO) </js/in_game.js> (:1131) - [TargetCheck] Finding potential target...
+2025-05-06 13:57:08,891 (INFO) </js/in_game.js> (:1132) - [TargetCheck] Looping through ITEM_PRIORITY (count: 6)...
+2025-05-06 13:57:08,891 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Lich Bane
+2025-05-06 13:57:08,891 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Lich Bane: Component required but not owned. Skipping.
+2025-05-06 13:57:08,892 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Rabadon's Deathcap
+2025-05-06 13:57:08,892 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Rabadon's Deathcap: Component required but not owned. Skipping.
+2025-05-06 13:57:08,892 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Banshee's Veil
+2025-05-06 13:57:08,893 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Banshee's Veil: Component required but not owned. Skipping.
+2025-05-06 13:57:08,894 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Zhonya's Hourglass
+2025-05-06 13:57:08,894 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Zhonya's Hourglass: Component required but not owned. Skipping.
+2025-05-06 13:57:08,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Shadowflame
+2025-05-06 13:57:08,895 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Shadowflame: Component required but not owned. Skipping.
+2025-05-06 13:57:08,895 (INFO) </js/in_game.js> (:1134) - [TargetCheck] Checking item in loop: Void Staff
+2025-05-06 13:57:08,896 (INFO) </js/in_game.js> (:1136) - [TargetCheck] --- Currently checking VOID STAFF --- 
+2025-05-06 13:57:08,896 (INFO) </js/in_game.js> (:1147) - [TargetCheck] -> Void Staff: Component required but not owned. Skipping.
+2025-05-06 13:57:08,896 (INFO) </js/in_game.js> (:1270) - [WardCheck] Running check...
+2025-05-06 13:57:08,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Soraka: Prev=0, Curr=0
+2025-05-06 13:57:08,897 (INFO) </js/in_game.js> (:1286) - [WardCheck] Ezreal: Prev=0, Curr=0
+2025-05-06 13:57:08,898 (INFO) </js/in_game.js> (:1286) - [WardCheck] Vayne: Prev=0, Curr=0
+2025-05-06 13:57:08,898 (INFO) </js/in_game.js> (:1299) - [WardCheck] Finished check.

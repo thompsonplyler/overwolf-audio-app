@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Toggle Window</title>
+    <link rel="stylesheet" href="../css/general.css"> <!-- Assuming a general CSS file exists -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            /* For the transparent window */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        #toggleInGameBtn {
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            min-width: 120px;
+            /* Ensure button has some width */
+            text-align: center;
+        }
+
+        #toggleInGameBtn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="toggleInGameBtn">Toggle Logs</button>
+    <script src="js/toggler_button.js"></script> <!-- Corrected path -->
+</body>
+
+</html>
