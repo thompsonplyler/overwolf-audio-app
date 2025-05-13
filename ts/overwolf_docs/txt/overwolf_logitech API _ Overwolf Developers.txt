@@ -1,0 +1,63 @@
+Title: overwolf.logitech API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/logitech/ow-logitech
+
+overwolf.logitech API
+=====================
+
+An API for Logitech features.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.logitech.getVersion()](#getversioncallback)
+* [overwolf.logitech.getDevices()](#getdvicescallback)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.logitech.overwolf.logitech.LogitechData](#overwolflogitechlogitechdata-object) Object
+* [overwolf.logitech.Logitech Device](#logitech-device-object) Object
+
+getVersion(callback)[](#getversioncallback "Direct link to getVersion(callback)")
+------------------------------------------------------------------------------------
+
+#### Version added: 0.93[](#version-added-093 "Direct link to Version added: 0.93")
+
+> Gets the current version of the Logitech Gaming Software.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | function | Called with the version of LGS currently installed |
+
+getDevices(callback)[](#getdevicescallback "Direct link to getDevices(callback)")
+------------------------------------------------------------------------------------
+
+#### Version added: 0.93[](#version-added-093-1 "Direct link to Version added: 0.93")
+
+> Gets the currently installed Logitech devices.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | function | Called with the current device information |
+
+LogitechData Object[](#logitechdata-object "Direct link to LogitechData Object")
+-----------------------------------------------------------------------------------
+
+#### Version added: 0.93[](#version-added-093-2 "Direct link to Version added: 0.93")
+
+> Container for Logitech data.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| minimal\_lgs\_version | version Object (string wrapper) | Minimal LGS version required for this app |
+| arx | [LogitechArxData](/ow-native/reference/logitech/led#overwolflogitechledlogitecharxdata-object) Object | The Arx API data |
+| led | [LogitechLedData](/ow-native/reference/logitech/led#overwolflogitechledlogitechleddata-object) Object | The LED API data |
+
+Logitech Device Object[](#logitech-device-object "Direct link to Logitech Device Object")
+--------------------------------------------------------------------------------------------
+
+#### Version added: 0.93[](#version-added-093-3 "Direct link to Version added: 0.93")
+
+> Logitech device type.
+
+No further info.

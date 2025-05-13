@@ -1,0 +1,583 @@
+Title: OBS | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/obs
+
+OBS
+===
+
+The Overwolf recording APIs are directly based on the [OBS project](https://github.com/obsproject/obs-studio), integrating it into the relevant framework.  
+As such, this page covers important OBS (also referred to as `Recording Engine`) terminology and settings, that are not strictly related to any specific API.
+
+* Overwolf Platform
+* Overwolf Electron
+
+A history of OW-OBS versions by Overwolf client versions:
+
+| Overwolf Version | OBS Version |
+| --- | --- |
+| 0.250 and newer | [30.1.2](https://github.com/obsproject/obs-studio/tree/30.1.2) |
+| 0.224 and newer | [29.1.0](https://github.com/obsproject/obs-studio/tree/29.1.0) |
+| 0.223 and older | [27.2.3](https://github.com/obsproject/obs-studio/tree/27.2.3) |
+
+OBS Is **currently** not implemented as part of the [ow-electron](/ow-electron/getting-started/overview) package.
+
+List of supported encoders[](#list-of-supported-encoders "Direct link to List of supported encoders")
+--------------------------------------------------------------------------------------------------------
+
+* OBS Version 30.1.2
+* OBS Version 29.1.0
+* OBS Version 27.2.3
+
+Encoders-30.1.2
+
+```
+const OBS.30.1.2.Encoders = [  
+    {  
+        "name": "INTEL",  
+        "display_name": "IntelÂ® Quick Sync (uses iGPU)",  
+        "presets": [  
+            "QUALITY",  
+            "BALANCED",  
+            "SPEED",  
+            "VERYSLOW",  
+            "SLOWER",  
+            "SLOW",  
+            "MEDIUM",  
+            "FAST",  
+            "FASTER",  
+            "VERYFAST"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VCM",  
+            "AVBR",  
+            "ICQ",  
+            "LA_ICQ",  
+            "LA_VBR",  
+            "LA_CBR"  
+        ],  
+    },  
+    {  
+        "name": "INTEL_HEVC",  
+        "display_name": "IntelÂ® Quick Sync HEVC (uses iGPU)",  
+        "presets": [  
+            "QUALITY",  
+            "BALANCED",  
+            "SPEED",  
+            "VERYSLOW",  
+            "SLOWER",  
+            "SLOW",  
+            "MEDIUM",  
+            "FAST",  
+            "FASTER",  
+            "VERYFAST"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VCM",  
+            "AVBR",  
+            "ICQ",  
+            "LA_ICQ",  
+            "LA_VBR",  
+            "LA_CBR"  
+        ]  
+    },  
+    {  
+    "name": "INTEL_AV1",  
+    "display_name": "IntelÂ® Quick Sync AV1 (uses iGPU)",  
+    "presets": [  
+        "QUALITY",  
+        "BALANCED",  
+        "SPEED",  
+        "VERYSLOW",  
+        "SLOWER",  
+        "SLOW",  
+        "MEDIUM",  
+        "FAST",  
+        "FASTER",  
+        "VERYFAST"  
+    ],  
+    "rateControls": [  
+        "RC_CBR",  
+        "RC_CQP",  
+        "RC_VBR",  
+        "RC_VCM",  
+        "AVBR",  
+        "ICQ",  
+        "LA_ICQ",  
+        "LA_VBR",  
+        "LA_CBR"  
+    ],  
+    },  
+    {  
+        "name": "X264",  
+        "display_name": "X264 (uses CPU)",  
+        "presets": [  
+            "ULTRAFAST",  
+            "SUPERFAST",  
+            "VERYFAST",  
+            "FASTER",  
+            "FAST",  
+            "MEDIUM",  
+            "SLOW",  
+            "SLOWER",  
+            "VERYSLOW",  
+            "PLACEBO"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY"  
+        ]  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_NEW",  
+        "display_name": "NVIDIAÂ® NVENC New (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ]  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_HEVC",  
+        "display_name": "NVIDIAÂ® NVENC HEVC (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ]  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_AV1",  
+        "display_name": "NVIDIAÂ® NVENC AV1 (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ]  
+    },  
+    {  
+        "name": "AMD_AMF",  
+        "display_name": "AMDÂ® HW H.264 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ]  
+    },  
+    {  
+        "name": "AMD_AMF_HEVC",  
+        "display_name": "AMDÂ® HW H.265 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ]  
+    },  
+    {  
+        "name": "AMD_AMF_AV1",  
+        "display_name": "AMD HW AV1 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ]  
+    }  
+]  
+
+```
+
+Encoders-29.1.0
+
+```
+const OBS.Latest.Encoders = [  
+    {  
+        "name": "INTEL",  
+        "display_name": "IntelÂ® Quick Sync (uses iGPU)",  
+        "presets": [  
+            "QUALITY",  
+            "BALANCED",  
+            "SPEED",  
+            "VERYSLOW",  
+            "SLOWER",  
+            "SLOW",  
+            "MEDIUM",  
+            "FAST",  
+            "FASTER",  
+            "VERYFAST"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VCM",  
+            "AVBR",  
+            "ICQ",  
+            "LA_ICQ",  
+            "LA_VBR",  
+            "LA_CBR"  
+        ],  
+    },  
+    {  
+        "name": "INTEL_HEVC",  
+        "display_name": "IntelÂ® Quick Sync HEVC (uses iGPU)",  
+        "presets": [  
+            "QUALITY",  
+            "BALANCED",  
+            "SPEED",  
+            "VERYSLOW",  
+            "SLOWER",  
+            "SLOW",  
+            "MEDIUM",  
+            "FAST",  
+            "FASTER",  
+            "VERYFAST"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VCM",  
+            "AVBR",  
+            "ICQ",  
+            "LA_ICQ",  
+            "LA_VBR",  
+            "LA_CBR"  
+        ],  
+    },  
+    {  
+        "name": "X264",  
+        "display_name": "X264 (uses CPU)",  
+        "presets": [  
+            "ULTRAFAST",  
+            "SUPERFAST",  
+            "VERYFAST",  
+            "FASTER",  
+            "FAST",  
+            "MEDIUM",  
+            "SLOW",  
+            "SLOWER",  
+            "VERYSLOW",  
+            "PLACEBO"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY"  
+        ],  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_NEW",  
+        "display_name": "NVIDIAÂ® NVENC New (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ],  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_HEVC",  
+        "display_name": "NVIDIAÂ® NVENC HEVC (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ],  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_AV1",  
+        "display_name": "NVIDIAÂ® NVENC AV1 (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "PRESET_MAX_QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY",  
+            "RC_LOSSLESS"  
+        ],  
+    },  
+    {  
+        "name": "AMD_AMF",  
+        "display_name": "AMDÂ® HW H.264 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ],  
+    },  
+    {  
+        "name": "AMD_AMF_HEVC",  
+        "display_name": "AMDÂ® HW H.265 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ],  
+    },  
+    {  
+        "name": "AMD_AMF_AV1",  
+        "display_name": "AMD HW AV1 (uses GPU)",  
+        "presets": [  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_VBR_LAT",  
+            "RC_QVBR",  
+            "RC_HQVBR",  
+            "RC_HQCBR"  
+        ],  
+    }  
+]  
+  
+
+```
+
+Encoders-27.2.3
+
+```
+const OBS.27.2.3.Encoders = [  
+    {  
+        "name": "INTEL",  
+        "display_name": "IntelÂ® Quick Sync (uses iGPU)",  
+        "presets": [  
+            "LOW",  
+            "MEDIUM",  
+            "HIGH"  
+        ],  
+        "rateControls": [],  
+    },  
+    {  
+        "name": "X264",  
+        "display_name": "X264 (uses CPU)",  
+        "presets": [  
+            "ULTRAFAST",  
+            "SUPERFAST",  
+            "VERYFAST",  
+            "FASTER",  
+            "FAST",  
+            "MEDIUM",  
+            "SLOW",  
+            "SLOWER",  
+            "VERYSLOW",  
+            "PLACEBO"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY"  
+        ],  
+    },  
+    {  
+        "name": "NVIDIA_NVENC",  
+        "display_name": "NVIDIAÂ® NVENC (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "BLURAY_DISK",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "HIGH_PERFORMANCE_LOSSLESS"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY"  
+        ],  
+    },  
+    {  
+        "name": "NVIDIA_NVENC_NEW",  
+        "display_name": "NVIDIAÂ® NVENC New (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "DEFAULT",  
+            "HIGH_QUALITY",  
+            "HIGH_PERFORMANCE",  
+            "BLURAY_DISK",  
+            "LOW_LATENCY",  
+            "HIGH_PERFORMANCE_LOW_LATENCY",  
+            "HIGH_QUALITY_LOW_LATENCY",  
+            "LOSSLESS",  
+            "HIGH_PERFORMANCE_LOSSLESS"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP",  
+            "RC_2_PASS_QUALITY"  
+        ],  
+    },  
+    {  
+        "name": "AMD_AMF",  
+        "display_name": "AMDÂ® AMF (uses GPU)",  
+        "presets": [  
+            "AUTOMATIC",  
+            "BALANCED",  
+            "SPEED",  
+            "QUALITY",  
+            "ULTRA_LOW_LATENCY",  
+            "LOW_LATENCY"  
+        ],  
+        "rateControls": [  
+            "RC_CBR",  
+            "RC_CQP",  
+            "RC_VBR",  
+            "RC_VBR_MINQP"  
+        ],  
+    }  
+]  
+
+```

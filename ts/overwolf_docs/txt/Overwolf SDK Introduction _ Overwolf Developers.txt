@@ -1,0 +1,165 @@
+Title: Overwolf SDK Introduction | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/ow-sdk-introduction
+
+Overwolf SDK Introduction
+=========================
+
+Overwolf's SDK unlocks in-game app development, and Overwolf's [APIs](/ow-native/reference/ow-api-overview) contain all the information you need to create your app. This article outlines and provides the relevant information about the different parts of an Overwolf app.
+
+App architecture[](#app-architecture "Direct link to App architecture")
+--------------------------------------------------------------------------
+
+There three main parts to an Overwolf app:
+
+* A manifest file (manifest.json), detailing the properties of the app. More info [here](#manifest-file).
+* HTML / javascript source files. More info [here](#htmljs-source-files).
+* Visuals and images such as icons and buttons. More info [here](#assets).
+
+Only JS frameworks are supported
+
+For example vue.js, angular.js, react, backbone.js and similar ones.  
+However, full-blown desktop application solutions such as AppJS and others are not supported by the Overwolf native client.
+Use [Overwolf Electron](/ow-electron/getting-started/ow-electron-technical-overview) for Electron applications.
+
+For Vue.JS developers, its strongly advised against using UI libraries like Vuetify, Buefy, and others. This is due to issues in non-native windows, where different controls might not respond to mouse input (clicks).
+
+However, if you can find the control's outer element, have it listen to `onmousedown`, and simulate a `click()`.
+
+To build an Overwolf app, you need to download the [developer version of the Overwolf client](https://download.overwolf.com/install/Download?Channel=developers).
+
+### Manifest file[](#manifest-file "Direct link to Manifest file")
+
+The `manifest.json` is a mandatory file and describes the different aspects of your app. It ***MUST*** be present in your app's root folder for the app to function. The file defines the app's general behavior, features it will be using, and any other *meta-data* Overwolf needs to run your app exactly the way you want it to.
+
+For more information, see [Manifest.json](/ow-native/reference/manifest/manifest-json).
+
+An example of a basic manifest file:
+
+```
+{  
+	"manifest_version":1,  
+	"type":"WebApp",  
+	"meta":{  
+		"name":"Demo App",  
+		"version":"1.0.0",  
+		"minimum-overwolf-version":"0.77.10",  
+		"author":"Developer Name",  
+		"icon":"IconMouseOver.png",  
+        "icon_gray":"IconMouseNormal.png",  
+        "launcher_icon": "desktop-icon.ico",  
+		"description":"Demo App"  
+	},  
+	"data": {  
+		"start_window":"MainWindow",  
+		"windows":{  
+			"MainWindow":{  
+					"file":"index.html",  
+					"transparent": false,  
+					"resizable": true,  
+					"use_os_windowing": true,  
+					"size": {  
+						"width":700,  
+						"height":400  
+						},  
+					"min_size": {  
+						"width":400,  
+						"height":400  
+					}  
+				}  
+		}  
+	}  
+}  
+
+```
+
+### HTML/JS source files[](#htmljs-source-files "Direct link to HTML/JS source files")
+
+In the example `manifest.json` above, the app contains a single window. The source file of this window is `index.html`. Below is an example HTML window source file:
+
+```
+<!DOCTYPE html>  
+<html>  
+<body>  
+  
+<h1>Basic sample app</h1>  
+<p>This is an Overwolf app window.</p>  
+  
+</body>  
+</html>  
+
+```
+
+### Assets[](#assets "Direct link to Assets")
+
+Your app can use images and assets like in any other web app. However, there are several mandatory assets that every Overwolf app needs. In the example `manifest.json` above, all the mandatory icons have been configured:
+
+* [icon](/ow-native/reference/manifest/manifest-json#meta-mouse-over).
+* [icon\_gray](/ow-native/reference/manifest/manifest-json#meta-gray_icon).
+* [launcher\_icon](/ow-native/reference/manifest/manifest-json#meta-launcher_icon).
+
+### OPK package[](#opk-package "Direct link to OPK package")
+
+After you finish building your app, you need to pack everything (the manifest, source files, and assets) into a single Overwolf app installer, called an **OPK** package.
+
+An **OPK** package is actually a *ZIP* package. To create it, just *ZIP* all of your files together, then change the file extension from *ZIP* to *OPK*. Double clicking a valid (**AND SIGNED**) *OPK* will install the package as a new Overwolf app.
+
+note
+
+Only [whitelisted](#get-whitelisted-as-a-developer) developers can install *OPKs* that were not downloaded from the store.
+
+#### Reduce OPK size[](#reduce-opk-size "Direct link to Reduce OPK size")
+
+The size of your app can lead to longer download and update times, slow app performance and other user experience issues. Most of the time, basic compression is enough. Most apps are sized between 1-3 Mb, but sometimes heavy assets push that higher, and the *OPK* can easily grow to more than 5Mb.
+Overwolf's standing policy is to minimize the footprint and requirements of apps and not strain the user's resources, storage and/or processing power.
+
+Use any of the following strategies to keep your *OPK* size manageable:
+
+* Compress images to as small as possible with [JPEGMini](https://www.jpegmini.com/), [TinyPNG](https://tinypng.com/) or a similar tool.
+* Remove non-critical JavaScript from your app to reduce transmission times, CPU-intensive compiling, and potential memory overhead.
+* Remove map (\*.map) files before zipping. The Developer tools in Firefox/Chrome use the map files to link minified JS/CSS generated files to the original JS/CSS so that you can debug your code as if it was not compressed.
+* Reduce font sizes, especially if you are using a font delivery service like google fonts. Fonts that can be over 500KB will need to be reduced. You may need to do this yourself. For more information, see [Reducing the file size of custom web fonts](https://parall.ax/blog/view/3072/tutorial-reducing-the-file-size-of-custom-web-fonts).
+* Remove `.DS_Store` files. These files are proprietary Mac/OSX system files which hold attributes/meta-data and is not needed for your app.
+* Remove `.git`, `node_modules` or anything that is not required to run the app.
+* Serve assets through a CDN. If you have a large list of images (e.g. League of Legends champion tiles), upload them to a CDN and have your app download them on demand. If you use AWS, upload them to a S3 bucket and set up a CDN using Cloudfront. **Make sure that downloading the assets during a game does not put a heavy load on the client's connection speed.**
+
+You can combine any of the above, and even add your own strategy to keep your *OPK's* size manageable.
+
+Safety & Security[](#safety--security "Direct link to Safety & Security")
+----------------------------------------------------------------------------
+
+Protecting the community of gamers is of utmost importance, and Overwolf works hard to ensure the safety and security of gamers and developers alike. To ensure safety and security:
+
+1. Each app goes through a comprehensive review process.
+2. Each app is hosted separately in its own web browser, and each web browser runs as a separate process.
+3. Each app is being run from a different virtual directory.
+
+Additional steps Overwolf uses to support security, separation, and encapsulation include making sure apps:
+
+* Don't have access to the userâs local files without permission.
+* Can't directly interfere with other apps.
+* That crashes or breaks doesnât affect the rest of the system.
+
+API[](#api "Direct link to API")
+-----------------------------------
+
+You can build some awesome things with web technologies. Our way to make apps even better is using in-game real time information and events to fuel app functions. With [Overwolf's JavaScript API](/ow-native/reference/ow-api-overview) you can unlock features that read and interact with in-game events.
+
+You app can leverage simple in-game events (e.g. kills, deaths, victories and similar key events) to more complicated ones (e.g. trigger taking a screenshot or recording a video of the game). Events can trigger user experience features (e.g changing window size, analyzing in-game stats to display tips and more). Overwolf is constantly developing new tools and features that you can use to build your dream app. [Contact us](/ow-native/support/contact-us) to suggest a feature if you can't find it.
+
+Overwolf Plugins[](#overwolf-plugins "Direct link to Overwolf Plugins")
+--------------------------------------------------------------------------
+
+You can add even more features to your app by using one of the Overwolf [plugins](/ow-native/guides/dev-tools/plugins/ow-plugins-overview). For example, the [simple I/O plugin](/ow-native/guides/dev-tools/plugins/ow-simple-io-plugin) for reading files from the local disk. You can even create your own plugin by using existing C/C++/C# code. Wrap it inside an Overwolf Plugin DLL file and interact with it in your Overwolf app.
+
+For more details, see [Overwolf Plugins](/ow-native/guides/dev-tools/plugins/ow-plugins-overview).
+
+Next steps[](#next-steps "Direct link to Next steps")
+--------------------------------------------------------
+
+### Real world sample app[](#real-world-sample-app "Direct link to Real world sample app")
+
+To learn how to build an app that uses in-game events, pop notifications, displays in-game overlays, and more, download the [sample app](/ow-native/getting-started/onboarding-resources/basic-sample-app).
+
+### Get whitelisted as a developer[](#get-whitelisted-as-a-developer "Direct link to Get whitelisted as a developer")
+
+Only whitelisted Overwolf developer accounts can load or install apps that are not available on the Overwolf store (including unreleased beta versions). If you are not whitelisted, you will not be able to run or install such apps, which means that testing your work in progress will be difficult. Therefore, start by [submitting your app proposal](/ow-native/getting-started/project-roadmap#step-5---app-submission) in order to get whitelisted.

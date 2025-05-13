@@ -1,0 +1,746 @@
+Title: overwolf.settings API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/settings/ow-settings
+
+overwolf.settings API
+=====================
+
+Use this API to view and modify one of the following Overwolf settings properties:
+
+* Hotkeys â register a function for a given hotkey, or retrieve an existing hotkey key combination.
+* Retrieve the current Overwolf user language.
+* Video (i.e., folder location, capture settings, FPS settings, etc.).
+
+Special OW URL's[](#special-ow-urls "Direct link to Special OW URL's")
+-------------------------------------------------------------------------
+
+You can also use the following helpful URLs to open the Overwolf settings and hotkey windows:
+
+* `overwolf://settings`  
+  A clickable link that opens the Overwolf settings window from your app.
+* `overwolf://settings/subscriptions`  
+  A clickable link that opens the Overwolf Subscriptions settings window from your app.
+* `overwolf://settings/games-overlay`  
+  A clickable link that opens the Overwolf Overlay and Hotkeys settings window from your app.
+* `overwolf://settings/games-overlay?hotkey=hotkey_name_in_manifest`  
+  A clickable link that opens the Overwolf Overlay and Hotkeys settings window from your app, and then focuses on the stated hotkey.
+  This should be the same hotkey name as written in the manifest.json.
+
+  Note that this means you canât focus on Overwolfâs built-in hotkeys or hotkeys of other apps.
+* You can even link into the hotkeys of a specific game settings:  
+  `overwolf://settings/games-overlay?hotkey=hotkey_name_in_manifest&gameId=game_id`
+
+Read more about how to use the [overwolf.settings.hotkeys API](/ow-native/reference/settings/hotkeys-api) in our [Hotkeys best practices guide](/ow-native/guides/general-tech/hotkeys-best-practices).
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.settings.getHotKey()](#gethotkeyfeatureid-callback)
+* [overwolf.settings.registerHotKey()](#registerhotkeyactionid-callback)
+* [overwolf.settings.getCurrentOverwolfLanguage()](#getcurrentoverwolflanguagecallback)
+* [overwolf.settings.getOverwolfVideosFolder()](#getoverwolfvideosfoldercallback)
+* [overwolf.settings.setOverwolfVideosFolder()](#setoverwolfvideosfolderpath-callback)
+* [overwolf.settings.getOverwolfScreenshotsFolder()](#getoverwolfscreenshotsfoldercallback)
+* [overwolf.settings.setOverwolfScreenshotsFolder()](#setoverwolfscreenshotsfolderpath-callback)
+* [overwolf.settings.getVideoCaptureSettings()](#getvideocapturesettingscallback)
+* [overwolf.settings.setVideoCaptureSettings()](#setvideocapturesettingsresolutionsettings-fps-callback)
+* [overwolf.settings.getAudioCaptureSettings()](#getaudiocapturesettingscallback)
+* [overwolf.settings.setAudioCaptureSettings()](#setaudiocapturesettingsenablesound-enablemicrophone-callback)
+* [overwolf.settings.getFpsSettings()](#getfpssettingscallback)
+* [overwolf.settings.setFpsSettings()](#setfpssettingssettings-callback)
+* [overwolf.settings.setExtensionSettings()](#setextensionsettingsextensionsettings-callback)
+* [overwolf.settings.getExtensionSettings()](#getextensionsettingscallback)
+
+Events Reference[](#events-reference "Direct link to Events Reference")
+--------------------------------------------------------------------------
+
+* [overwolf.settings.onFpsSettingsChanged](#onfpssettingschanged)
+* [overwolf.settings.OnVideoCaptureSettingsChanged](#onvideocapturesettingschanged)
+* [overwolf.settings.OnAudioCaptureSettingsChanged](#onaudiocapturesettingschanged)
+* [overwolf.settings.OnHotKeyChanged](#onhotkeychanged)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.settings.enums.ResolutionSettings](#resolutionsettings-enum) enum
+* [overwolf.settings.enums.eIndicationPosition](#eindicationposition-enum) enum
+* [FpsSettings](#fpssettings-object) Object
+* [GetFpsSettingsResult](#getfpssettingsresult-object) Object
+* [GeneralExtensionSettings](#generalextensionsettings-object) Object
+* [GetExtensionSettingsResult](#getextensionsettingsresult-object) Object
+* [FolderResult](#folderresult-object) Object
+* [SetFolderResult](#setfolderresult-object) Object
+* [Path](#path-object) Object
+* [GetVideoCaptureSettingsResult](#getvideocapturesettingsresult-object) Object
+* [GetAudioCaptureSettingsResult](#getaudiocapturesettingsresult-object) Object
+* [FpsSettingsChangedEvent](#fpssettingschangedevent-object) Object
+* [VideoCaptureSettingsChangedEvent](#videocapturesettingschangedevent-object) Object
+* [AudioCaptureSettingsChangedEvent](#audiocapturesettingschangedevent-object) Object
+
+getHotKey(featureId, callback)[](#gethotkeyfeatureid-callback "Direct link to getHotKey(featureId, callback)")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078 "Direct link to Version added: 0.78")
+
+#### Permissions required: Hotkeys[](#permissions-required-hotkeys "Direct link to Permissions required: Hotkeys")
+
+> Returns the hotkey assigned to a given feature id by calling the callback.
+
+Deprecated
+
+This function is Deprecated. Instead, please use [overwolf.settings.hotkeys.get()](/ow-native/reference/settings/hotkeys-api#getcallback).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| featureId | string | The feature id for which to get the set hotkey |
+| callback | function | A callback function which will be called with the status of the request |
+
+#### Callback argument: Success[](#callback-argument-success "Direct link to Callback argument: Success")
+
+A callback function which will be called with the status of the request
+
+```
+{   
+    "status": "success",  
+    "hotkey ": "Ctrl+F2"  
+}  
+
+```
+
+registerHotKey(actionId, callback)[](#registerhotkeyactionid-callback "Direct link to registerHotKey(actionId, callback)")
+-----------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-1 "Direct link to Version added: 0.78")
+
+#### Permissions required: Hotkeys[](#permissions-required-hotkeys-1 "Direct link to Permissions required: Hotkeys")
+
+> Registers a callback for a given hotkey action.
+
+Deprecated
+
+This function is Deprecated. Instead, please register to the [overwolf.settings.hotkeys.onPressed](/ow-native/reference/settings/hotkeys-api#onpressed) event.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| actionId | string | The action id for which to register the callback |
+| callback | function | The function to run when the hotkey is pressed |
+
+info
+
+If you are using a transparnet background controller (window), you must register the hotkey in that window.
+
+#### Callback argument: Success[](#callback-argument-success-1 "Direct link to Callback argument: Success")
+
+On successful registration, the callback function which will be called when the hotkey is pressed.
+A Note regarding hotkeys: Shift can only be combined with the F keys.
+
+```
+{   
+    "status": "success",  
+    "hotkey ": "Ctrl+F2"  
+}  
+
+```
+
+#### Callback argument: Failure[](#callback-argument-failure "Direct link to Callback argument: Failure")
+
+If the registration had failed, the callback function will be called immediately with the status "error" and another property,
+âerrorâ, indicating the reason for the failure.
+
+```
+{ "status": "error", "error": "something went wrong..." }  
+
+```
+
+#### Usage Example[](#usage-example "Direct link to Usage Example")
+
+If your manifest.json file defined these hotkeys:
+
+```
+"data": {  
+    "hotkeys" : {  
+        "my_cool_action": {  
+            "title": "My Cool Action",  
+            "action-type": "custom",  
+            "default": "Ctrl+Alt+C"  
+        }  
+    }  
+}  
+
+```
+
+A call to register this hotkey should be look like this:
+
+```
+overwolf.settings.registerHotKey(  
+    "my_cool_action",  
+    function(arg) {  
+        if (arg.status == "success") {  
+            alert("This is my cool action!");  
+        }  
+    }  
+);  
+
+```
+
+getCurrentOverwolfLanguage(callback)[](#getcurrentoverwolflanguagecallback "Direct link to getCurrentOverwolfLanguage(callback)")
+------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.85[](#version-added-085 "Direct link to Version added: 0.85")
+
+> Returns the current language Overwolf is set to in a two letter ISO name format.
+
+Deprecated
+
+This function is Deprecated. Instead, please use [overwolf.settings.language](/ow-native/reference/settings/language-api) API.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | function | A callback function which will be called with the status of the request |
+
+#### Callback argument: Success[](#callback-argument-success-2 "Direct link to Callback argument: Success")
+
+A callback function which will be called with the status of the request and the current language Overwolf is set to:
+
+```
+{   
+    "status": "success",  
+    "language ": "en"  
+}  
+
+```
+
+getOverwolfVideosFolder(callback)[](#getoverwolfvideosfoldercallback "Direct link to getOverwolfVideosFolder(callback)")
+---------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.86[](#version-added-086 "Direct link to Version added: 0.86")
+
+> Returns the current folder Overwolf uses to store videos.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result:FolderResult )](#folderresult-object) => void | called with the status of the request |
+
+setOverwolfVideosFolder(path, callback)[](#setoverwolfvideosfolderpath-callback "Direct link to setOverwolfVideosFolder(path, callback)")
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.119[](#version-added-0119 "Direct link to Version added: 0.119")
+
+> Sets the folder Overwolf uses to store videos.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| path | string | The folder to use |
+| callback | [(Result:SetFolderResult)](#setfolderresult-object) => void | called with the status of the request |
+
+Note: when you set a directory, you should use escape characters:
+
+```
+overwolf.settings.setOverwolfVideosFolder("C:\\Users\\Azamoth\\Videos\\Captures",console.log)  
+
+```
+
+getOverwolfScreenshotsFolder(callback)[](#getoverwolfscreenshotsfoldercallback "Direct link to getOverwolfScreenshotsFolder(callback)")
+------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.103[](#version-added-0103 "Direct link to Version added: 0.103")
+
+> Returns the current folder Overwolf uses to store screenshots and GIFs.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result:FolderResult )](#folderresult-object) => void | called with the result of the request which contains the current Overwolf screenshots folder |
+
+setOverwolfScreenshotsFolder(path, callback)[](#setoverwolfscreenshotsfolderpath-callback "Direct link to setOverwolfScreenshotsFolder(path, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.119[](#version-added-0119-1 "Direct link to Version added: 0.119")
+
+> Sets the folder Overwolf uses to store screenshots.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| path | string | The folder to use |
+| callback | [(Result:SetFolderResult )](#setfolderresult-object) => void | called with the result of the request which contains the current Overwolf screenshots folder |
+
+getVideoCaptureSettings(callback)[](#getvideocapturesettingscallback "Direct link to getVideoCaptureSettings(callback)")
+---------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.86[](#version-added-086-1 "Direct link to Version added: 0.86")
+
+> Returns the current video capture settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result:GetVideoCaptureSettingsResult)](#getvideocapturesettingsresult-object) => void | called with the result of the request which contains the current Overwolf capture settings |
+
+setVideoCaptureSettings(resolutionSettings, fps, callback)[](#setvideocapturesettingsresolutionsettings-fps-callback "Direct link to setVideoCaptureSettings(resolutionSettings, fps, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117 "Direct link to Version added: 0.117")
+
+#### Permissions required: VideoCaptureSettings[](#permissions-required-videocapturesettings "Direct link to Permissions required: VideoCaptureSettings")
+
+requires the |VideoCaptureSettings| permission.
+
+> Sets new video capture settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| resolutionSettings | [overwolf.settings.ResolutionSettings](#resolutionsettings-enum) enum |  |
+| fps | int |  |
+| callback | (Result) => void | called with the result of the request |
+
+getAudioCaptureSettings(callback)[](#getaudiocapturesettingscallback "Direct link to getAudioCaptureSettings(callback)")
+---------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117-1 "Direct link to Version added: 0.117")
+
+> Returns the current audio capture settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result:GetAudioCaptureSettingsResult)](#getaudiocapturesettingsresult-object) => void | called with the status of the request |
+
+setAudioCaptureSettings(enableSound, enableMicrophone, callback)[](#setaudiocapturesettingsenablesound-enablemicrophone-callback "Direct link to setAudioCaptureSettings(enableSound, enableMicrophone, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117-2 "Direct link to Version added: 0.117")
+
+> Sets new audio capture settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| enableSound | bool | The folder to use |
+| enableMicrophone | bool |  |
+| callback | (Result) => void | called with the result of the request |
+
+getFpsSettings(callback)[](#getfpssettingscallback "Direct link to getFpsSettings(callback)")
+------------------------------------------------------------------------------------------------
+
+#### Version added: 0.89[](#version-added-089 "Direct link to Version added: 0.89")
+
+> Gets the status of the FPS control (on/off), its position, its offset (in pixels) and its scale [0, 1].
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | ([Result: GetFpsSettingsResult](#getfpssettingsresult-object)) => void | A callback function which will be called with the status of the request |
+
+setFpsSettings(settings, callback)[](#setfpssettingssettings-callback "Direct link to setFpsSettings(settings, callback)")
+-----------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.89[](#version-added-089-1 "Direct link to Version added: 0.89")
+
+> Sets the state (on/off), position, offset (in pixels) and scale [0, 1] of the Fps control.
+
+Deprecated
+
+This function is Deprecated.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| settings | [FpsSettings](#fpssettings-object) Object | Container for the FPS settings |
+| callback | (Result) => void | called with the result of the request |
+
+setExtensionSettings(extensionSettings, callback)[](#setextensionsettingsextensionsettings-callback "Direct link to setExtensionSettings(extensionSettings, callback)")
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149 "Direct link to Version added: 0.149")
+
+> Sets the extension settings.
+
+Supports enabling/disabling app auto-launch with Overwolf client, exit with Overwolf client and more.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| extensionSettings | [GeneralExtensionSettings](#generalextensionsettings-object) Object | Container for the extension settings |
+| callback | (Result) => void | called with the result of the request |
+
+getExtensionSettings(callback)[](#getextensionsettingscallback "Direct link to getExtensionSettings(callback)")
+------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149-1 "Direct link to Version added: 0.149")
+
+> Gets the extension settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | ([Result: GetExtensionSettingsResult](#getextensionsettingsresult-object)) => void | A callback function which will be called with the status of the request |
+
+onFpsSettingsChanged[](#onfpssettingschanged "Direct link to onFpsSettingsChanged")
+--------------------------------------------------------------------------------------
+
+#### Version added: 0.89[](#version-added-089-2 "Direct link to Version added: 0.89")
+
+> Fired when fps settings are changed, with the following structure: [FpsSettingsChangedEvent](#fpssettingschangedevent-object) Object.
+
+OnVideoCaptureSettingsChanged[](#onvideocapturesettingschanged "Direct link to OnVideoCaptureSettingsChanged")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117-3 "Direct link to Version added: 0.117")
+
+> Fired when video capture settings are changed, with the following structure: [VideoCaptureSettingsChangedEvent](#fpssettingschangedevent-object) Object.
+
+OnAudioCaptureSettingsChanged[](#onaudiocapturesettingschanged "Direct link to OnAudioCaptureSettingsChanged")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117-4 "Direct link to Version added: 0.117")
+
+> Fired when audio capture settings are changed, with the following structure: [AudioCaptureSettingsChangedEvent](#audiocapturesettingschangedevent-object) Object.
+
+OnHotKeyChanged[](#onhotkeychanged "Direct link to OnHotKeyChanged")
+-----------------------------------------------------------------------
+
+#### Version added: 0.119[](#version-added-0119-2 "Direct link to Version added: 0.119")
+
+> Fired when a hotkey is modified. Apps will only be notified of hotkey changes that relate to them.
+
+Deprecated
+
+This event is Deprecated. Instead, please use the [overwolf.settings.hotkeys.onChanged](/ow-native/reference/settings/hotkeys-api#onchanged) event.
+
+#### Event Data Example: Success[](#event-data-example-success "Direct link to Event Data Example: Success")
+
+```
+{ "source": "replayhud_save", "description": "Replay HUD: Save Replay for later", "hotkey": "Ctrl+Shift+F7" }  
+
+```
+
+ResolutionSettings enum[](#resolutionsettings-enum "Direct link to ResolutionSettings enum")
+-----------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-2 "Direct link to Version added: 0.78")
+
+> Describes Resolution settings.
+
+| Option | Description |
+| --- | --- |
+| Original |  |
+| R1080p |  |
+| R720p |  |
+| R480p |  |
+
+eIndicationPosition enum[](#eindicationposition-enum "Direct link to eIndicationPosition enum")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-3 "Direct link to Version added: 0.78")
+
+> Describes position to use as anchor.
+
+| Option | Description |
+| --- | --- |
+| None | -1 |
+| TopLeftCorner | 0 |
+| TopRightCorner | 1 |
+| BottomLeftCorner | 2 |
+| BottomRightCorner | 3 |
+
+FpsSettings Object[](#fpssettings-object "Direct link to FpsSettings Object")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-4 "Direct link to Version added: 0.78")
+
+> Container for the FPS settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| offset | 2DPoint`{x, y}` | The offset from the edge (in pixels) |
+| scale | double | A scale (1.0 = original) |
+| enabled | bool | Whether to enable or disable fps |
+| position | [eIndicationPosition](#eindicationposition-enum) enum | The position (anchor) to use |
+
+#### Object Data Example[](#object-data-example "Direct link to Object Data Example")
+
+```
+{  
+    "settings": {  
+        "offset": {  
+            "x": 0,  
+            "y": 0  
+        },  
+        "scale": 1,  
+        "enabled": false,  
+        "position": 0  
+    }  
+}  
+
+```
+
+GeneralExtensionSettings Object[](#generalextensionsettings-object "Direct link to GeneralExtensionSettings Object")
+-----------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149-2 "Direct link to Version added: 0.149")
+
+> Container for the extension settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| auto\_launch\_with\_overwolf | bool | Set your app to auto-launch when the OW client starts. See [notes](#auto_launch_with_notes). |
+| exit\_overwolf\_on\_exit | bool | Set the OW client to auto-shutdown when your OW app closes. See [notes](#exit_overwolf_on_exit-notes). |
+| channel | string | Set the app to a specific channel. See [notes](#channel-notes). |
+
+warning
+
+The exit\_overwolf\_on\_exit option shouldnât be used without Overwolfâs permission
+
+```
+{  
+    "settings": {  
+        "auto_launch_with_overwolf": true,  
+        "exit_overwolf_on_exit": false,  
+        "channel": "channel_name"  
+    }  
+}  
+
+```
+
+Usage example:
+
+```
+SetExtensionSettings({"auto_launch_with_overwolf": true, channel: 'channel_name'}, callback).  
+
+```
+
+#### `auto_launch_with_overwolf` notes[](#auto_launch_with_overwolf-notes "Direct link to auto_launch_with_overwolf-notes")
+
+* After setting the "auto\_launch\_with\_overwolf", your app should use auto-launch after you start the client (takes ~15 seconds).
+* If you would like to set app auto-launch with OW client, you should add the "Tray" permission to your app's [manifest permissions list](/ow-native/reference/manifest/manifest-json#permissions-array).
+* You can set the same app auto-launch with OW client using the manifest. [Read more about it](/ow-native/reference/manifest/manifest-json#enable-app-auto-launch-with-overwolf).
+* Apps launched this way will have [origin](/ow-native/reference/extensions/ow-extensions#the-origin-string) "overwolfstartlaunchevent".
+
+#### `exit_overwolf_on_exit` notes[](#exit_overwolf_on_exit-notes "Direct link to exit_overwolf_on_exit-notes")
+
+* If you would like to set app auto-launch with OW client, you should add the "Shutdown" permission to your app's [manifest permissions list](/ow-native/reference/manifest/manifest-json#permissions-array).
+* Currently you can NOT set the same auto-exit with OW client using the manifest. Maybe we will add this feature in the future.
+* Overwolf client no not closes when an app that was using that setting has crashed, however, it will still close Overwolf if the user has dismissed the crash notification or didnât click on the "Relaunch" button in that same notification.
+
+#### `channel` notes[](#channel-notes "Direct link to channel-notes")
+
+* You should pre-define your app channels in your dev console.
+* You can set a specific channel to use a specific version, this way you can super easily create and distribute beta versions for your apps.
+
+GetFpsSettingsResult Object[](#getfpssettingsresult-object "Direct link to GetFpsSettingsResult Object")
+-----------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| settings | [FpsSettings](#fpssettings-object) Object | container for the FPS object |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+```
+{  
+    "status": "success",  
+    "settings": {  
+        "offset": {  
+            "x": 0,  
+            "y": 0  
+        },  
+        "scale": 1,  
+        "enabled": false,  
+        "position": 0  
+    }  
+}  
+
+```
+
+GetExtensionSettingsResult Object[](#getextensionsettingsresult-object "Direct link to GetExtensionSettingsResult Object")
+-----------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| settings | [GeneralExtensionSettings](#generalextensionsettings-object) Object | Container for the extension settings |
+
+#### Example data: Success[](#example-data-success-1 "Direct link to Example data: Success")
+
+```
+{  
+    "success": true,  
+    "settings": {  
+        "auto_launch_with_overwolf": true  
+    }  
+}  
+
+```
+
+FolderResult Object[](#folderresult-object "Direct link to FolderResult Object")
+-----------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| path | [Path](#path-object) Object | Container for the path entity |
+
+#### Example data: Success[](#example-data-success-2 "Direct link to Example data: Success")
+
+```
+{  
+    "status": "success",  
+    "path": {   
+        "Value": "E:\Video\Overwolf",  
+        "Type": "System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",  
+        "Name": "Folders_VideoCapturesFolder"  
+    }  
+}  
+
+```
+
+SetFolderResult Object[](#setfolderresult-object "Direct link to SetFolderResult Object")
+--------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| path | string | Container for the path |
+
+#### Example data: Success[](#example-data-success-3 "Direct link to Example data: Success")
+
+```
+{  
+    "status": "success",  
+    "path": "E:\Video\Overwolf"  
+}  
+
+```
+
+FolderResult Object[](#folderresult-object-1 "Direct link to FolderResult Object")
+-------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| path | [Path](#path-object) Object | Container for the path entity |
+
+#### Example data: Success[](#example-data-success-4 "Direct link to Example data: Success")
+
+```
+{  
+    "status": "success",  
+    "path": {   
+        "Value": "E:\Video\Overwolf",  
+        "Type": "System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",  
+        "Name": "Folders_VideoCapturesFolder"  
+    }  
+}  
+
+```
+
+Path Object[](#path-object "Direct link to Path Object")
+-----------------------------------------------------------
+
+> Container for the path entity
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| Value | string |  |
+| Type | string |  |
+| Name | string |  |
+
+#### Example data[](#example-data "Direct link to Example data")
+
+```
+{  
+    "Value": "E:\Video\Overwolf",  
+    "Type": "System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",  
+    "Name": "Folders_VideoCapturesFolder"  
+}  
+
+```
+
+GetVideoCaptureSettingsResult Object[](#getvideocapturesettingsresult-object "Direct link to GetVideoCaptureSettingsResult Object")
+--------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| encoder | string |  |
+| preset | string |  |
+| fps | number |  |
+| resolution | number |  |
+
+#### Example data: Success[](#example-data-success-5 "Direct link to Example data: Success")
+
+```
+{  
+    "encoder": "NVIDIA_NVENC",  
+    "preset": "DEFAULT",  
+    "fps": 30,  
+    "resolution": 2  
+}  
+
+```
+
+GetAudioCaptureSettingsResult Object[](#getaudiocapturesettingsresult-object "Direct link to GetAudioCaptureSettingsResult Object")
+--------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| sound\_enabled | boolean |  |
+| microphone\_enabled | boolean |  |
+
+#### Example data: Success[](#example-data-success-6 "Direct link to Example data: Success")
+
+```
+{  
+    "sound_enabled": true,  
+    "microphone_enabled": false  
+}  
+
+```
+
+FpsSettingsChangedEvent Object[](#fpssettingschangedevent-object "Direct link to FpsSettingsChangedEvent Object")
+--------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| setting | string | One of the following values: "OnScreenLocation" / "Enabled" / "Scale" / "Offset" |
+
+#### Event data example[](#event-data-example "Direct link to Event data example")
+
+```
+{   
+   "setting":"OnScreenLocation"  
+}  
+
+```
+
+VideoCaptureSettingsChangedEvent Object[](#videocapturesettingschangedevent-object "Direct link to VideoCaptureSettingsChangedEvent Object")
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| setting | string | One of the following values: "resolution" / "fps" / "unknown" / "Offset" |
+
+#### Event data example[](#event-data-example-1 "Direct link to Event data example")
+
+```
+{   
+   "setting":"resolution"  
+}  
+
+```
+
+AudioCaptureSettingsChangedEvent Object[](#audiocapturesettingschangedevent-object "Direct link to AudioCaptureSettingsChangedEvent Object")
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| setting | string | One of the following values: "speakers" / "microphone" / "unknown" / "Offset" |
+
+#### Event data example[](#event-data-example-2 "Direct link to Event data example")
+
+```
+{   
+   "setting":"speakers"  
+}  
+
+```

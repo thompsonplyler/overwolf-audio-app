@@ -1,1 +1,3 @@
-- Get a copy of the full game object for players' inventories. We had a lot of difficulty finding it, and I want to make sure it's explicit and clear for future instances of AI-assisted coding.
+- - Address failure of Overwolf window to shrink to minimal size via `changeSize`, despite `manifest.json` `min_size` settings and correct internal content toggling.
+- Make the app work from the time a game starts.
+- Figure out how to migrate the app to the new Electron framework.

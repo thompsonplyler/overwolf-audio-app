@@ -1,0 +1,334 @@
+Title: Subscriptions API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/subscriptions-api
+
+Subscriptions API
+=================
+
+The [Overwolf Subscriptions API](/ow-native/monetization/implementation) relies on a combination of endpoints and deeplinks, detailed in this page.
+
+Endpoints[](#endpoints "Direct link to Endpoints")
+-----------------------------------------------------
+
+The following list of endpoints are exposed by the Overwolf Subscriptions API and handle the most common operations.
+
+**For live examples of the different endpoints, see the [Tebex Subs Sample App](https://github.com/overwolf/tebex-subs-sample).**
+
+**For live examples of the new categories and upgrade/downgrade endpoint, see the [Tebex Subs Sample App on the âupgrade/downgrade-developâ branch](https://github.com/overwolf/tebex-subs-sample/tree/upgrade/downgrade-develop).**
+
+### Checkout[](#checkout "Direct link to Checkout")
+
+> Generates a checkout page for a specific subscription plan (package).
+
+```
+Request Type: 'GET'  
+Hostname: 'subscriptions-api.overwolf.com'  
+Path: '/checkout/${STORE_ID}/${PACKAGE_ID}'  
+Search Params:  
+  extensionId: string  
+  userId: string  
+  discordId (required when using discord actions): string  
+  
+Result: 'Checkout Webpage'  
+
+```
+
+note
+
+The `userId` key requires the `uuid` value from [`getCurrentUser(callback)`](/ow-native/reference/profile/ow-profile#getcurrentusercallback).
+
+> This request redirects directly to the page, and should be opened as a link in the users' browser.
+
+### Subscriptions[](#subscriptions "Direct link to Subscriptions")
+
+> Returns a list of all active subscription plans (packages) for the current user logged into the app.
+
+```
+Request Type: 'GET'  
+Hostname: 'subscriptions-api.overwolf.com'  
+Path: '/subscriptions/${STORE_ID}'  
+Search Params:  
+  extensionId: string  
+Headers:  
+  Authorization: 'Bearer ${token}'  
+  
+Result: 'Array of:'  
+    userId: "string",  
+    packageId: "number",  
+    state: "ACTIVE | PENDING_CANCELLATION | EXPIRED | CANCELLED ",  
+    recurringPaymentId: "string"  
+
+```
+
+> Generate the `Bearer ${token}`using the [`overwolf.profile.generateUserSessionToken()`](/ow-native/reference/profile/ow-profile#generateusersessiontokencallback) API.
+
+| State | Description |
+| --- | --- |
+| `ACTIVE` | The user has successfully activated a subscription. |
+| `PENDING_CANCELLATION` | The user has requested a subscription cancellation. This state continues till the next recurring payment date. |
+| `EXPIRED` | The user has successfully cancelled the subscription. This state is only reported after the user has cancelled the subscription and after the recurring payment date has passed. |
+| `CANCELLED` | A cancellation was issued by the app developer. This state is only reported after the app developer issued a cancellation of the subscription and after the recurring payment date has passed. |
+
+### Packages[](#packages "Direct link to Packages")
+
+> Returns a list of all available subscription plans (packages) for this app.
+
+```
+Request Type: 'GET'  
+Hostname: 'subscriptions-api.overwolf.com'  
+Path: '/packages/${STORE_ID}'  
+Search Params:  
+  extensionId: string  
+  
+Result: 'Array of:'  
+  base_price: 'number'  
+  category:   
+    id: 'number'  
+    name: 'string'  
+  created_at: 'string'  
+  description: 'string'  
+  disable_gifting: 'boolean'  
+  disable_quantity: 'boolean'  
+  discount: 'number'  
+  expiration_date?: 'string'  
+  id: 'number'  
+  image?: 'string'  
+  name: 'string'  
+  sales_tax: 'number'  
+  total_price: 'number'  
+  type: 'subscription | single'  
+  updated_at: 'string'  
+
+```
+
+### Categories[](#categories "Direct link to Categories")
+
+> Returns a list of all categories and their associated packages available for a specific store in this app.
+
+```
+Request Type: 'GET'  
+Hostname: 'https://subscriptions-api.overwolf.com'  
+Path: '/subscriptions/${STORE_ID}/categories'  
+Search Params:  
+  extensionId: string  
+Headers:  
+  Authorization: 'Bearer ${token}'  
+  
+Result: Array of:  
+  name: 'string'  
+  description: 'string'   
+  active_tier?:  
+    tier_id: 'number'  
+    package:  
+      base_price: 'number'  
+      category:  
+        id: 'number'  
+        name: 'string'  
+      created_at: 'string'  
+      description: 'string'  
+      disable_gifting: 'boolean'  
+      disable_quantity: 'boolean'  
+      discount: 'number'  
+      expiration_date?: 'string'  
+      id: 'number'  
+      image?: 'string'  
+      name: 'string'  
+      sales_tax: 'number'  
+      total_price: 'number'  
+      type: 'subscription' | 'single'  
+      updated_at: 'string'  
+      prorate_price?: 'number'  
+      currency: 'string'  
+    active: 'boolean'  
+    created_at: 'string'  
+    next_payment_date: 'string'  
+    status:  
+      id: 'string'  
+      description: 'string'  
+  packages: Array of:  
+    base_price: 'number'  
+    category:  
+      id: 'number'  
+      name: 'string'  
+    created_at: 'string'  
+    description: 'string'  
+    disable_gifting: 'boolean'  
+    disable_quantity: 'boolean'  
+    discount: 'number'  
+    expiration_date?: 'string'  
+    id: 'number'  
+    image?: 'string'  
+    name: 'string'  
+    sales_tax: 'number'  
+    total_price: 'number'  
+    type: 'subscription' | 'single'  
+    updated_at: 'string'  
+    prorate_price?: 'number'  
+    currency: 'string'  
+
+```
+
+### Upgrade/Downgrade[](#upgradedowngrade "Direct link to Upgrade/Downgrade")
+
+> Updates the package tier of a subscription package within a specific category for this app.
+
+```
+Request Type: 'PUT'  
+Hostname: 'https://subscriptions-api.overwolf.com'  
+Path: '/subscriptions/${STORE_ID}'  
+Search Params:  
+  extensionId: string  
+Headers:  
+  Authorization: 'Bearer ${token}'  
+  
+Body:  
+{  
+// The tierId from the activeTier object received by the get categories method.  
+  "tierId": number,  
+// The packageId you want to change to.  
+  "packageId": number,   
+// Whether to upgrade or downgrade to a package.  
+  "type": "upgrade" | "downgrade"   
+}  
+
+```
+
+#### Notes for Using the Categories and Upgrade/Downgrade Endpoints:[](#notes-for-using-the-categories-and-upgradedowngrade-endpoints "Direct link to Notes for Using the Categories and Upgrade/Downgrade Endpoints:")
+
+* To utilize the new `Categories` endpoint, you **must** create a new category and packages for that category in your Tebex store.
+* If you have users subscribed to the "old" package type (which cannot be upgraded or downgraded), please implement the following UI changes in the subscription settings section of your app:
+  + Inform the user that he canât switch between plans and must cancel his current plan first.
+  + Allow the user to cancel his subscription and only then allow him to switch to the new package type that allows for Upgrading/Downgrading their package tier.
+* When subscribing to the new package type, an initial purchase must be made using the `Checkout` endpoint. After the initial subscription, you can query the new `Categories` endpoint to check if the user has an active tier (subscription), and then display the Update/Downgrade buttons accordingly using the `prorate_price`.
+
+Deeplinks[](#deeplinks "Direct link to Deeplinks")
+-----------------------------------------------------
+
+The following is a list of deeplinks used by the Overwolf Subscriptions API, to handle calls back to the application.
+
+### Success[](#success "Direct link to Success")
+
+> Invoked when a user successfully finishes the checkout flow.
+
+```
+`${YOUR_DEEPLINK_SCHEME}://?result=success`  
+
+```
+
+### Cancelled[](#cancelled "Direct link to Cancelled")
+
+> Invoked when a user cancelled the checkout flow explicitly (does not fire if they closed the tab).
+
+```
+`${YOUR_DEEPLINK_SCHEME}://?result=cancel`  
+
+```
+
+Testing subscriptions[](#testing-subscriptions "Direct link to Testing subscriptions")
+-----------------------------------------------------------------------------------------
+
+Use the following test procedures to verify that your app implementation is working correctly.
+
+**Prerequisites**:
+
+* A valid subscription plan in your Tebex account with a package that has a one week recurring payment.
+* A test user(s) that have not had any kind of subscription.
+
+### Successful subscription (active state)[](#successful-subscription-active-state "Direct link to Successful subscription (active state)")
+
+To test the user's status as active:
+
+1. Open your app.
+2. Subscribe to the test package.
+3. Call the [`subscriptions`](#subscriptions) status endpoint.
+
+The expected response for a successful subscription should be:
+
+```
+{  
+ "userId": "<userId>",  
+ "packageId": packageId,  
+ "state": "ACTIVE",  
+ "recurringPaymentId": "<recurringPaymentId>"  
+    }  
+
+```
+
+### User initiated subscription cancellation[](#user-initiated-subscription-cancellation "Direct link to User initiated subscription cancellation")
+
+When a user initiates a cancellation, the `state` field returns a `PENDING_CANCELLATION`. This state continues till the next recurring payment date and will change to `EXPIRED` after the recurring payment date has passed. To complete this test, ***You will need a user with an `ACTIVE` subscription***.
+
+> It is recommended that your app contain a button that links to <https://checkout.tebex.io/payment-history> so that the user can manage the subscriptions manually.
+
+To test these states:
+
+1. Open your app.
+2. Press the button that leads to: <https://checkout.tebex.io/payment-history>.
+3. Enter the email of the subscribed user.
+4. The user should receive an email from Tebex with a button that redirects the user to view the payment history.
+5. Press the button in the email, then press the *Subscriptions* tab.
+6. Press *Manage*, then press *Cancel* and then *Cancel Subscription* to confirm.
+7. In the *Active* tab, note the status changes to *Ending*.
+8. Call the [`subscriptions`](#subscriptions) status endpoint.
+   The expected response for a successful cancellation should be::
+
+   ```
+   {  
+       "userId": "<userId>",  
+       "packageId": packageId,  
+       "state": "PENDING_CANCELLATION",  
+       "recurringPaymentId": "<recurringPaymentId>"  
+   }  
+
+   ```
+9. Wait for the package to expire. If the packageâs payment recurs every week, wait for a week to pass.
+10. Call [`subscriptions`](#subscriptions) status endpoint.
+    The expected response for a user cancelled subscription should be:
+
+```
+    {  
+        "userId": "<userId>",  
+        "packageId": packageId,  
+        "state": "EXPIRED",  
+        "recurringPaymentId": "<recurringPaymentId>"  
+    }  
+
+```
+
+### Developer initiated subscription cancellation[](#developer-initiated-subscription-cancellation "Direct link to Developer initiated subscription cancellation")
+
+As the app developer, you can manually cancel a userâs subscription by going to <https://creator.tebex.io/recurring-payments>.
+In this flow, the user `state` will be listed as `CANCELLED`. To complete this test, ***You will need a user with an `ACTIVE` subscription***.
+
+To test these states:
+
+1. Go to <https://creator.tebex.io/recurring-payments>.
+2. Enter the user whose subscription you want to end.
+3. Press *View* to enter the userâs page.
+4. Press *Cancel Agreement* in the top right corner.
+5. Note that the userâs *Status* has now changed to *Ending*.
+6. Call the [`subscriptions`](#subscriptions) status endpoint.
+   The expected response for a successful cancellation should be::
+
+```
+{  
+    "userId": "<userId>",  
+    "packageId": packageId,  
+    "state": "PENDING_CANCELLATION",  
+    "recurringPaymentId": "<recurringPaymentId>"  
+}  
+
+```
+
+7. Wait for the package to expire. If the packageâs payment recurs every week, wait for a week to pass.
+8. Call [`subscriptions`](#subscriptions) status endpoint.
+   The expected response for when a developer successfully cancels the user's subscription should be:
+
+```
+    {  
+        "userId": "<userId>",  
+        "packageId": packageId,  
+        "state": "CANCELLED",  
+        "recurringPaymentId": "<recurringPaymentId>"  
+    }  
+
+```

@@ -1,0 +1,68 @@
+Title: overwolf.os API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/os/ow-os
+
+overwolf.os API
+===============
+
+Use this API for Operating System related functionalities.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.os.getRegionInfo()](#getregioninfocallback)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.os.GetRegionInfoResult](#getregioninforesult-object) Object
+* [overwolf.os.RegionInfo](#regioninfo-object) Object
+
+getRegionInfo(callback)[](#getregioninfocallback "Direct link to getRegionInfo(callback)")
+---------------------------------------------------------------------------------------------
+
+#### Version added: 0.132[](#version-added-0132 "Direct link to Version added: 0.132")
+
+> Returns regional information about the user.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | ([Result: GetRegionInfoResult](#getregioninforesult-object)) => void | Returns with the result |
+
+GetRegionInfoResult Object[](#getregioninforesult-object "Direct link to GetRegionInfoResult Object")
+--------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| status | string | deprecated. For backward compatibility only |
+| Reason | string | deprecated. For backward compatibility only |
+| info | [RegionInfo](#regioninfo-object) Object | Region Info |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+```
+{   
+	"success": true,  
+	"info":  
+	{   
+		"date_format": "M/d/yyyy",  
+		"time_format": "h:mm:ss tt",   
+		"currency_symbol": "$",   
+		"is_metric": false,  
+		"name": "en-US"}  
+	}  
+}  
+
+```
+
+RegionInfo Object[](#regioninfo-object "Direct link to RegionInfo Object")
+-----------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| date\_format | string |  |
+| time\_format | string |  |
+| currency\_symbol | string |  |
+| is\_metric | boolean |  |
+| name | string |  |

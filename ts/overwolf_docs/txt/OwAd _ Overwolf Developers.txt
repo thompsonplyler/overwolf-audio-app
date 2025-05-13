@@ -1,0 +1,215 @@
+Title: OwAd | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/ads/owad
+
+OwAd
+====
+
+Use the following guides to understand the best practices for including ads in your app.
+
+* For an overview on ads, see the overview on [Advertising](/ow-native/monetization/advertising/overview).
+* For information about working with ads, see [Working with ads](/ow-native/monetization/advertising/standard-ads/working-with-ads).
+* For information about layouts, see [Recommended ad layouts](/ow-native/monetization/advertising/standard-ads/recommended-ads-layouts).
+* For information about ad policy, see [Advertising policy](/ow-native/monetization/advertising/overview#ad-policy).
+
+The Ads SDK creates simple Managed Ads Containers, which are controlled by the SDK with minimal intervention from the app.
+
+### Creating a Managed Ads Container[](#creating-a-managed-ads-container "Direct link to Creating a Managed Ads Container")
+
+You must first [set up](#setting-up-the-ads-sdk) the ads SDK in your app. This defines the [`OwAd`][owad] variable,
+which is instantiated and linked to a specific DOM element which creates the Managed Ads Container.
+
+Multiple Ad containers
+
+You need to create multiple instances of [`OwAd`][owad] If you want to show more than one ad in your app. Make sure you pass a different container element for each instance, and that you properly comply with our [acceptable Ads policy][acceptable-ads].
+
+### Setting up the Ads SDK[](#setting-up-the-ads-sdk "Direct link to Setting up the Ads SDK")
+
+In order to use the Ads SDK in an Overwolf app, you must first fetch it from `https://content.overwolf.com/libs/ads/latest/owads.min.js`. Below is a snippet that fetches the SDK, and then sets up an [`OwAd`](/ow-native/reference/ads/owad) instance:
+
+Fetch the latest version of the Ads-SDK, and make sure it loaded
+
+```
+<script src="https://content.overwolf.com/libs/ads/latest/owads.min.js" async onerror="onAdsSDKNotLoaded()" onload="onAdsSDKReady()"></script>  
+<script>  
+    // Reached if the SDK's script failed to load (took too long, couldn't be found, etc)  
+    function onAdsSDKNotLoaded() {  
+        // If this happens, it is up to the app to decide how to proceed.  
+        console.error("Couldn't load owads.min.js!");  
+    }  
+  
+    function onAdsSDKReady() {  
+        if (!OwAd) {  
+            // Reached if the SDK's script failed to properly load.  
+            // If this happens, it is up to the app to decide how to proceed.  
+            // onAdsSDKNotLoaded();  
+            return;  
+        }  
+        // Reached if the script loaded properly.  
+        // You can now create however many ad containers you need for this window, granted that they follow the implementation guidelines.  
+        let adContainer = new OwAd(document.getElementById(/*Insert ad container Id here*/), {/*Mandatory Ad settings*/});  
+    }  
+  
+</script>  
+
+```
+
+#### Snippet implementation notes[](#snippet-implementation-notes "Direct link to Snippet implementation notes")
+
+* The script tag is added with an `async` attribute so that it is loaded asynchronously and won't interfere with the rest of the page's loading. Be aware that the script may take time to load and be ready. Use the `onload` and `onerror` callbacks from the script tag in order to be notified as soon as the load succeeded/failed.
+* When creating a new [`OwAd`](/ow-native/reference/ads/owad), you need to provide it with two parameters: a DOM element, and the **required** ad settings. In above snippet, the instance of the element is identified by calling `document.getElementById()`. However, you may use any other way to get the DOM element. You can also use `document.querySelector`, [jQuery](https://jquery.com/), or any other method you wish as long as the provided element is an HTML element available at the DOM.
+
+  Container Identification
+
+  Ad containers that don't have a pre-assigned element ID defined will automatically be assigned one.
+
+### Changes to your appâs manifest.json file[](#changes-to-your-apps-manifestjson-file "Direct link to Changes to your appâs manifest.json file")
+
+#### Required permissions[](#required-permissions "Direct link to Required permissions")
+
+The Overwolf Advertising library uses Overwolf APIs to improve ad targeting for users. Therefore, you need to add the following [permissions](/ow-native/reference/manifest/manifest-json#permissions-array) to your appâs permissions array:
+
+```
+   "permissions": ["Extensions", "Streaming", "Profile", "GameInfo"]  
+
+```
+
+note
+
+`OwAd` is an instance of an Overwolf Managed Ads Container.
+These can be created using the [Overwolf Ads SDK](/ow-native/reference/ads/owad).
+
+Methods[](#methods "Direct link to Methods")
+-----------------------------------------------
+
+### new OwAd(container, settings)[](#new-owadcontainer-settings "Direct link to new OwAd(container, settings)")
+
+> Creates a new instance of OwAd.
+
+| Parameter | Type | Description | Required |
+| --- | --- | --- | --- |
+| container | DOM Element | The Ad's container element | Yes |
+| settings | [ContainerSettings](#containersettings-object) | The container's desired size configuration(s) | No (defaults to a 400x300 Ad container if left empty) |
+
+#### Example[](#example "Direct link to Example")
+
+Creates a new OwAd, with the element ad-div as its container, with a container size of 400x300
+
+```
+let owAd = new OwAd(document.getElementById("ad-div"), {size: {width: 400, height: 300}});  
+
+```
+
+### shutdown()[](#shutdown "Direct link to shutdown()")
+
+> Shuts down the Ads container completely.
+
+For specific use cases, please refer to [Guidelines for ad integration](/ow-native/reference/ads/owad#guidelines-for-ads-integration).
+
+#### Example[](#example-1 "Direct link to Example")
+
+Shut Down an existing OwAd instance
+
+```
+let owAd = new OwAd(...);  
+...  
+  
+owAd.shutdown();  
+
+```
+
+### addEventListener(event, callback)[](#addeventlistenerevent-callback "Direct link to addEventListener(event, callback)")
+
+> Adds a listener to a certain Ad event.
+
+| Parameter | Type | Description | Required |
+| --- | --- | --- | --- |
+| event | string | The name of the event to listen to | Yes |
+| callback | (Result) => void | The callback that will be called when this event occurs | Yes |
+
+#### Example[](#example-2 "Direct link to Example")
+
+Add an event listener to an OwAd
+
+```
+let OwAd = new OwAd(...);  
+...  
+  
+OwAd.addEventListener("player_loaded", (name, ...) => {...});  
+
+```
+
+Events[](#events "Direct link to Events")
+--------------------------------------------
+
+### player\_loaded (Video Only)[](#player_loaded-video-only "Direct link to player_loaded (Video Only)")
+
+> Fires when a Video Ad's player is successfully loaded into the page.
+
+### display\_ad\_loaded[](#display_ad_loaded "Direct link to display_ad_loaded")
+
+> Fires when a Display Ad was served to the container.
+
+### play[](#play "Direct link to play")
+
+> Fires when an Ad started "playing" (Video Ad started playing, or display Ad was presented).
+
+### impression (Video Only)[](#impression-video-only "Direct link to impression (Video Only)")
+
+> Fires when a Video Ad triggered an Impression. This happens at different intervals depending on the advertiser.
+
+### complete (Video Only)[](#complete-video-only "Direct link to complete (Video Only)")
+
+> Fires when a Video Ad completely finished playing.
+
+### error (Video Only)[](#error-video-only "Direct link to error (Video Only)")
+
+> Fires if an error occurred while loading a Video Ad.
+
+note
+
+The following events are supported in **OW-Electron**: `player_loaded`, `display_ad_loaded`, `play`, `complete` and `impression`.
+
+### house-ad-action[](#house-ad-action "Direct link to house-ad-action")
+
+> Fires when a house ad is clicked.
+
+Types[](#types "Direct link to Types")
+-----------------------------------------
+
+### ContainerSettings Object[](#containersettings-object "Direct link to ContainerSettings Object")
+
+List of settings that can be used when setting up an OwAd instance.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| size | [ContainerSize](#containersize-object) | The size of Ad containers that this Ad container can become. See [List of Ad Sizes](#list-of-ad-sizes) |
+
+### ContainerSize Object[](#containersize-object "Direct link to ContainerSize Object")
+
+Width/height settings of an Ads container.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| width | number | Width of the target Ad container size |
+| height | number | Height of the target Ad container size |
+
+#### List of ad sizes[](#list-of-ad-sizes "Direct link to List of ad sizes")
+
+The following Ad container sizes are currently supported by the Ads SDK:
+
+| Container size | (ow-plat) Size value snippet | (ow-electron) Container min size snippet |
+| --- | --- | --- |
+| 400x300 | `{ width: 400, height: 300 }` | `min-width: 400px;` `min-height: 300px;` |
+| 400x600 | `{ width: 400, height: 600 }` | `min-width: 400px;` `min-height: 600px;` |
+| 300x250 | `{ width: 300, height: 250 }` | `min-width: 300px;` `min-height: 250px;` |
+| 160x600 | `{ width: 160, height: 600 }` | `min-width: 160px;` `min-height: 600px;` |
+| 728x90 | `{ width: 728, height: 90 }` | `min-width: 728px;` `min-height: 90px;` |
+| 400x60 | `{ width: 400, height: 60}` | `min-width: 400px;` `min-height: 60px;` |
+
+Overwolf loads ads of different sizes within the above container sizes. However, the container size determines the maximum size ad (or ads) loaded.
+
+Ad sizes Are precise
+
+Make sure to only enter values from a single line of the `Size value snippet`! Any unsupported values will potentially cause no ads to show!
+
+[Contact us](/ow-native/support/contact-us) if you want to use multiple ad sizes in a single container.

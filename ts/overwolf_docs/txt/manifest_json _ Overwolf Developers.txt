@@ -1,0 +1,910 @@
+Title: manifest.json | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/manifest/manifest-json
+
+manifest.json
+=============
+
+Welcome to the manifest.json file[](#welcome-to-the-manifestjson-file "Direct link to Welcome to the manifest.json file")
+----------------------------------------------------------------------------------------------------------------------------
+
+This [JSON](https://www.json.org/) formatted file is responsible for describing aspects of your app. This includes your app's name, window size, transparency settings and more basic settings for how your app operates. This is a mandatory file which has to exist in the root folder for your app.
+[Here](https://github.com/overwolf/sample-app/blob/master/native/manifest.json) you can see an example version of the manifest.json file.
+
+manifest.json with fields summary[](#manifestjson-with-fields-summary "Direct link to manifest.json with fields summary")
+----------------------------------------------------------------------------------------------------------------------------
+
+The following code shows supported manifest fields for Overwolf apps, with links to the section that discusses each field.
+Note that not all flags are mandatory - we included all available flags for documentation purposes.
+
+*Use this manifest with Overwolf client version 0.141 and above*
+
+```
+{  
+    //Mandatory  
+    "manifest_version": 1,  
+    "type": "WebApp",  
+    //Mandatory, The app metadata  
+    "meta": {  
+        "name": "Name of your app",  
+        "author": "Author name",  
+        "version": "1.2.3.456",  
+        "minimum-overwolf-version": "128.0.0.1",  
+        "minimum-gep-version": "128.0.0.1",  
+        "description": "A plain text description",  
+        "dock_button_title": "Short name of your app",  
+        "icon": "iconMouseOver.png",  
+        "icon_gray": "iconMouseNormal.png",  
+        "launcher_icon": "icon.ico",  
+        "splash_image": "splashIcon.png",  
+        "window_icon": "windowIcon.png"  
+    },  
+    //An array of permissions that the app requires  
+    "permissions": ["Streaming","Hotkeys","GameInfo"],  
+    "max_rotation_log_files": 20,  
+    //Mandatory, a list of additional meta-data on the app  
+    "data": {  
+        //An app can declare itself as targeted to one game or more  
+        "game_targeting": {"type": "dedicated","game_ids": [10906, 7764]},  
+        //The name of the window (from the âwindowsâ list) initially loaded when the app starts  
+        "start_window": "windowName",  
+        "enable_top_isolation": true,  
+         //A map from window names to window settings  
+        "windows": {  
+            "windowName": {  
+                //Mandatory. Points to the file to be loaded inside the window  
+                "file": "name.html",  
+                "show_in_taskbar": true,  
+                "transparent": true,  
+                "override_on_update": true,  
+                "resizable": false,  
+                "show_minimize": true,  
+                "clickthrough": false,  
+                "style": "inputPassThrough",  
+                "disable_rightclick": false,  
+                "forcecapture": false,  
+                "show_only_on_stream": false,  
+                "ignore_keyboard_events": false,  
+                "in_game_only": false,  
+                "desktop_only": false,  
+                "disable_restore_animation": false,  
+                "grab_keyboard_focus": false,  
+                "size": {...},  
+                "min_size": {...},  
+                "max_size": {...},  
+                "start_position": {...},  
+                "topmost": false,  
+                "bottommost": false,  
+                "block_top_window_navigation": true,  
+                "keep_window_location": true,  
+                "use_os_windowing": false,  
+                "background_optimization": true,  
+                "mute": true,  
+                "mute_excluded_hosts": ["..."],  
+                "popup_blocker": false,  
+                "show_maximize": true,  
+                "disable_blur": false,  
+                "native_window": false,  
+                "is_background_page": true,  
+                "focus_game_takeover": "ReleaseOnLostFocus",  
+                "focus_game_takeover_release_hotkey": "...",  
+                "allow_local_file_access": true,  
+                "is_alt_f4_blocked": false,  
+                "dev_tools_window_style": false,  
+                "debug_url": "http://localhost:3000",  
+                "optimize_accelerate_rendering": false, //Use directly shared texture rendering in game (only DX11)  
+                "disable_auto_dpi_sizing": false, //disable the DPI Aware behavior of native windows  
+                "restrict_to_game_bounds": false, //Restrict window to game client (window) area.  
+                "disable_hardware_acceleration": false, // Disable GPU hardware acceleration, per window. <br/>*Notes: Use this flag mainly for native windows that run as a second-screen with fps intensive games. It improves the performance of the game by reducing usage of the GPU while you are playing.*  
+                "open_dev_tools": true //Used for debugging, automatically opens the dev tools when the app window opens  
+            },  
+        },  
+        //Toggle printing of ads log to the console  
+        "enable_top_isolated_sites_console": false,  
+        //External URLs the web app should be able to access  
+        "externally_connectable": { "matches": ["http://*.overwolf.com", "https://*.overwolf.com", "https://*.google-analytics.com"] },  
+        //Override the relative protocol with a preferred one  
+        "protocol_override_domains": {"domain.com": "http","ajax.googleapis.com": "https"},  
+        //Causes links in the app to be opened using the userâs default browser ("user") or Overwolfâs browser ("overwolf")  
+        "force_browser": "user"/"overwolf",  
+        //Enable OSR|GPU acceleration if supported by this machine  
+        "enable_osr_acceleration": true,  
+        //A list of game ids for which game events are required  
+        "game_events": [...],  
+        //Disable the log file 1000 lines limitation. Don't enable it without Overwolf approval.  
+        "disable_log_limit": false,  
+        //Allows the access of custom plugin dlls  
+        "extra-objects": {"my-plugin":{"file":"plugins/my_plugin.dll","class":"MyPlugin.EntryPoint"}},  
+        //shortcut keys that trigger an app action  
+        "hotkeys":{"save_YourAppName": {"title": "Save Replay for later", "action-type":"custom", "default":"Ctrl+Shift+F9"}},  
+        //A list of content scripts to be loaded for specific windows  
+        "content_scripts": [{ "windows": [ "index" ], "js": [ "myscript.js" ] }],  
+        //A list of events causing the app to launch  
+        "launch_events": [{"event": "GameLaunch", "event_data":{"game_ids": [1136]}, "start_minimized": true}],  
+        //Disable opening of the developer tools for the app  
+        "disable_dt": false,  
+        //hosting app flexible data  
+        "service_providers": {"nafihghfcpikebhfhdhljejkcifgbdahdhngepfb": {"whatever": "value"}},  
+        //Additional setting for developers (only when the app is in dev mode)  
+        "developer": {  
+                //Enable auto App reloading when detecting local files changes.True by Default  
+                "enable_auto_refresh": true,  
+                //Reload delay (in ms) when detecting file changes (for multiple change)default is 1000 (1 second)  
+                "reload_delay": 1000,  
+                //Filter files which will be tracked.e.g (*.js;*.html)Default: all files (*.*)  
+                "filter": "*.json;*.html"  
+            },  
+        //If set to true, app local data will not be cleaned up after app uninstallation  
+        "disable_cleanup": true,  
+        "process_name": "my sample app",  
+        "url_protocol": {"scheme": "testscheme"},  
+        "uninstall_window": {  
+        //if exists, the client will run this window in the background for the required time before actually uninstalling an app.  
+            "file": "name.html",  
+            //exactly as other Overwolf windows. this window should not display UI as it runs in the background.  
+            "required_runtime": 1000,  
+            //if not defined, the default is 10 seconds. valid up to 60000 (1 minute).  
+        },  
+        "auto_relaunch_on_crash": true,  
+        //Automatically relaunches the app if it crashes up to 5 times.  
+        "open_dev_tools": true   
+        //Used for debugging, automatically opens the dev tools when an app window opens  
+    }  
+}  
+
+```
+
+manifest.json without fields summary[](#manifestjson-without-fields-summary "Direct link to manifest.json without fields summary")
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Here you can see the same manifest.json file, but without comments
+
+*Use this manifest with Overwolf client version 0.141 and above*
+
+```
+{  
+    "manifest_version": 1,  
+    "type": "WebApp",  
+    "meta": {  
+        "name": "Name of your app",  
+        "author": "Author name",  
+        "version": "1.2.3.456",  
+        "minimum-overwolf-version": "128.0.0.1",  
+        "minimum-gep-version": "128.0.0.1",  
+        "description": "A plain text description",  
+        "dock_button_title": "Short name of your app",  
+        "icon": "iconMouseOver.png",  
+        "icon_gray": "iconMouseNormal.png",  
+        "launcher_icon": "icon.ico",  
+        "splash_image": "splashIcon.png",  
+        "window_icon": "windowIcon.png"  
+    },  
+    "permissions": ["Streaming","Hotkeys","GameInfo"],  
+      
+    "max_rotation_log_files": 20,  
+    "data": {  
+        "game_targeting": {"type": "dedicated","game_ids": [10906, 7764]},  
+        "start_window": "windowName",  
+        "enable_top_isolation": true,  
+        "windows": {  
+            "windowName": {  
+                "file": "name.html",  
+                "show_in_taskbar": true,  
+                "transparent": true,  
+                "resizable": false,  
+                "show_minimize": true,  
+                "clickthrough": false,  
+                "style": "inputPassThrough",  
+                "disable_rightclick": false,  
+                "forcecapture": false,  
+                "show_only_on_stream": false,  
+                "ignore_keyboard_events": false,  
+                "in_game_only": false,  
+                "desktop_only": false,  
+                "disable_restore_animation": false,  
+                "grab_keyboard_focus": false,  
+                "grab_focus_on_desktop": false,  
+                "size": {...},  
+                "min_size": {...},  
+                "max_size": {...},  
+                "start_position": {...},  
+                "topmost": false,  
+                "bottommost": false,  
+                "block_top_window_navigation": true,  
+                "keep_window_location": true,  
+                "use_os_windowing": false,  
+                "background_optimization": true,  
+                "mute": true,  
+                "mute_excluded_hosts": ["..."],  
+                "popup_blocker": false,  
+                "show_maximize": true,  
+                "disable_blur": false,  
+                "native_window": false,  
+                "is_background_page": true,  
+                "focus_game_takeover": "ReleaseOnLostFocus",  
+                "focus_game_takeover_release_hotkey": "...",  
+                "allow_local_file_access": true,  
+                "is_alt_f4_blocked": false,  
+                "dev_tools_window_style": false,  
+                "debug_url": "http://localhost:3000",  
+                "optimize_accelerate_rendering": false,  
+                "disable_auto_dpi_sizing": false,  
+                "restrict_to_game_bounds": false,  
+                "disable_hardware_acceleration": false  
+            },  
+        },  
+        "enable_top_isolated_sites_console": false,  
+        "externally_connectable": { "matches": ["http://*.overwolf.com", "https://*.overwolf.com", "https://*.google-analytics.com"] },  
+        "protocol_override_domains": {"domain.com": "http","ajax.googleapis.com": "https"},  
+        "force_browser": "user"/"overwolf",  
+        "enable_osr_acceleration": true,  
+        "game_events": [...],  
+        "disable_log_limit": false,  
+        "extra-objects": {"my-plugin":{"file":"plugins/my_plugin.dll","class":"MyPlugin.EntryPoint"}},  
+        "hotkeys":{"save_YourAppName": {"title": "Save Replay for later", "action-type":"custom", "default":"Ctrl+Shift+F9"}},  
+        "content_scripts": [{ "windows": [ "index" ], "js": [ "myscript.js" ] }],  
+        "launch_events": [{"event": "GameLaunch", "event_data":{"game_ids": [1136]}, "start_minimized": true}],  
+        "disable_dt": false,  
+        "service_providers": {"nafihghfcpikebhfhdhljejkcifgbdahdhngepfb": {"whatever": "value"}},  
+        "developer": {  
+                "enable_auto_refresh": true,  
+                "reload_delay": 1000,  
+                "filter": "*.json;*.html"  
+            },  
+        "disable_cleanup": true,  
+        "process_name": "my sample app",  
+        "url_protocol": {"scheme": "testscheme"},  
+        "uninstall_window": {  
+            "file": "name.html",  
+            "required_runtime": 1000,  
+        }  
+    }  
+}  
+
+```
+
+Validate your manifest.json[](#validate-your-manifestjson "Direct link to Validate your manifest.json")
+----------------------------------------------------------------------------------------------------------
+
+To help you make sure that your manifest file is correct and complete, validate it against our schema file.
+
+Please read all the info in our [schema validation best practice](/ow-native/reference/manifest/validate-your-manifest-json).
+
+Access the manifest from your app[](#access-the-manifest-from-your-app "Direct link to Access the manifest from your app")
+-----------------------------------------------------------------------------------------------------------------------------
+
+You can read the manifest JSON from your app's code using the [overwolf.extensions.getManifest()](/ow-native/reference/extensions/ow-extensions#getmanifestid-callback) function.
+
+Top manifest objects[](#top-manifest-objects "Direct link to Top manifest objects")
+--------------------------------------------------------------------------------------
+
+There are many features enabled through this file. Some are mandatory (marked accordingly), others optional. Below is a description of features you can activate through the manifest.json :
+
+| Name | Type | Description |
+| --- | --- | --- |
+| manifest\_version | integer | Mandatory. Targets the manifest version you are working on. Currently there is only one version, therefore this value is always "1" |
+| type | string | Mandatory. Declares the type of application. Can only be "WebApp" |
+| meta | [meta](#meta-object) Object | Mandatory. The app metadata |
+| permissions | [permissions[]](#permissions-array) | An array of permissions that the app requires |
+| data | [webapp settings](#webapp-settings-object) Object | Mandatory. App data. Changes between different apps types. Currently can only be from type webapp settings |
+| max\_rotation\_log\_files | number | Configure the app's log file rotation (between 10 and 40, defaults to 10). |
+
+Permissions array[](#permissions-array "Direct link to Permissions array")
+-----------------------------------------------------------------------------
+
+To use most overwolf.\* APIs, your Overwolf app must declare relevant permissions in the relevant manifest.json field. It's an array of permissions that the app requires:
+
+```
+"permissions": ["Streaming","Hotkeys","GameInfo"]  
+
+```
+
+| Permission | Description |
+| --- | --- |
+| "Camera" | Access webcam |
+| "Microphone" | Access microphone |
+| "Logging" | Access overwolf.log (Deprecated)API |
+| "Extensions" | Run or get information about other apps |
+| "Streaming" | Enable game streaming |
+| "DesktopStreaming" | Enable desktop streaming |
+| "Profile" | Access profile information and perform actions such as login and modifications |
+| "Clipboard" | Access clipboard |
+| "Hotkeys" | Get hotkey information for the current app |
+| "Media" | Access media library |
+| "GameInfo" | Access current game information |
+| "GameControl" | Allows to send key strokes to the game by using [overwolf.utils.sendKeyStroke()](/ow-native/reference/utils/ow-utils) |
+| "FileSystem" | Allows accessing files from the local file system.  *Note: This is the only permission we currently enforce* |
+| "LogitechLed" | Allows accessing [overwolf.logitech.led](/ow-native/reference/logitech/led) API |
+| "LogitechArx" | Allows accessing [overwolf.logitech.arx](/ow-native/reference/logitech/arx) API |
+| "VideoCaptureSettings" | Appear as a video capture extension in the capture settings + allows setting video capture settings |
+| "Web" | access to the [overwolf.web](/ow-native/reference/web/ow-web) API |
+| "Tray" | Access to creating tray icons |
+
+Meta object[](#meta-object "Direct link to Meta object")
+-----------------------------------------------------------
+
+Includes app metadata:
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| name | string | Mandatory. Name of your app. *See [note](#meta-note).* | 0.78 |
+| author | string | Mandatory. The app's developer. *See [note](#meta-note).* | 0.78 |
+| version | string | Mandatory. Up to four dot-separated integers identifying the current app version. Needs to be in the format of X.X.X where the Xâs are numbers. Here are some examples of valid versions:   ["version": "1", "version": "1.0", "version": "2.11.3", "version": "4.1.2.345"] | 0.78 |
+| minimum-overwolf-version | string | Mandatory. Minimum version of the Overwolf Client with which the app is compatible. The format is similar to the "version" field. Make sure to set a version that is completly released to all the users. Otherwise, users will get the updated version but will not be able to launch it. | 0.78 |
+| minimum-gep-version | string | Minimum version of the Overwolf Game Events Provider with which the app is compatible. The format is similar to the "version" field. | 0.134 |
+| description | string | Mandatory. Short description of your app. Limited to 180 characters. | 0.78 |
+| dock\_button\_title | string | Short name of your app. Provide a short title that will fit in the dock button area â 18 chars max | 0.79 |
+| author\_display | string | An author name override to display instead of the actual author name. *See [note](#meta-note).* | 0.78 |
+| icon | string | Mandatory. A relative path from the app folder to the iconâs png file. This is the mouse-over (multi-colored) version of the icon that will be displayed on the Overwolf dock. The icon dimensions should be 256Ã256 pixels, 72 PPI. Overwolf will resize it to 37Ã37. Please make sure the png is smaller than 30KB. More details on app icons can be found [here](/ow-native/getting-started/submit-your-app). | 0.78 |
+| icon\_gray | string | A relative path from the app folder to the iconâs png file. This grayscale version of the icon is for the default state that will be displayed on the Overwolf dock. The icon dimensions should be 256Ã256 pixels, 72 PPI. Overwolf will resize it to 37Ã37. Please make sure the png is smaller than 30KB | 0.78 |
+| launcher\_icon | string | A relative path from the app folder to the desktop shortcut iconâs ico file. This is a colored icon for the appâs desktop shortcut. More info [here](/ow-native/getting-started/submit-your-app#opk-package-overview). | 0.78 |
+| tray\_icon | string | A relative path from the app folder to tray icon's ico file. This is the icon that will be used for the app in the tray. Defaults to `launcher_icon` if it is not defined | 0.201 |
+| splash\_image | string | A relative path from the app folder to the splash image iconâs png file. The image size should be 256x256px. If this image is missing, Overwolf will use the âiconâ image as a splash image | 0.116 |
+| window\_icon | string | A relative path from the app folder to the iconâs png file. This is the window task bar icon \ window header. The icon dimensions should be 256x256 pixels. | 0.116 |
+
+info
+
+Each app has a unique id (UID) that is generated out of the ânameâ and âauthorâ strings. Once an app is published on the Appstore, its UID canât be changed, so please choose your app and author names wisely before
+[submitting](/ow-native/getting-started/project-roadmap#step-5---app-submission) your app.
+However, if absolutely necessary, it is possible to hide the original author name using `author_display`!
+
+Webapp settings object[](#webapp-settings-object "Direct link to Webapp settings object")
+--------------------------------------------------------------------------------------------
+
+A list of additional settings for the app.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| game\_targeting | [GameTargeting](#gametargeting-object) Object | An app can declare itself as targeted for one game or more. | 0.78 |
+| start\_window | string | Mandatory. The name of the window (from the âwindowsâ list) to initially load when the app starts. | 0.78 |
+| enable\_top\_isolation | bool | Enable iframe isolation: runs it in a different process, so if some iframe is misbehaving (e.g. memory leak, etc.) it wonât crash your app and will only crash the iframe process.  useful with Overwolf ads that run in an iframe. *Default value is true* | 0.110 |
+| windows | [extension\_window\_data](#extension_window_data-object) Object | Mandatory. A map from window names to window settings. | 0.78 |
+| enable\_top\_isolated\_sites\_console | bool | Enable/Disable printing of ads log to the console.  *Default value is âfalseâ.* | 0.115 |
+| externally\_connectable | [ExternallyConnectable](#externallyconnectable-object) Object | A definition of external URLs the web app should be able to access. Allow your local app to be able to communicate with an iframe within the app. | 0.78 |
+| protocol\_override\_domains | [ProtocolOverrideDomains](#protocoloverridedomains-object) Object | Overrides the relative protocol with a preferred one. | 0.78 |
+| force\_browser | string | Choose whether links in the app will be opened using the userâs default browser or Overwolfâs browser. *Possible values: "user" or "overwolf".* | 0.91 |
+| enable\_osr\_acceleration | bool | Enable OSR/GPU acceleration if supported by this machine.  *Note 1: The OSR acceleration feature is no longer supported and maintained.* *Note 2: This flag is only relevant for D3D11 supported games.*  *Note 3: see also the [optimize\_accelerate\_rendering](#optimize_accelerate_rendering) flag.* | 0.126 |
+| game\_events | [game\_events[]](#game_events-array) | A list of game ids for which game events are required. | 0.92 |
+| disable\_log\_limit | bool | Disable the log file's 1000-line limitation.  *Note: Do not enable it without Overwolf's approval.* | 0.12 |
+| extra-objects | [extra-objects](#extra-objects-object) Object | Allows access to custom plugin dlls. | 0.81 |
+| hotkeys | [hotkeys](#hotkeys-object) Object | Shortcut keys that trigger an app action. | 0.78 |
+| content\_scripts | [content\_scripts[]](#content_scripts-array) | A list of content scripts to be loaded for specific windows. | 0.78 |
+| launch\_events | [launch\_event\_settings[]](#launch_event_settings-array) | A list of events causing the app to launch. | 0.82 |
+| disable\_dt | bool | Disable opening of the developer tools for the app (with Ctrl+shift+I).  *Default value â âfalseâ* | 0.118 |
+| service\_providers | [service\_providers](#service_providers-object) object | Extra data to external service providers | 0.137 |
+| developer | [developer setting](#developer-settings-object) object | Additional setting for developers. | 0.127 |
+| disable\_cleanup | bool | If set to true, app localStorage data will not be cleaned up after app uninstallation. | 0.147 |
+| process\_name | string | Overrides the default (OverwolfBrowser.exe) process name in task manager (defaults to the app's `name`)   **Please read our [notes](#process_name-notes)** | 0.153 |
+| logging | [logging](#logging-object) | Configures the app's log filtering behavior. | 0.217 |
+| url\_protocol | [url\_protocol](#url_protocol-object) object | Ability to open an application from a browser using a link. | 0.158 |
+| uninstall\_window | [uninstall\_window](#uninstall_window-object) object | triggers the client to run a window on app uninstall for a required time set.  Use it for running uninstall background actions like removing DLLs, logs, images, and other files injected by the app to the user's machine. | 0.187 |
+| auto\_relaunch\_on\_crash | bool | Causes apps to automatically relaunch if their process has crashed. if the app crashes 5 times consecutively, it will stop trying to relaunch. | 0.191 |
+| open\_dev\_tools | bool | Used for debugging. Automatically opens the dev tools window when opening an app window. \*Note: it's possible to set this behavior on a per window basis if by adding this property to a specific window in the [Window object](#open_dev_tools_window) | 0.191 |
+
+#### process\_name Notes[](#process_name-notes "Direct link to process_name Notes")
+
+* By adding a custom "process\_name", the deafult OverwolfBrowser.exe process name (shown in the task manager) is overridden.
+
+Note that The flag only affects external processes running, not ones that interact directly with the game. Also, the process will still have Overwolf's signature.
+
+**Defaults to the app's `name` if it is not defined!**
+
+GameTargeting object[](#gametargeting-object "Direct link to GameTargeting object")
+--------------------------------------------------------------------------------------
+
+In order for an app to show in-game windows, it must declare its target games. This can be one of three options:
+
+* `none` - No games
+* `dedicated` - One or more games
+* `all` - All supported games
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| type | string | Targeting type | 0.78 |
+| game\_ids | int[] | If you chose `dedicated` - The list of games (by game id) that your app can show in-game overlay windows in. | 0.78 |
+
+Example code:
+
+```
+"game_targeting": {  
+    "type": "dedicated",  
+    "game_ids": [5426, 7764]  // only if type === "dedicated", wildcard (*) is not supported  
+}  
+
+```
+
+info
+
+* If your app also requires real time [game events](/ow-native/reference/games/events) for any of those games, don't forget to also set the [game\_events](#game_events-array) array.
+* If your app should also launch alongside any of those games, don't forget to also set the appropriate [launch\_events](#launch_event_settings-array).
+
+extension\_window\_data object[](#extension_window_data-object "Direct link to extension_window_data object")
+----------------------------------------------------------------------------------------------------------------
+
+A list of settings for the app windows.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| file | string | Mandatory. Points to a local HTML file to be loaded inside the window. If you wish to host your app in a remote web-site, youâll have to have a local page that redirects to that remote website. In such cases, you need to make sure that the [block\_top\_window\_navigation](#windows-block_top_window_navigation) property is set to false. | 0.78 |
+| show\_in\_taskbar | bool | Define if the window is displayed in the Windows taskbar and alt-tab window selection menu. | 0.78 |
+| transparent | bool | Indicates whether the window will be transparent and borderless. Any part of your window with transparent background ("background: transparent;") will become a see-through area that blends with the game or desktop.  If set to false a standard Overwolf window will be created. | 0.78 |
+| override\_on\_update | bool | Indicates whether the windowâs locally saved data should be overridden when the windowâs size/location/opacity changes after a version update. | 0.119 |
+| resizable | bool | Indicates whether the window can be resized. | 0.78 |
+| show\_minimize | bool | Indicates whether to show the window minimize button. Only relevant when not in transparent mode. | 0.79 |
+| clickthrough | bool | Indicates whether the window will not receive clicks in-game, instead, the clicks will be passed on to the game. | 0.80 |
+| style | string | Mouse and keyboard input will pass to the window AND to the game (no input blocking). `InputPassThrough` is currently the only possible value, You can set this flag also using the [overwolf.windows.setWindowStyle()](/ow-native/reference/windows/ow-windows#setwindowstylewindowid-style-callback). | 0.174 |
+| disable\_rightclick | bool | When set to true, disable right clicks entirely for this window. | 0.92 |
+| forcecapture | bool | Indicates whether this window should always be included in recordings, overriding any other setting. | 0.78 |
+| show\_only\_on\_stream | bool | Indicates whether this window is visible only in streams (not visible to the streamer), overriding any other setting. | 0.78 |
+| ignore\_keyboard\_events | bool | Indicates whether the window will receive keyboard events or pass them on to the game. | 0.83 |
+| in\_game\_only | bool | Marks the window as available in-game only (Not accessible on Desktop). | 0.78 |
+| desktop\_only | bool | Mark the window as available on desktop only, and not in-game. This flag should be used (set to âtrueâ) when âuse\_os\_windowingâ or ânative\_windowâ flags are set to true.  *Note: using âdesktop\_onlyâ and ânative\_windowâ flags for desktop windows will dramatically improve your appâs performance.* | 0.89 |
+| disable\_restore\_animation | bool | Indicates whether the window will animate on minimize/restore while in game. | 0.89 |
+| grab\_keyboard\_focus | bool | Indicates whether the in-game window will 'steal' the keyboard focus automatically from the game when it opens, or leave the keyboard focus untouched.  *Default value is false* | 0.82 |
+| grab\_focus\_on\_desktop | bool | Indicates whether the desktop window will grab the focus automatically when it opens, or leave the focus untouched.  *Default value is true* | 0.99 |
+| size | [size](#size-object) object | Defines the size of the window in pixels when it is first opened. If your window is not resizable, this will be the constant size of your window. However, if your app is resizable â the app size is saved by Overwolf when closed so that the next time it is opened, it will preserve it. See our [window sizes tips](/ow-native/guides/dev-tools/windows/using-overwolf-windows/#window-sizes) | 0.78 |
+| min\_size | [size](#size-object) object | Defines the minimum size of the window in pixels. Default value is 100x100 pixels. If you want a window smaller than that, set this property to 0,0.   See our [window sizes tips](/ow-native/guides/dev-tools/windows/using-overwolf-windows/#window-sizes) | 0.78 |
+| max\_size | [size](#size-object) object | Defines the maximum size of the window in pixels. See our [window sizes tips](/ow-native/guides/dev-tools/windows/using-overwolf-windows/#window-sizes) | 0.78 |
+| start\_position | [point](#point-object) object | The default starting position of the window counted in pixels from the top left corner of the screen. | 0.78 |
+| topmost | bool | Indicates whether the window will be on top of other Overwolf windows. Handle with care as topmost windows can negatively impact user experience. | 0.89 |
+| bottommost | bool | Indicates whether the window will be on bottom of other Overwolf windows. Handle with care as bottommost windows can negatively impact user experience. | 0.180 |
+| block\_top\_window\_navigation | bool | Prevents non "target=\_blank" html elements from âtaking-overâ the entire appâs window | 0.100 |
+| keep\_window\_location | bool | Window location wonât be changed when game focus is changed | 0.101 |
+| use\_os\_windowing | bool | When set to true, allows your window to have a full-screen maximize when calling the overwolf.windows.maximize function, and a real taskbar minimize when calling overwolf.windows.minimize.  *Note: Should only be used with desktop\_only windows* | 0.102 |
+| background\_optimization | bool | Enables JS engine background optimization.  *Default value is true* | 0.103 |
+| mute | bool | Mutes sounds in window | 0.102 |
+| mute\_excluded\_hosts | string[] | Excludes hosts list so a stream from these hosts origins will not get muted even if the window is on "mute": true | 0.103 |
+| popup\_blocker | bool | Prevents new browser windows being opened automatically using script.  *Default value is true* | 0.103 |
+| show\_maximize | bool | Enables window maximize button. Relevant only for the standard Overwolf window ("transparent": false)  *Default value is false* | 0.106 |
+| disable\_blur | bool | Causes the appâs window to never âlose focusâ, so the window.onblur event is never triggered.  *Default value is false* | 0.106 |
+| native\_window | bool | Creates a native CEF desktop only window (which improves performance) *Note: Should only be used with desktop\_only windows*.  *Default value is false* | 0.107 |
+| is\_background\_page | bool | This flag MUST be used with background/hidden controller windows.  *Note: With this flag set to 'true', there's no need to set window related properties such as size, focus, transparency, etc.* | 0.107 |
+| focus\_game\_takeover | string | Allows you to control the behavior of an app window while in a âmouse-lessâ game state.  *Possible values: "ReleaseOnHidden" or "ReleaseOnLostFocus".* Read [notes](#focus_game_takeover-options). | 0.107 |
+| focus\_game\_takeover\_release\_hotkey | string | Allow Overwolf to display your appâs hotkey combination on the screen when the user switches to âexclusive modeâ.  *The string value should be the hotkey name from the hotkeys section.* *Relevant only if you set focus\_game\_takeover=ReleaseOnHidden* | 0.110 |
+| allow\_local\_file\_access | bool | Allows access to local files that are not located in your appâs (extension) folder. *Default value is false* | 0.109 |
+| is\_alt\_f4\_blocked | bool | Blocks the user from closing the window by using Alt+F4. You can register to the onAltF4Blocked event to be noticed when a âblockâ was triggered. | 0.113 |
+| dev\_tools\_window\_style | bool | Opens developer tools in dedicated window. | 0.117 |
+| debug\_url | string | For local-server debugging (like react apps). You can use this field to set the localhost:port URL. *Notes: You must have a local web server installed on your machine.  Valid only when loading unpacked extensions. Valid only with "localhost" / "127.0.0.1".* | 0.127 |
+| optimize\_accelerate\_rendering | bool | Valid only for transparent windows. Valid only if [enable\_osr\_acceleration](#enable_osr_acceleration) is on. | 0.127 |
+| disable\_auto\_dpi\_sizing | bool | Relevant only for native windows. Disable the DPI Aware behavior of native windows. [overwolf.windows.changeSize()](/ow-native/reference/windows/ow-windows#changesizechangesizeparams-callback) can Overwrite this flag in runtime. | 0.148 |
+| restrict\_to\_game\_bounds | bool | The window will always stay within the game window while being dragged. | 0.158 |
+| disable\_hardware\_acceleration | bool | Disable GPU hardware acceleration, per window.  *Notes: Use this flag mainly for native windows that run as a second-screen with fps intensive games. It improves the performance of the game by reducing usage of the GPU while you are playing.* | 0.159 |
+| open\_dev\_tools | bool | Used for debugging. Automatically opens the dev tools window when opening the app window | 0.191 |
+
+ExternallyConnectable object[](#externallyconnectable-object "Direct link to ExternallyConnectable object")
+--------------------------------------------------------------------------------------------------------------
+
+A definition of external URLs the web app should be able to access. Read more [here](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
+
+Using "externally\_connectable" will allow your local app to be able to communicate with an iframe within the app (via [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)).
+
+In addition, adding externally\_connectable to your app allows you to send HTTP/S requests (e.g., fetch data using XmlHttpRequest) to the defined URL's and get a response without getting a CORS violation error.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| matches | string[] | Array of web page URL patterns to match with an external server URL | 0.78 |
+
+Notes:
+
+* Use star (\*) in place of subdomain to allow access to all subdomains
+* Make sure that the end of URL is WITHOUT any slash/backslash
+
+Example code:
+
+```
+"externally_connectable": {  
+    "matches": [  
+    "http://*.mysite.com", //make sure that the end of URL is WITHOUT any slash/backslash  
+    "https://*.mysecuredsite.com",  
+    "my-protocol://"  
+    ]  
+}  
+
+```
+
+ProtocolOverrideDomains object[](#protocoloverridedomains-object "Direct link to ProtocolOverrideDomains object")
+--------------------------------------------------------------------------------------------------------------------
+
+Overwolf apps run under a custom url protocol and domain ([www.overwolf.com://[app-id](http://www.overwolf.com://%5Bapp-id)]).
+This means that protocol-relative urls (//ajax.googleapis.comâ¦) will try to load from a the overwolf-app protocol.
+Unless you want this to happen, you can use protocol\_override\_domains to override the relative protocol with a preferred one (e.g. https/http).
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| protocol\_override\_domains | string | web page URL patterns to override. | 0.78 |
+
+Example code:
+
+```
+"protocol_override_domains" : {"ajax.googleapis.com": "https", "domain.com": "http"}  
+
+```
+
+This will swap the overwolf-app protocol with https for ajax.googleapis.com domain requests and with http for domain.com requests.
+
+game\_events array[](#game_events-array "Direct link to game_events array")
+------------------------------------------------------------------------------
+
+A list of game ids for which game events are required.
+The full list of games that Overwolf supports real time event listening can be found [here](/ow-native/guides/dev-tools/games-ids).
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| game\_events | int[] | The games IDs that your app targets. | 0.92 |
+
+Example code:
+
+```
+"game_events": [7764, 5426, 7314]  
+
+```
+
+info
+
+* Wildcards are not supported - even if your app targtes every game with events, you must still specify all of the relevant game ids.
+* If your app should also be able to display an overlay on top of any of those games, don't forget to also set the appropriate [GameTargeting](#gametargeting-object).
+* If your app should also launch alongside any of those games, don't forget to also set the appropriate [launch\_events](#launch_event_settings-array).
+
+extra-objects object[](#extra-objects-object "Direct link to extra-objects object")
+--------------------------------------------------------------------------------------
+
+Allows the access of custom plugin dlls. For more info see <https://github.com/overwolf/overwolf-plugins>.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| file | string | the relative file path for the custom plugin dll. | 0.81 |
+| class | string | the namespace entry point for the custom plugin dll. | 0.81 |
+
+Example code:
+
+```
+"extra-objects":{  
+    "my-plugin":{  
+        "file":"plugins/my_plugin.dll",  
+        "class":"MyPlugin.EntryPoint"  
+    },  
+    "simple-io-plugin":{  
+        "file":"plugins/simple-io-plugin.dll",  
+        "class":"overwolf.plugins.simpleio.SimpleIOPlugin"  
+    }  
+}  
+
+```
+
+Then, from your app you can use the [overwolf.extensions.current](/ow-native/reference/extensions/current-api) API to get an instance:
+
+```
+overwolf.extensions.current.getExtraObject(âsimple-io-pluginâ, functionâ¦)  
+
+```
+
+hotKeys object[](#hotkeys-object "Direct link to hotKeys object")
+--------------------------------------------------------------------
+
+HotKeys are shortcut keystrokes that trigger app actions. The most common, basic usage is to show and hide your app in-game, but you can trigger more actions like saving, refreshing or any other custom actions.
+
+Please read all the info about hotkeys and how to use them in our [hotkeys best practice](/ow-native/guides/general-tech/hotkeys-best-practices) guide.
+
+The map between the hotkey feature name and its settings:
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| title | string | Mandatory. Name of the hotkey as it will appear in the Hotkey tab in the settings. | 0.78 |
+| action-type | enum | Defines the behavior of the hotkey: **["toggle" | "custom"]** | 0.78 |
+| default | string | The default key combination. | 0.78 |
+| passthrough | bool | The hotkey will not block keys from the game. | 0.78 |
+| custom\_modifier\_key | bool | Optional arbitrary modifier key for this keybind. | 0.208 |
+| game\_ids | number[] | Optional filter list of games to define the hotkey for. | 0.221 |
+| hold | bool | Defines whether this hotkey is meant to invoke an action while being held. | 0.142 |
+
+Example code:
+
+```
+"hotkeys": {  
+    "show_YourAppName": {  
+        "title": "Show Player",  
+        "action-type": "custom",  
+        "default": "Shift+F9",  
+        "passthrough": true,  
+        "custom_modifier_key": 192,  
+        "hold": true  
+    },  
+    "save_YourAppName": {  
+        "title": "Save Replay for later",  
+        "action-type": "custom",  
+        "default": "Ctrl+Shift+F9"  
+    },  
+    "only_in_league": {  
+        "title": "Hello From League Settings",  
+        "action-type": "custom",  
+        "default": "Ctrl+G",  
+        "game_ids": [5426]  
+    }  
+}  
+
+```
+
+content\_scripts Array[](#content_scripts-array "Direct link to content_scripts Array")
+------------------------------------------------------------------------------------------
+
+A list of content scripts to be loaded for specific windows.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| windows | string[] | The list of windows for which to apply this content script. | 0.78 |
+| matches | string[] | The list of URLs for which to apply this content script. (regex supported) | 0.78 |
+| css | string[] | The list of CSS files to be applied in this content script. | 0.78 |
+| js | string[] | The list of JS files to be applied in this content script. | 0.78 |
+
+In this example, when loading the index window, myscript.js will be loaded and when encountering <https://google.com>, mystyles.css and myscript2.js will be loaded:
+
+```
+"content_scripts": [  
+    { "windows": [ "index" ], "js": [ "myscript.js" ] },  
+    { "matches": [ "https://google.com/" ], "css": [ "mystyles.css" ], "js": [ "myscript2.js" ] }  
+]  
+
+```
+
+*Note: it also work for any iframes the app is hosting in an Overwolf window (not just the main page).*
+
+launch\_event\_settings array[](#launch_event_settings-array "Direct link to launch_event_settings array")
+-------------------------------------------------------------------------------------------------------------
+
+A list of events causing the app to launch. It's enough that one of the events occurs to launch the app.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| event | enum | The type name of the event.  **["GameLaunch", "AllGamesLaunch", "LaunchWithOverwolf"]** | 0.82 |
+| event\_data | [launch\_event](#launch_event-object) object | The list of game class IDs for which the app will launch. | 0.82 |
+| include\_launchers | bool | The app will be launched when **any** game launcher is detected (Requires "AllGamesLaunch" to work). | 0.103 |
+| tracked | bool | Launch App when gameid is detected (even when not injected). Only works for supported launchers. | 0.132 |
+| track\_all\_games | bool | Only applicable when the 'tracked' property is set to true. Launches the app for all instances defined in the Gameslist, even those who are defined as "Unsupported". | 0.195 |
+| start\_minimized | bool | The appâs main window will start minimized. | 0.82 |
+
+Code Example:
+
+```
+"launch_events": [  
+    {  
+        "event": "GameLaunch",  
+        "tracked": false,  
+        "event_data": {  
+            "game_ids": [1136],  
+            "wait_for_stable_framerate": 30  
+        },  
+        "start_minimized": true  
+    }  
+]  
+
+```
+
+info
+
+* If your app also requires real time [game events](/ow-native/reference/games/events) for any games, don't forget to also set the [game\_events](#game_events-array) array.
+* If your app should also be able to display an overlay on top of any games, don't forget to also set the appropriate [GameTargeting](#gametargeting-object).
+
+#### Enable app auto-launch[](#enable-app-auto-launch "Direct link to Enable app auto-launch")
+
+The 'LaunchWithOverwolf' Flag
+
+Even if your app is set to `LaunchWithOverwolf`, it must never open any visible windows before a game is launched, unless:
+
+* The user has explicitly opted in to this behavior
+* There is a clear and visible way for the user to opt out at any moment
+
+You can launch your app when a certain event occurs, by setting `event` to these values:
+
+* When the OW client launches: "LaunchWithOverwolf".
+* When a listed game launches: "GameLaunch".
+* When any game launches: "AllGamesLaunch".
+
+By setting `include_launchers` to true, the app will also launch if it detects a launcher while having `AllGamesLaunch` as the `event` property.
+**Launchers can still be detected without this flag, using their direct game id**.
+
+If the app would have been launched by any of these behaviours, but it is already open, [onAppLaunchTriggered](/ow-native/reference/extensions/ow-extensions#onapplaunchtriggered) is fired.
+
+Notes:
+
+* You should add the "Tray" permission to your app's [manifest permissions list](#permissions-array).
+* Apps launched this way will have [origin](/ow-native/reference/extensions/ow-extensions#the-origin-string) `overwolfstartlaunchevent`.
+
+Code example:
+
+```
+"launch_events": [  
+    {  
+        "event": "LaunchWithOverwolf" // The event is fired when Overwolf starts.  
+    }  
+]  
+
+```
+
+launch\_event object[](#launch_event-object "Direct link to launch_event object")
+------------------------------------------------------------------------------------
+
+Contains a list of game class IDs for which the app will launch.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| game\_ids | int[] | The list of game class IDs for which the app will launch. | 0.82 |
+| wait\_for\_stable\_framerate | int | The app wonât start until the gameâs framerate will stabilize around or above the stated framerate. | 0.82 |
+
+Code Example:
+
+```
+ "event_data": {  
+        "game_ids": [1136],  
+        "wait_for_stable_framerate": 30  
+    }  
+
+```
+
+developer settings object[](#developer-settings-object "Direct link to developer settings object")
+-----------------------------------------------------------------------------------------------------
+
+Additional setting for helping apps developers. Mainly to set auto reloading of an app when local files changes.
+
+Note
+
+These settings are relevant only if your app is in dev mode (channel="developers"), or if you are loading it as an unpacked folder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable\_auto\_refresh | bool | Enable auto App reloading when detecting files changes.  *default is true* | 0.127 |
+| reload\_delay | int | Delay in milliseconds. When detecting file changes (for multiple changes).  *default value is 1000 milliseconds (1 second)* | 0.127 |
+| filter | string | Filter files which will be tracked.e.g (*.js;*.html.  *default value is â*.*â -> all files, but you can use several value like â*.json;*.htmlâ* | 0.127 |
+
+Code Example:
+
+```
+"developer": {  
+    "enable_auto_refresh": true,  
+    "reload_delay": 1000,  
+    "filter": "*.json;*.html"  
+}  
+
+```
+
+service\_providers object[](#service_providers-object "Direct link to service_providers object")
+---------------------------------------------------------------------------------------------------
+
+Provide extra data to external service providers. External apps (AKA service providers) can fetch this data from your app's manifest.
+
+This object can contain any valid JSON objects, as long as it wrapped with the **hosting app UID**.
+
+Code Example:
+
+```
+"service_providers": {  
+    "nafihghfcpikebhfhdhljejkcifgbdahdhngepfb": {  //hosting app UID, Mandatory. On this case, it's the Game Summary built-in app UID.  
+        "whatever": "value"  
+    }  
+}  
+
+```
+
+size Object[](#size-object "Direct link to size Object")
+-----------------------------------------------------------
+
+Defines a size (width and height) in pixels.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| width | int | Defines the width in pixels. *Optional parameter* | 0.78 |
+| height | int | Defines the height in pixels. *Optional parameter* | 0.78 |
+
+point Object[](#point-object "Direct link to point Object")
+--------------------------------------------------------------
+
+Defines a top-left position in pixels.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| top | int | Defines the position in the Y axis from the top in pixels. *Optional parameter* | 0.78 |
+| left | int | Defines the position in the X axis from the left in pixels. *Optional parameter* | 0.78 |
+
+focus\_game\_takeover options[](#focus_game_takeover-options "Direct link to focus_game_takeover options")
+-------------------------------------------------------------------------------------------------------------
+
+In games such as Overwatch 2, which have a state without a mouse cursor, the user canât control the Overwolf app window.
+This flag automatically sets the app window into "exclusive mode" â input donât pass to the game, and a cursor is available.
+
+Note that some of the games (e.g [Counter-Strike 2](/ow-native/live-game-data-gep/supported-games/counter-strike-2)) can run in "trusted mode," which disable the "exclusive mode" in the game and makes it impossible to interact with your OW app window.
+
+You can defines how the âexclusive modeâ should be turned off:
+
+* **ReleaseOnHidden** â When the window is hidden, automatically turn off exclusive mode. (if you are using this option, you must set also the [focus\_game\_takeover\_release\_hotkey](/ow-native/reference/manifest/manifest-json#focus_game_takeover_release_hotkey) flag)
+* **ReleaseOnLostFocus** â If the user clicks outside the window, exclusive mode is turned off.
+
+Read more in our [Exclusive Mode](/ow-native/guides/general-tech/exclusive-mode-overlay) guide.
+
+logging object[](#logging-object "Direct link to logging object")
+--------------------------------------------------------------------
+
+Defines the prints that will be filtered from the logs. Any console prints originating from external domains (webpages/iframes) will be filtered before being logged to the log files,
+and will only be logged if that domain is whitelisted.
+
+Blocked Prints
+
+Both [`content.overwolf.com`](https://content.overwolf.com) and [`google-analytics.com`](https://google-analytics.com) will **always** be filtered, unless this feature is disabled.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| allowed\_domains | string[] | List of ***specific domains*** (without wildcards) whitelisted to print to the app logs | 0.217 |
+| ignore\_externally\_connectable | bool | Should all prints from [`externally_connectable`](#externally_connectable) domains be ***blacklisted*** | 0.217 |
+| disable\_blocking | bool | Disables any app log filtering | 0.217 |
+
+#### Example data:[](#example-data "Direct link to Example data:")
+
+```
+"logging": {  
+    "allowed_domains": ["content.exampleDomain.com"],  
+    "ignore_externally_connectable": false,  
+	"disable_blocking": false  
+}  
+
+```
+
+url\_protocol object[](#url_protocol-object "Direct link to url_protocol object")
+------------------------------------------------------------------------------------
+
+Allows your app to be opened from a url.
+
+Add your custom url protocol under "url\_protocol" (for example, `outplayed://data-goes-here/and-here`) to create a link to your app.
+
+You can use this link on a webpage, another App, or even a discord message, to allow a user to open your OW app, potentially
+with extra data.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| *scheme* | *string* | ***Deprecated** - The custom data URL protocol scheme.* | 0.158 |
+| schemes | string[] | An array of custom data URL protocol schemes. | 0.236 |
+
+#### Example data:[](#example-data-1 "Direct link to Example data:")
+
+```
+{"schemes": ["outplayed", "outplayed-data"]}  
+
+```
+
+#### Link behavior[](#link-behavior "Direct link to Link behavior")
+
+* For a closed app, a click on a custom link launches the app.
+* For a closed OW client, a click on a custom link launches OW + the app.
+* For an open app, a click on a custom link opens the app and fire the [onAppLaunchTriggered](/ow-native/reference/extensions/ow-extensions#onapplaunchtriggered) event with a "urlscheme" origin.
+
+If an extra params has been sent (e.g. "outplayed://something/null"), the [onAppLaunchTriggered](/ow-native/reference/extensions/ow-extensions#onapplaunchtriggered) event callback will show them under the "parameter" field:
+
+```
+{origin: "urlscheme", parameter: "outplayed%3a%2f%2fsomething%null"}  
+
+```
+
+uninstall\_window object[](#uninstall_window-object "Direct link to uninstall_window object")
+------------------------------------------------------------------------------------------------
+
+This manifest flag triggers the client to run a window on app uninstall for a required time set.
+Use it for running uninstall background actions like removing DLLs, logs, images, and other files injected by the app to the user's machine. You can also use it for showing an uninstall survey (in the user's default browser).
+
+* If it exists, the client will run this window in the background for the required time (or 10 seconds by default. Valid up to 1 minute) before actually uninstalling an app.
+* When the flag is set, the Overwolf client will run this window in the background right BEFORE the app is removed.
+* If the Overwolf client is uninstalled, the uninstaller will let the client run all uninstall windows before actually uninstalling overwolf.
+
+info
+
+The uninstall window is running in the background, you shouldn't open any Overwolf app window while it's running. You can open the user's default browser (for uninstall survey for example).
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| file | string | Points to a local HTML file to be loaded inside the window | 0.187 |
+| required\_runtime | int | Valid up to 60000 (1 minute).  default value is 10000 milliseconds (10 seconds) | 0.187 |
+
+Code Example:
+
+```
+"uninstall_window": {  
+    "file": "name.html",  
+    "required_runtime": 20000  
+}  
+
+```

@@ -1,0 +1,108 @@
+Title: overwolf.cryptography API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/cryptography/api
+
+overwolf.cryptography API
+=========================
+
+Use this API to encrypt and decrypt ciphertext and secure app data and variables. e.g., localStorage that stores auth-tokens, etc.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.cryptography.encryptForCurrentUser()](#encryptforcurrentuserplaintext-callback)
+* [overwolf.cryptography.decryptForCurrentUser()](#decryptforcurrentuserciphertext-callback)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.cryptography.EncryptedDataResult](#encrypteddataresult-object) Object
+* [overwolf.cryptography.DecryptedDataResult](#decrypteddataresult-object) Object
+
+encryptForCurrentUser(plaintext, callback))[](#encryptforcurrentuserplaintext-callback "Direct link to encryptForCurrentUser(plaintext, callback))")
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.160[](#version-added-0160 "Direct link to Version added: 0.160")
+
+> Returns encrypted ciphertext.
+
+**Note that the generated hash is unique per Windows current user.**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| plaintext | string | The plain text to encrypt |
+| callback | [(Result:EncryptedDataResult)](#encrypteddataresult-object) => void | Returns info about the currently running game |
+
+#### Usage Example[](#usage-example "Direct link to Usage Example")
+
+```
+overwolf.cryptography.encryptForCurrentUser('test123',console.log)  
+
+```
+
+decryptForCurrentUser(ciphertext, callback))[](#decryptforcurrentuserciphertext-callback "Direct link to decryptForCurrentUser(ciphertext, callback))")
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.160[](#version-added-0160-1 "Direct link to Version added: 0.160")
+
+> Returns decrypted plaintext.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| ciphertext | string | The cipher text to decryptd |
+| callback | [(Result:DecryptedDataResult)](#decrypteddataresult-object) => void | Returns info about the currently running game |
+
+#### Usage Example[](#usage-example-1 "Direct link to Usage Example")
+
+```
+overwolf.cryptography.decryptForCurrentUser(`${paste hashed string here}`,console.log)  
+
+```
+
+EncryptedDataResult Object[](#encrypteddataresult-object "Direct link to EncryptedDataResult Object")
+--------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| ciphertext | string | The encrypted ciphertext |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+```
+{  
+   "success":true,  
+   "ciphertext": "AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAALUGXOFJUAE+tTxx0B2â¦FNYoUDbjKgdMDGuYhZbyfdGBkmGoaIxZk4qybUWBpu0iX4xM="  
+}  
+
+```
+
+#### Example data: Failure[](#example-data-failure "Direct link to Example data: Failure")
+
+```
+{"ciphertext": null, "success": false, "error": "Failed to encrypt"}  
+
+```
+
+DecryptedDataResult Object[](#decrypteddataresult-object "Direct link to DecryptedDataResult Object")
+--------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| plaintext | string | The decrypted plaintext |
+
+#### Example data: Success[](#example-data-success-1 "Direct link to Example data: Success")
+
+```
+{"plaintext": "test123", "success": true}  
+
+```
+
+#### Example data: Failure[](#example-data-failure-1 "Direct link to Example data: Failure")
+
+```
+{"plaintext": null, "success": false, "error": "Failed to decrypt"}  
+
+```

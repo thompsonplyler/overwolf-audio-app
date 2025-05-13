@@ -9,7 +9,13 @@ import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
 
 import WindowState = overwolf.windows.WindowStateEx;
 
+// Define these at a higher scope or pass them in if they vary,
+// for now, using manifest values.
+const MANIFEST_ORIGINAL_WIDTH = 1212;
+const MANIFEST_ORIGINAL_HEIGHT = 699;
+
 // --- Constants --- 
+const HEADER_HEIGHT = 54; // Assumed height of the header in pixels
 const PURCHASE_REMINDER_DELAY_SECONDS_CONFIG = 30; // 30 seconds (Original)
 const TEST_REMINDER_DELAY_SECONDS = 30; // 5 seconds for testing (longer than 2 to avoid rapid fire)
 const CURRENT_REMINDER_DELAY_SECONDS = TEST_REMINDER_DELAY_SECONDS; // Use this constant
@@ -111,6 +117,10 @@ const ITEM_PRIORITY: ItemDefinition[] = [
   ALL_TRACKED_ITEMS.VOID_STAFF
 ];
 
+// Define target dimensions for the "small button" state
+const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
+const COLLAPSED_WINDOW_HEIGHT = 50;  // Example height, adjust as needed (ensure manifest.json min_size allows this)
+
 // The window displayed in-game while a game is running.
 // It listens to all info events and to the game events listed in the consts.ts file
 // and writes them to the relevant log using <pre> tags.
@@ -122,14 +132,25 @@ class InGame extends AppWindow {
   private _eventsLog: HTMLElement;
   private _infoLog: HTMLElement;
   private _logsContainer: HTMLElement;
+  private _mainElement: HTMLElement;
   private _toggleLogsDisplayBtn: HTMLButtonElement;
   private _areLogsVisible: boolean = true;
+
+  // --- Header elements to toggle ---
+  private _headerIcon: HTMLImageElement;
+  private _headerTitle: HTMLHeadingElement;
+  private _headerHotkeyText: HTMLHeadingElement;
+  private _windowControlsGroup: HTMLDivElement;
 
   // --- State Variables ---
   private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null } =
     { gold: 0, items: [], summonerName: null, gameTime: 0, teamId: null };
   private _lastLoggedInventoryString: string = '';
   private _lastLoggedGold: number = -1;
+
+  private _originalWindowWidth: number;
+  private _originalWindowHeight: number;
+  private _currentWindowId: string;
 
   // --- NEW Target Item State ---
   // ID of the single item currently being suggested
@@ -151,41 +172,100 @@ class InGame extends AppWindow {
 
   private constructor() {
     super(kWindowNames.inGame);
+
+    // Original dimensions are now set in run(), after forcing initial size.
+
     this._eventsLog = document.getElementById('eventsLog');
     this._infoLog = document.getElementById('infoLog');
-    if (this._infoLog) this._infoLog.innerHTML = ''; // Clear log initially
+    if (this._infoLog) this._infoLog.innerHTML = '';
 
-    this._logsContainer = document.getElementById('logs');
+    this._logsContainer = document.getElementById('logs') as HTMLElement;
+    this._mainElement = document.querySelector('main') as HTMLElement;
     this._toggleLogsDisplayBtn = document.getElementById('toggleLogsDisplayBtn') as HTMLButtonElement;
+    this._headerIcon = document.querySelector('#header > img') as HTMLImageElement;
+    this._headerTitle = document.querySelector('#header > h1:not(.hotkey-text)') as HTMLHeadingElement;
+    this._headerHotkeyText = document.querySelector('#header > .hotkey-text') as HTMLHeadingElement;
+    this._windowControlsGroup = document.querySelector('#header > .window-controls-group') as HTMLDivElement;
 
-    this.setToggleHotkeyBehavior();
-    this.setToggleHotkeyText();
-    this.setupToggleLogsDisplay();
+    console.log('Constructor: All base elements queried.');
+    // _updateUIVisibility will be called in run() after initial size is forced.
   }
 
-  public static instance() {
-    if (!this._instance) {
-      this._instance = new InGame();
+  public static instance(): InGame {
+    if (!InGame._instance) {
+      InGame._instance = new InGame();
     }
+    return InGame._instance;
+  }
 
-    return this._instance;
+  private async getWindowInfo(windowName?: string): Promise<overwolf.windows.WindowInfo> {
+    return new Promise<overwolf.windows.WindowInfo>((resolve, reject) => {
+      const callback = (result: overwolf.windows.WindowResult) => {
+        if (result && typeof result === 'object' && typeof (result as any).success === 'boolean') {
+          const successResult = result as { success: boolean; window?: overwolf.windows.WindowInfo; error?: string };
+          if (successResult.success && successResult.window) {
+            resolve(successResult.window);
+          } else {
+            const errorMessage = successResult.error || `Operation not successful or window data missing for ${windowName || 'current window'}`;
+            reject(errorMessage);
+          }
+        } else {
+          reject(`Received unexpected result structure for ${windowName || 'current window'}`);
+        }
+      };
+      if (windowName) {
+        overwolf.windows.obtainDeclaredWindow(windowName, callback);
+      } else {
+        overwolf.windows.getCurrentWindow(callback);
+      }
+    });
   }
 
   public async run() {
-    const gameClassId = await this.getCurrentGameClassId();
+    try {
+      const preliminaryWindowInfo = await this.getWindowInfo();
+      this._currentWindowId = preliminaryWindowInfo.id;
+      console.log(`Run: Obtained window ID: ${this._currentWindowId}. Current reported size: ${preliminaryWindowInfo.width}x${preliminaryWindowInfo.height}`);
 
-    const gameFeatures = kGamesFeatures.get(gameClassId);
+      await new Promise<void>((resolve, reject) => {
+        console.log(`Run: Attempting to force window to manifest size: ${MANIFEST_ORIGINAL_WIDTH}x${MANIFEST_ORIGINAL_HEIGHT}`);
+        overwolf.windows.changeSize(
+          { window_id: this._currentWindowId, width: MANIFEST_ORIGINAL_WIDTH, height: MANIFEST_ORIGINAL_HEIGHT, auto_dpi_resize: true },
+          (result) => {
+            if (result && result.success) {
+              console.log('Run: Successfully forced initial large size.');
+              this._originalWindowWidth = MANIFEST_ORIGINAL_WIDTH;
+              this._originalWindowHeight = MANIFEST_ORIGINAL_HEIGHT;
+              resolve();
+            } else {
+              console.error('Run: Failed to force initial large size. Using reported size instead.', result);
+              this._originalWindowWidth = preliminaryWindowInfo.width; // Fallback
+              this._originalWindowHeight = preliminaryWindowInfo.height; // Fallback
+              // We might still want to resolve, or reject if this is critical failure.
+              // For now, let's resolve and see the state.
+              resolve();
+            }
+          }
+        );
+      });
 
-    if (gameFeatures && gameFeatures.length) {
-      this._gameEventsListener = new OWGamesEvents(
-        {
-          onInfoUpdates: this.onInfoUpdates.bind(this),
-          onNewEvents: this.onNewEvents.bind(this)
-        },
-        gameFeatures
-      );
+      console.log(`Run: Effective original dimensions: ${this._originalWindowWidth}x${this._originalWindowHeight}.`);
 
-      this._gameEventsListener.start();
+      // Now apply initial UI visibility based on the (now hopefully correct) size
+      this._updateUIVisibility(); // _areLogsVisible is true by default
+
+      this.setToggleHotkeyText();
+      this.setToggleHotkeyBehavior();
+      this.setupToggleLogsDisplay();
+
+      const gameClassId = await this.getCurrentGameClassId();
+      const gameFeatures = kGamesFeatures.get(gameClassId);
+      if (gameFeatures && gameFeatures.length) {
+        this._gameEventsListener = new OWGamesEvents({ onInfoUpdates: this.onInfoUpdates.bind(this), onNewEvents: this.onNewEvents.bind(this) }, gameFeatures);
+        this._gameEventsListener.start();
+      }
+    } catch (e) {
+      console.error("Failed to initialize InGame window essentials:", e);
     }
   }
 
@@ -721,21 +801,84 @@ class InGame extends AppWindow {
   }
 
   private setupToggleLogsDisplay(): void {
-    if (this._toggleLogsDisplayBtn && this._logsContainer) {
+    if (
+      this._toggleLogsDisplayBtn && // Check only button; other elements are handled by _updateUIVisibility
+      this._mainElement &&
+      this._currentWindowId &&
+      typeof this._originalWindowWidth === 'number' &&
+      typeof this._originalWindowHeight === 'number'
+      // Removed checks for individual header elements here as _updateUIVisibility handles them
+    ) {
       this._toggleLogsDisplayBtn.addEventListener('click', () => {
         this._areLogsVisible = !this._areLogsVisible;
+        console.log(`Toggle button clicked. _areLogsVisible is now: ${this._areLogsVisible}`);
+
+        // Update all UI elements based on the new state
+        this._updateUIVisibility();
+
+        // Perform window resizing
+        let targetWidth: number;
+        let targetHeight: number;
+        let logMessage: string;
+
         if (this._areLogsVisible) {
-          this._logsContainer.style.display = ''; // Or 'flex', depending on original display style
-          this._toggleLogsDisplayBtn.innerText = 'Hide Logs';
+          targetWidth = this._originalWindowWidth;
+          targetHeight = this._originalWindowHeight;
+          logMessage = `Window restoring to original size: ${targetWidth}x${targetHeight}.`;
         } else {
-          this._logsContainer.style.display = 'none';
-          this._toggleLogsDisplayBtn.innerText = 'Show Logs';
+          targetWidth = COLLAPSED_WINDOW_WIDTH;
+          targetHeight = COLLAPSED_WINDOW_HEIGHT;
+          logMessage = `Window collapsing to ${targetWidth}x${targetHeight}.`;
         }
+
+        const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
+          window_id: this._currentWindowId,
+          width: targetWidth,
+          height: targetHeight,
+          auto_dpi_resize: true
+        };
+
+        overwolf.windows.changeSize(sizeParams, (result) => {
+          if (result && result.success) {
+            console.log(logMessage, 'Success.');
+          } else {
+            console.error('Failed to change window size:', result, logMessage);
+          }
+        });
       });
     } else {
-      if (!this._toggleLogsDisplayBtn) console.error("toggleLogsDisplayBtn not found");
-      if (!this._logsContainer) console.error("logs container not found");
+      console.error("setupToggleLogsDisplay: Prerequisites not met for base elements.", {
+        btn: !!this._toggleLogsDisplayBtn,
+        main: !!this._mainElement,
+        id: this._currentWindowId,
+        width: this._originalWindowWidth,
+        height: this._originalWindowHeight
+      });
+      // Log if specific header elements were not found during constructor (they won't be logged here anymore)
+      // This part of the log might be less relevant if the _updateUIVisibility uses its internal checks.
     }
+  }
+
+  // NEW: Centralized UI update logic based on visibility state
+  private _updateUIVisibility(): void {
+    console.log(`_updateUIVisibility called, _areLogsVisible: ${this._areLogsVisible}`);
+    if (this._areLogsVisible) {
+      if (this._mainElement) this._mainElement.style.display = 'flex';
+      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Hide Logs';
+      if (this._headerIcon) this._headerIcon.style.display = ''; // Revert to stylesheet default
+      if (this._headerTitle) this._headerTitle.style.display = '';
+      if (this._headerHotkeyText) this._headerHotkeyText.style.display = '';
+      if (this._windowControlsGroup) this._windowControlsGroup.style.display = '';
+    } else {
+      if (this._mainElement) this._mainElement.style.display = 'none';
+      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Activate App';
+      if (this._headerIcon) this._headerIcon.style.display = 'none';
+      if (this._headerTitle) this._headerTitle.style.display = 'none';
+      if (this._headerHotkeyText) this._headerHotkeyText.style.display = 'none';
+      if (this._windowControlsGroup) this._windowControlsGroup.style.display = 'none';
+    }
+    // Diagnostic for button text after update
+    if (this._toggleLogsDisplayBtn) console.log(`_updateUIVisibility - Button text is now: ${this._toggleLogsDisplayBtn.innerText}`);
   }
 }
 

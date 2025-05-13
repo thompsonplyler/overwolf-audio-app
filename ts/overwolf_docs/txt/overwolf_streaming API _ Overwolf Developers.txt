@@ -1,0 +1,2013 @@
+Title: overwolf.streaming API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/streaming/ow-streaming
+
+overwolf.streaming API
+======================
+
+This namespace contains all the functionality that allows the streaming of video/audio.
+
+The term streaming might be a bit misleading â we regard saving a video to the local drive as streaming, as well as streaming the video to a streaming service such as Twitch.tv.
+
+**Permissions required: Streaming**
+
+info
+
+Please check the [streaming API sample app](#sample-app) that demonstrates a primary usage in the API.
+Please read all the info about streaming usage and options on our [video capture best practices](/ow-native/guides/general-tech/video-capture-best-practices) guide.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.streaming.start()](#startsettings-callback)
+* [overwolf.streaming.stop()](#stopstreamid-callback)
+* [overwolf.streaming.getActiveRecordingApps()](#getactiverecordingappscallback)
+* [overwolf.streaming.getCapabilities()](#getcapabilitiescallback)
+* [overwolf.streaming.split()](#splitstreamid-callback)
+* [overwolf.streaming.changeVolume()](#changevolumestreamid-audiooptions-callback)
+* [overwolf.streaming.setWatermarkSettings()](#setwatermarksettingssettings-callback)
+* [overwolf.streaming.getWatermarkSettings()](#getwatermarksettingscallback)
+* [overwolf.streaming.getWindowStreamingMode()](#getwindowstreamingmodewindowid-callback)
+* [overwolf.streaming.setWindowStreamingMode()](#setwindowstreamingmodewindowid-streamingmode-callback)
+* [overwolf.streaming.setWindowObsStreamingMode()](#setwindowobsstreamingmodewindowid-obsstreamingmode-callback)
+* [overwolf.streaming.setBRBImage()](#setbrbimagestreamid-image-backgroundcolor-callback)
+* [overwolf.streaming.getStreamEncoders()](#getstreamencoderscallback)
+* [overwolf.streaming.getAudioDevices()](#getaudiodevicescallback)
+* [overwolf.streaming.updateStreamingDesktopOptions()](#updatestreamingdesktopoptionsstreamid-newoptions-mousecursorstreamingmethod-callback)
+
+Events Reference[](#events-reference "Direct link to Events Reference")
+--------------------------------------------------------------------------
+
+* [overwolf.streaming.onStreamingSourceImageChanged](#onstreamingsourceimagechanged)
+* [overwolf.streaming.onStopStreaming](#onstopstreaming)
+* [overwolf.streaming.onStartStreaming](#onstartstreaming)
+* [overwolf.streaming.onStreamingError](#onstreamingerror)
+* [overwolf.streaming.onStreamingWarning](#onstreamingwarning)
+* [overwolf.streaming.onVideoFileSplit](#onvideofilesplit)
+* [overwolf.streaming.onSupportedEncodersUpdated](#onsupportedencodersupdated)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.streaming.StreamingCapabilities](#streamingcapabilities-object) Object
+* [overwolf.streaming.StreamSettings](#streamsettings-object) Object
+* [overwolf.streaming.enums.StreamingProvider](#streamingprovider-enum) Enum
+* [overwolf.streaming.enums.CaptureErrorCode](#captureerrorcode-enum) Enum
+* [overwolf.streaming.StreamParams](#streamparams-object) Object
+* [overwolf.streaming.StreamInfo](#streaminfo-object) Object
+* [overwolf.streaming.StreamAuthParams](#streamauthparams-object) Object
+* [overwolf.streaming.StreamVideoOptions](#streamvideooptions-object) Object
+* [overwolf.streaming.enums.VideoColorSpec](#videocolorspec-enum) Enum
+* [overwolf.streaming.enums.VideoColorFormat](#videocolorformat-enum) Enum
+* [overwolf.streaming.StreamingVideoEncoderSettings](#streamingvideoencodersettings-object) Object
+* [overwolf.streaming.enums.StreamEncoder](#streamencoder-enum) Enum
+* [overwolf.streaming.StreamingVideoEncoderNVIDIA\_NVENCSettings](#streamingvideoencodernvidia_nvencsettings-object) Object
+* [overwolf.streaming.enums.StreamEncoderPreset\_NVIDIA](#streamencoderpreset_nvidia-enum)
+* [overwolf.streaming.enums.StreamEncoderRateControl\_NVIDIA](#streamencoderratecontrol-nvidia-enum)
+* [overwolf.streaming.StreamingVideoEncoderIntelSettings](#streamingvideoencoderintelsettings-object) Object
+* [overwolf.streaming.StreamingVideoEncoderx264Setting](#streamingvideoencoderx264settings-object) Object
+* [overwolf.streaming.enums.StreamEncoderPreset\_x264](#streamencoderpreset_x264-enum) Enum
+* [overwolf.streaming.enums.StreamEncoderRateControl\_x264](#streamencoderratecontrol_x264-enum) Enum
+* [overwolf.streaming.StreamingVideoEncoderAMD\_AMFSettings](#streamingvideoencoderamd_amfsettings-object) Object
+* [overwolf.streaming.enums.StreamEncoderPreset\_AMD\_AMF](#streamencoderpreset_amd_amf-enum) Enum
+* [overwolf.streaming.enums.StreamEncoderRateControl\_AMD\_AMF](#streamencoderratecontrol_amd_amf-enum) Enum
+* [overwolf.streaming.StreamDesktopCaptureOptions](#streamdesktopcaptureoptions-object) Object
+* [overwolf.streaming.StreamAudioOptions](#streamaudiooptions-object) Object
+* [overwolf.streaming.enums.AudioSampleRate](#audiosamplerate-enum) Enum
+* [AudioDeviceOptions](#audiodeviceoptions-object) Object
+* [ProcessAudioCapture](#processaudiocapture-object) Object
+* [overwolf.streaming.StreamDeviceVolume](#streamdevicevolume-object) Object
+* [overwolf.streaming.enums.AudioTracks](#audiotracks-enum) Enum
+* [overwolf.streaming.GameAudioDevice](#gameaudiodevice-object) Object
+* [overwolf.streaming.GameCaptureOptions](#gamecaptureoptions-object) Object
+* [overwolf.streaming.StreamPeripheralsCaptureOptions](#streamperipheralscaptureoptions-object) Object
+* [overwolf.streaming.StreamPeripheralsCaptureOptions](#streamperipheralscaptureoptions-object) Object
+* [overwolf.streaming.enums.StreamMouseCursor](#streammousecursor-enum) Enum
+* [overwolf.streaming.StreamIngestServer](#streamingestserver-object) Object
+* [overwolf.streaming.WatermarkSettings](#watermarksettings-object) Object
+* [overwolf.streaming.enums.StreamingMode](#streamingmode-enum) Enum
+* [overwolf.streaming.enums.ObsStreamingMode](#streamingmode-enum) Enum
+* [overwolf.streaming.SplitResult](#splitresult-object) Object
+* [overwolf.streaming.enums.indication\_position](#indication_position-enum) Enum
+* [overwolf.streaming.enums.indication\_type](#indication_type-enum) Enum
+* [overwolf.streaming.StreamQuotaParams](#streamquotaparams-object) Object
+* [overwolf.streaming.StreamResult](#streamresult-object) Object
+* [overwolf.streaming.GetActiveRecordingAppsResult](#getactiverecordingappsresult-object) Object
+* [overwolf.streaming.ActiveRecordingApps](#activerecordingapps-object) Object
+* [overwolf.streaming.StreamEvent](#streamevent-object) Object
+* [overwolf.streaming.StopStreamingEvent](#stopstreamingevent-object) Object
+* [overwolf.streaming.StopStreamingResult](#stopstreamingresult-object) Object
+* [overwolf.streaming.GetWatermarkSettingsResult](#getwatermarksettingsresult-object) Object
+* [overwolf.streaming.GetWindowStreamingModeResult](#getwindowstreamingmoderesult-object) Object
+* [overwolf.streaming.GetStreamEncodersResult](#getstreamencodersresult-object) Object
+* [overwolf.streaming.EncoderData](#encoderdata-object) Object
+* [overwolf.streaming.AudioDeviceData](#audiodevicedata-object) Object
+* [overwolf.streaming.GetAudioDevicesResult](#getaudiodevicesresult-object) Object
+* [overwolf.streaming.StreamingSourceImageChangedEvent](#streamingsourceimagechangedevent-object) Object
+* [overwolf.streaming.VideoFileSplitedEvent](#videofilesplitedevent-object) Object
+* [overwolf.streaming.enums.eVideoBaseFrameSizeSource](#evideobaseframesizesource-enum) Enum
+* [overwolf.streaming.enums.eVideoFrameSizeCalcMethod](#evideoframesizecalcmethod-enum) Enum
+* [overwolf.streaming.GameWindowCapture](#gamewindowcapture-object) Object
+
+Sample app[](#sample-app "Direct link to Sample app")
+--------------------------------------------------------
+
+In our [APIs sample apps repository](https://github.com/overwolf/apis-sample-apps), you can find and download the `Streaming Sample App`. It's a great place to get started - All the samples in this repository are built with JS code and demonstrate primary usage in the API.
+
+### Functionality[](#functionality "Direct link to Functionality")
+
+The sample app's functionality is pretty straightforward: You launch it, open the dev console (to see all the debug messages) and hit the `start` button to start the capture, and `stop` to stop it. You can look at the dev console to see the status of each call (success, failure, etc.). Once done, you can hit the open media folder to check the captured clip.
+Setting up
+
+### Setting up[](#setting-up "Direct link to Setting up")
+
+Download the app's source code from the [repository](https://github.com/overwolf/apis-sample-apps) as a zip file, and extract it to a new folder on your machine.  
+Load the app as an "unpacked extension" (Note that to do that you have to whitelist your OW username as a developer).
+
+* Open the Overwolf desktop client settings (by right-clicking the client and selecting "Packages" Or by clicking on the wrench icon in the dock and going to the "About" tab => "Development Options").
+* Click on "Development options".
+* In the opened window, click on "Load unpacked extension" and select the extracted 'streaming-sample' folder. This will add the app to your Overwolf dock.
+* Make sure you are logged in to the OW client. Otherwise, you will get an "Unauthorized App" error message. (Click on the "Appstore" icon in the OW dock to login to the OW client).
+* Click on the app's icon in your OW dock to run the app.
+
+start(settings, callback)[](#startsettings-callback "Direct link to start(settings, callback)")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078 "Direct link to Version added: 0.78")
+
+> Start a new stream.
+
+Note that this feature will work only when your target game is running.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| settings | [StreamSettings](#streamsettings-object) object | The stream settings |
+| callback | ([Result: StreamResult](#streamresult-object)) => void | Returns with the result |
+
+For more info read our [Basic streaming usage flow](/ow-native/guides/general-tech/video-capture-best-practices#usage-example).
+
+tip
+
+Note that the stream will be recorded in chunks in a size of `max_file_size_bytes`. If you would like in addition, a full length single file copy, you can set `include_full_size_video` to true.
+
+#### Usage Examples[](#usage-examples "Direct link to Usage Examples")
+
+Minimal required settings:
+
+Here you can find example with the minimal required setting.  
+Note that when a setting value is not defined, a default value is set.
+
+```
+  
+overwolf.streaming.onStopStreaming.addListener(console.log); //register to the onStopStreaming  
+overwolf.streaming.onStreamingError.addListener(console.log); //register to the onStreamingError  
+overwolf.streaming.onStreamingWarning.addListener(console.log); //register to the onStreamingWarning  
+var streamId; //we will use this variable to save the stream id  
+var stream_settings = {  
+  "provider": overwolf.streaming.enums.StreamingProvider.VideoRecorder,  
+  "settings": {  
+    "audio": {"mic": {},"game": {} },  
+    "video": {}  
+  }  
+};  
+  
+//start the stream  
+overwolf.streaming.start(stream_settings,  
+    function(result) {  
+      if (result.status == "success")  
+      {  
+        streamId = result.stream_id; //we need it for stopping the stream and manipulating stream settings later   
+        console.debug(result.stream_id);   
+        }  
+        else {  
+          console.debug("something went wrong...");  
+        }  
+    }  
+);  
+  
+//stop the stream  
+overwolf.streaming.stop(streamId);  
+
+```
+
+Example with customized Audio and Video settings:
+
+```
+  
+overwolf.streaming.onStopStreaming.addListener(console.log); //register to the onStopStreaming  
+overwolf.streaming.onStreamingError.addListener(console.log); //register to the onStreamingError  
+overwolf.streaming.onStreamingWarning.addListener(console.log); //register to the onStreamingWarning  
+  
+var streamId; //we will use this variable to save the stream id  
+  
+var stream_settings = {  
+  "provider": overwolf.streaming.enums.StreamingProvider.VideoRecorder,  
+  "settings": {  
+    "audio": {  
+      "mic": {  
+        "volume": 75,  
+        "enable": true  
+      },  
+      "game": {  
+        "volume": 75,  
+        "enable": true  
+      }  
+    },  
+    "video": {  
+      "auto_calc_kbps": false,  
+      "fps": 30,  
+      "width": 1920,  
+      "height": 1080,  
+      "max_kbps": 1500,  
+      "buffer_length": 20000,  
+      "max_file_size_bytes": 50000000,  
+      "include_full_size_video": true,  
+      "notify_dropped_frames_ratio": 0.5,  
+      "test_drop_frames_interval": 5000,  
+      "indication_position": 'TopRightCorner',  
+      "indication_type": 'dot',  
+      "base_frame_size_source" : ["Setting","Auto"] , // if not set, "Setting" is the default  
+       "frame_size_method": ["Original", "ExactOrKeepRatio", "ExactOrClosestResolution"] , // // Original  
+      "encoder": {  
+        "name": overwolf.streaming.enums.StreamEncoder.X264,  
+        "config": {  
+          "preset": overwolf.streaming.enums.StreamEncoderPreset_x264,  
+          "rate_control": overwolf.streaming.enums.StreamEncoderRateControl_x264,  
+          "keyframe_interval": 2  
+        }  
+      }  
+    }  
+  }  
+};  
+  
+//start the stream  
+overwolf.streaming.start(stream_settings,  
+    function(result) {  
+      if (result.status == "success")  
+      {  
+        streamId = result.stream_id; //we need it for stopping the stream and manipulating stream settings later   
+        console.debug(result.stream_id);   
+        }  
+        else {  
+          console.debug("something went wrong...");  
+        }  
+    }  
+);  
+  
+//stop the stream  
+overwolf.streaming.stop(streamId);  
+
+```
+
+Example with customized Quota settings:
+
+You can customize the stream quota settings and enable individual folders that are not part of the quota (to save favorite videos, for example). Read more about quota options [here](#streamquotaparams-object).
+
+```
+  
+overwolf.streaming.onStopStreaming.addListener(console.log); //register to the onStopStreaming  
+overwolf.streaming.onStreamingError.addListener(console.log); //register to the onStreamingError  
+overwolf.streaming.onStreamingWarning.addListener(console.log); //register to the onStreamingWarning  
+  
+var streamId; //we will use this variable to save the stream id  
+  
+var stream_settings = {  
+  "provider": overwolf.streaming.enums.StreamingProvider.VideoRecorder,  
+  "settings": {  
+    "audio": {"mic": {},"game": {} },  
+    "video": {},  
+    "quota": {  
+      "max_quota_gb": 2,  
+      "excluded_directories": [ "cool_session" ] //set directories that are not part of the quota  
+    }  
+  }  
+};  
+  
+//start the stream  
+overwolf.streaming.start(stream_settings,  
+    function(result) {  
+      if (result.status == "success")  
+      {  
+        streamId = result.stream_id; //we need it for stopping the stream and manipulating stream settings later   
+        console.debug(result.stream_id);   
+        }  
+        else {  
+          console.debug("something went wrong...");  
+        }  
+    }  
+);  
+  
+//stop the stream  
+overwolf.streaming.stop(streamId);  
+
+```
+
+stop(streamId, callback)[](#stopstreamid-callback "Direct link to stop(streamId, callback)")
+-----------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-1 "Direct link to Version added: 0.78")
+
+> Stops the given stream.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| streamId | int | The id of the stream to stop |
+| callback | ([Result: StopStreamingResult](#stopstreamingresult-object)) => void | Returns with the result |
+
+getActiveRecordingApps(callback)[](#getactiverecordingappscallback "Direct link to getActiveRecordingApps(callback)")
+------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.233[](#version-added-0233 "Direct link to Version added: 0.233")
+
+> Checks which apps are currently using the `overwolf.streaming` recording engine.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | ([Result: GetActiveRecordingAppsResult](#getactiverecordingappsresult-object)) => void | Returns with the result |
+
+getCapabilities(callback)[](#getcapabilitiescallback "Direct link to getCapabilities(callback)")
+---------------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199 "Direct link to Version added: 0.199")
+
+> Returns all different streaming capabilities
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | ([Result: StreamingCapabilities](#streamingcapabilities-object)) => void | The streaming capabilities |
+
+split(streamId, callback)[](#splitstreamid-callback "Direct link to split(streamId, callback)")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.141[](#version-added-0141 "Direct link to Version added: 0.141")
+
+> Request to split video now.
+
+warning
+
+This is an experimental function and shouldnât be used without Overwolfâs permission
+
+This method is available when recording with the [enable\_on\_demand\_split](#streamvideooptions-object) setting.  
+[onVideoFileSplit](#onvideofilesplit) event will be fired when the video splits.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| streamId | int | The id of the stream to split |
+| callback | ([Result: SplitResult](#splitresult-object)) => void | Returns with the result |
+
+changeVolume(streamId, audioOptions, callback)[](#changevolumestreamid-audiooptions-callback "Direct link to changeVolume(streamId, audioOptions, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-2 "Direct link to Version added: 0.78")
+
+> Changes the volume of the stream.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| streamId | int | The id of the stream on which the volume is changed |
+| audioOptions | [StreamAudioOptions](#streamaudiooptions-object) Object | The new volumes encapsulated in an object |
+| callback | (Result) => void | Returns with the result |
+
+setWatermarkSettings(settings, callback)[](#setwatermarksettingssettings-callback "Direct link to setWatermarkSettings(settings, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-3 "Direct link to Version added: 0.78")
+
+> Sets the watermark settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| settings | [WatermarkSettings](#watermarksettings-object) Object | The new watermark settings |
+| callback | (Result) => void | Returns with the result |
+
+#### Usage Example[](#usage-example "Direct link to Usage Example")
+
+```
+overwolf.streaming.setWatermarkSettings(  
+    { showWatermark : true },  
+    function (result) {  
+        console.log ("watermark settings changed.");  
+    }  
+);  
+
+```
+
+getWatermarkSettings(callback)[](#getwatermarksettingscallback "Direct link to getWatermarkSettings(callback)")
+------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-4 "Direct link to Version added: 0.78")
+
+> Gets the watermark settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetWatermarkSettingsResult)](#getwatermarksettingsresult-object) => void | Returns with the result and the current watermark settings |
+
+getWindowStreamingMode(windowId, callback)[](#getwindowstreamingmodewindowid-callback "Direct link to getWindowStreamingMode(windowId, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-5 "Direct link to Version added: 0.78")
+
+> Call the given callback function with the windowâs streaming mode as a parameter.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowId | string | The id of the window for which to get the streaming mode |
+| callback | [(Result: GetWindowStreamingModeResult)](#getwindowstreamingmoderesult-object) => void | Returns with the result |
+
+setWindowStreamingMode(windowId, streamingMode, callback)[](#setwindowstreamingmodewindowid-streamingmode-callback "Direct link to setWindowStreamingMode(windowId, streamingMode, callback)")
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-6 "Direct link to Version added: 0.78")
+
+> Call the given callback function with the windowâs streaming mode as a parameter.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowId | string | The id of the window for which to set the streaming mode |
+| streamingMode | [streamingMode](#streamingmode-enum) enum | The desired streaming mode |
+| callback | (Result) => void | Returns with the result |
+
+setWindowObsStreamingMode(windowId, obsStreamingMode, callback)[](#setwindowobsstreamingmodewindowid-obsstreamingmode-callback "Direct link to setWindowObsStreamingMode(windowId, obsStreamingMode, callback)")
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-7 "Direct link to Version added: 0.78")
+
+> Sets the streaming mode for the window when using OBS.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowId | string | The id of the window for which to set the streaming mode |
+| streamingMode | [ObsStreamingMode](#streamingmode-enum) enum | The desired OBS streaming mode |
+| callback | (Result) => void | Returns with the result |
+
+setBRBImage(streamId, image, backgroundColor, callback)[](#setbrbimagestreamid-image-backgroundcolor-callback "Direct link to setBRBImage(streamId, image, backgroundColor, callback)")
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-8 "Direct link to Version added: 0.78")
+
+> Set a streamâs Be Right Back image.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| streamId | int | The id of the stream for which to set the Be Right Back image |
+| image | Object | The image to set, as an IMG object or a URL |
+| backgroundColor | string | The color to paint the last game frame with before overlaying the image |
+| callback | (Result) => void | Returns with the result |
+
+getStreamEncoders(callback)[](#getstreamencoderscallback "Direct link to getStreamEncoders(callback)")
+---------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083 "Direct link to Version added: 0.83")
+
+> Returns an array of supported streaming encoders, with extra metadata for each one.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetStreamEncodersResult)](#getstreamencodersresult-object) => void | A callback function to call with the array of encoders and their metadata |
+
+getAudioDevices(callback)[](#getaudiodevicescallback "Direct link to getAudioDevices(callback)")
+---------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-9 "Direct link to Version added: 0.78")
+
+> Returns an array of all audio devices that can be used.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetAudioDevicesResult)](#getaudiodevicesresult-object) => void | A callback function to call with the array of audio devices and their metadata |
+
+updateStreamingDesktopOptions(streamId, newOptions, mouseCursorStreamingMethod, callback)[](#updatestreamingdesktopoptionsstreamid-newoptions-mousecursorstreamingmethod-callback "Direct link to updateStreamingDesktopOptions(streamId, newOptions, mouseCursorStreamingMethod, callback)")
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-10 "Direct link to Version added: 0.78")
+
+> Update stream desktop capture options.
+
+Deprecated
+
+This function is Deprecated.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| streamId | int | The id of the stream |
+| newOptions | [StreamDesktopCaptureOptions](#streamdesktopcaptureoptions-object) Object | The updated desktop capture streaming options |
+| mouseCursorStreamingMethod | [streamMouseCursor](#streammousecursor-enum) enum | The updated value of the mouse cursor streaming method |
+| callback | (Result) => void | Reports success or failure |
+
+onStreamingSourceImageChanged[](#onstreamingsourceimagechanged "Direct link to onStreamingSourceImageChanged")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-11 "Direct link to Version added: 0.78")
+
+> Fired when the stream started streaming a new image source (desktop, game), with the following structure: [StreamingSourceImageChangedEvent](#streamingsourceimagechangedevent-object) Object.
+
+onStopStreaming[](#onstopstreaming "Direct link to onStopStreaming")
+-----------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-12 "Direct link to Version added: 0.78")
+
+> Fired when the stream was stopped (and a recording was created), with the following structure: [StopStreamingEvent](#stopstreamingevent-object) Object.
+
+onStartStreaming[](#onstartstreaming "Direct link to onStartStreaming")
+--------------------------------------------------------------------------
+
+#### Version added: 0.106[](#version-added-0106 "Direct link to Version added: 0.106")
+
+> Fired when the stream has started, with the following structure: [StreamEvent](#streamevent-object) Object.
+
+onStreamingError[](#onstreamingerror "Direct link to onStreamingError")
+--------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-13 "Direct link to Version added: 0.78")
+
+> Fired when the stream has crashed, with the following structure: [StreamEvent](#streamevent-object) Object.
+
+#### Possible Error Codes[](#possible-error-codes "Direct link to Possible Error Codes")
+
+* Unknown
+* Unauthorized
+* Invalid\_Server
+* No\_Internet
+* Invalid\_Video\_Settings
+* No\_Playback\_Device
+* Not\_InGame
+* Internet\_Congested
+* Game\_Quit\_Mid\_Stream
+* Twitch\_Dll\_Load\_Error
+* Twitch\_Init\_Error
+* No\_Encoder
+* Out\_Of\_Disk\_Space
+* Update\_Driver
+
+#### Event Data Example[](#event-data-example "Direct link to Event Data Example")
+
+```
+{  
+    "status": "error",  
+    "stream_id": 1,  
+    "error": "Internet_Congested"  
+}  
+
+```
+
+#### Event Data Example: Out\_Of\_Disk\_Space[](#event-data-example-out_of_disk_space "Direct link to Event Data Example: Out_Of_Disk_Space")
+
+```
+{  
+    "SubErrorMessage": "Out_Of_Disk_Space"  
+    "error": "Out_Of_Disk_Space"  
+    "status": "error",  
+    "stream_id": 1,  
+    "success": false  
+}  
+
+```
+
+onStreamingWarning[](#onstreamingwarning "Direct link to onStreamingWarning")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-14 "Direct link to Version added: 0.78")
+
+> Fired upon a warning with the stream, with the following structure: [StreamEvent](#streamevent-object) Object.
+
+#### Usage example[](#usage-example-1 "Direct link to Usage example")
+
+```
+overwolf.streaming.onStreamingWarning.addListener(function(result) {  
+  //result.stream_id  
+  //result.error = "HIGH_CPU_USAGE" // there will probably be frames lost  
+});  
+
+```
+
+#### Event Data Example: low\_disk\_space\_warning[](#event-data-example-low_disk_space_warning "Direct link to Event Data Example: low_disk_space_warning")
+
+```
+{  
+    "stream_id": 1,  
+    "SubErrorMessage": "{PATH/TO/FILE}",  
+    "status": "error",  
+    "success": false,  
+    "error": "low_disk_space_warning"  
+}  
+
+```
+
+onVideoFileSplit[](#onvideofilesplit "Direct link to onVideoFileSplit")
+--------------------------------------------------------------------------
+
+#### Version added: 0.103[](#version-added-0103 "Direct link to Version added: 0.103")
+
+> Fired upon video file splited, with the following structure: [VideoFileSplitedEvent](#videofilesplitedevent-object) Object.
+
+onSupportedEncodersUpdated[](#onsupportedencodersupdated "Direct link to onSupportedEncodersUpdated")
+--------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.169[](#version-added-0169 "Direct link to Version added: 0.169")
+
+> Fired upon support encoder list updated, with the following structure: [SupportedEncodersUpdatedEvent](#supportedencodersupdatedevent-object) Object.
+
+StreamingCapabilities Object[](#streamingcapabilities-object "Direct link to StreamingCapabilities Object")
+--------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199-1 "Direct link to Version added: 0.199")
+
+Stream settings container.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| success | bool | The stream provider name | 0.199 |
+| error | string | *Optional* error if any occured | 0.199 |
+| video | [EncoderData](#encoderdata-object)[] | Array of available video encoders | 0.199 |
+| audio | [AudioDeviceData](#audiodevicedata-object)[] | Array of available audio devices | 0.199 |
+| audioProcessCaptureSupported | bool | Is filtered sound capturing supported? | 0.199 |
+
+#### Object data example[](#object-data-example "Direct link to Object data example")
+
+```
+"settings": {  
+  "success": true,  
+	"video": [  
+    {  
+      "display_name" : "Speakers (USB Ear-Microphone)",  
+      "display_id" : "{0.0.0.00000000}.{ec2a6c4b-f750-4045-bb93-d745ecc76937}",  
+      "device_state" : "Active",  
+      "can_record" : false,  
+      "can_playback" : true  
+    },  
+  ]  
+  "audio": [  
+    {  
+      ...  
+    }  
+  ],  
+  "audioProcessCaptureSupported": true  
+}   
+
+```
+
+AudioCapabilities Object[](#audiocapabilities-object "Direct link to AudioCapabilities Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199-2 "Direct link to Version added: 0.199")
+
+Audio devices container.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| devices | [AudioDeviceData](#audiodevicedata-object)[] | Array of available audio devices | 0.199 |
+| audioProcessCaptureSupported | bool | Is filtered sound capturing supported? | 0.199 |
+
+VideoCapabilities Object[](#videocapabilities-object "Direct link to VideoCapabilities Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199-3 "Direct link to Version added: 0.199")
+
+Video capabilities container.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| encoders | [EncoderData](#encoderdata-object)[] | Array of available video encoders | 0.199 |
+
+StreamSettings Object[](#streamsettings-object "Direct link to StreamSettings Object")
+-----------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-15 "Direct link to Version added: 0.78")
+
+Stream settings container.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| provider | [streamingProvider](#streamingprovider-enum) enum | The stream provider name | 0.78 |
+| settings | [StreamParams](#streamparams-object) object | The stream provider settings | 0.78 |
+
+#### Object data example[](#object-data-example-1 "Direct link to Object data example")
+
+```
+"settings": {  
+  "video": { "buffer_length": 20000 },  
+  "audio": {  
+	  "mic": {  
+      "volume": 100,  
+		  "enable": true,  
+      "mono": false  
+    },  
+	  "game": {  
+	    "volume": 75,  
+  	  "enable": true  
+	  }  
+  },  
+  "peripherals": {   
+  "capture_mouse_cursor": "both"   
+  },  
+  "quota": {  
+    "max_quota_gb": 2,  
+    "excluded_directories": [ "cool_session" ] //set directories that are not part of the quota  
+  }  
+}   
+
+```
+
+StreamingProvider Enum[](#streamingprovider-enum "Direct link to StreamingProvider Enum")
+--------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-16 "Direct link to Version added: 0.78")
+
+| Options | Description |
+| --- | --- |
+| Unknown | The stream provider name |
+| Twitch | Stream to Twitch |
+| VideoRecorder |  |
+| RTMP | Stream to YouTube, Facebook, smashcast.tv, etc. |
+
+CaptureErrorCode Enum[](#captureerrorcode-enum "Direct link to CaptureErrorCode Enum")
+-----------------------------------------------------------------------------------------
+
+#### Version added: 0.208[](#version-added-0208 "Direct link to Version added: 0.208")
+
+| Options | Description |
+| --- | --- |
+| Success | 0 |
+| FolderCreation | 1 |
+| RansomwareProtection | 2 |
+| AlreadyStreaming | 3 |
+| MissingSetting | 4 |
+| SettingError | 5 |
+| InternalOBSError | 6 |
+| NotAllowedInGame | 7 |
+| HighPerformanceCaptureNotSupported | 8 |
+| NotInGame | 9 |
+| HighlightsMissing | 10 |
+| RequestedHighlightsUnsupported | 11 |
+| UnsupportedEncoder | 12 |
+| Unknown | 1000 |
+
+#### RansomwareProtection Note[](#ransomwareprotection-note "Direct link to RansomwareProtection Note")
+
+If Windows ransomware protection on folders is turned on, writing to the capture folder path is blocked, and as such, the stream returns an error. More information can be found [here](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/controlled-folders?view=o365-worldwide#windows-system-folders-are-protected-by-default).
+
+StreamParams Object[](#streamparams-object "Direct link to StreamParams Object")
+-----------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-17 "Direct link to Version added: 0.78")
+
+Represents the settings required to start a stream.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| audio | [StreamAudioOptions](#streamaudiooptions-object) Object | Stream audio options | 0.78 |
+| peripherals | [StreamPeripheralsCaptureOptions](#streamperipheralscaptureoptions-object) Object | Defines how peripherals (i.e. mouse cursor) are streamed. **Permissions required: DesktopStreaming** | 0.78 |
+| max\_quota\_gb | double | Max media folder size in GB.   **deprecated** | 0.78 |
+| quota | [StreamQuotaParams](#streamquotaparams-object) object | Parameters for limiting disk space allocation. | 0.147 |
+| stream\_info | [StreamInfo](#streaminfo-object) object | The basic stream information | 0.78 |
+| auth | [StreamAuthParams](#streamauthparams-object) object | Stream authorization data | 0.78 |
+| video | [StreamVideoOptions](#streamvideooptions-object) Object | Stream video options | 0.78 |
+| ingest\_server | [StreamIngestServer](#streamingestserver-object) Object | Information on the server that is being streamed to | 0.78 |
+| replay\_type | [ReplayType](/ow-native/reference/media/replays#replaytype-enum) enum | The replay type to use | 0.78 |
+
+StreamQuotaParams Object[](#streamquotaparams-object "Direct link to StreamQuotaParams Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.147[](#version-added-0147 "Direct link to Version added: 0.147")
+
+The basic quota information.
+
+You can allocate limited disk space for your captured video and even set an array of directories that are excluded from max quota calculations.  
+You can use it, for example, to implement "favorites captures" feature: allow your app's users to mark some captured videos as "favorites," move them to one of the excluded directories, and make sure that they not deleted when the quota has reached the limit. Of course, this is just a suggested usage example.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| max\_quota\_gb | double | Max media folder size in GB | 0.147 |
+| excluded\_directories | string[] | Array of directories that are excluded from max quota calculations | 0.147 |
+
+#### Notes[](#notes "Direct link to Notes")
+
+To set your app to never deletes the captured clips, you can skip passing `max_quota_gb` (it's an optional property), or you exclude a specific directory using the excluded\_directories param.
+
+StreamInfo Object[](#streaminfo-object "Direct link to StreamInfo Object")
+-----------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-18 "Direct link to Version added: 0.78")
+
+The basic stream information.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| url | string | The URL where the stream can be watched | 0.78 |
+| title | string | The stream title | 0.78 |
+
+StreamAuthParams Object[](#streamauthparams-object "Direct link to StreamAuthParams Object")
+-----------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-19 "Direct link to Version added: 0.78")
+
+Stream authorization data.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| client\_id | string | The client id part of the authorization data. This part is usually constant for each application. | 0.78 |
+| token | string | The token part of the authorization data. This part if usually user-specific, and received after login. | 0.78 |
+
+StreamVideoOptions Object[](#streamvideooptions-object "Direct link to StreamVideoOptions Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-20 "Direct link to Version added: 0.78")
+
+Stream video options.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| auto\_detect | bool | Defines if to try to automatically detect the best settings for streaming | 0.83 |
+| auto\_calc\_kbps | bool | Defines if to try to automatically calculate the kbps. If set to true, then the max\_kbps field is ignored | 0.83 |
+| fps | int | Defines the Frames Per Second for the stream | 0.78 |
+| width | int | Defines the stream width in pixels | 0.78 |
+| height | int | Defines the stream height in pixels | 0.78 |
+| max\_kbps | int | Defines the maximum KB per second of the stream. See [notes](#max_kbps-notes). | 0.78 |
+| buffer\_length | int | Defines the length of the buffer to be recorded in millisenconds (max 40 seconds) | 0.83 |
+| encoder | [StreamingVideoEncoderSettings](#streamingvideoencodersettings-object) Object | Defines the video encoder settings to use | 0.83 |
+| capture\_desktop | [StreamDesktopCaptureOptions](#streamdesktopcaptureoptions-object) Object | Defines the desktop streaming options. Permissions required: DesktopStreaming | 0.83 |
+| test\_drop\_frames\_interval | uint | The interval, in milliseconds, in which to test for dropped frames | 0.92 |
+| notify\_dropped\_frames\_ratio | double | The ratio of dropped to non-dropped frames for which to issue a notification | 0.92 |
+| sub\_folder\_name | string | Defines Sub folder for video file path destination (See note below this table) | 0.103 |
+| override\_overwolf\_setting | bool | Do not use Overwolf capture setting. | 0.103 |
+| max\_file\_size\_bytes | uint | Defines file maximum size. when video reach `{max_file_size_bytes}`, the recorder will flush the video file and stat a new video file. [onVideoFileSplit](#onvideofilesplit) event will be fired | 0.103 |
+| enable\_on\_demand\_split | bool | Enable video file splitting on demand. See [notes](#enable_on_demand_split-notes). | 0.141 |
+| include\_full\_size\_video | bool | in case max\_file\_size\_bytes is onfull video will be recorded to disk parallel to splits videos. | 0.105 |
+| disable\_when\_sht\_not\_supported | bool | Do not start video replay service in case shared texture is not supported. | 0.105 |
+| indication\_position | [indication\_position](#indication_position-enum) Enum | Position of the recorder indicator. Available for video capture only. | 0.143 |
+| indication\_type | [indication\_type](#indication_type-enum) Enum | Type of the recorder indicator. Available for video capture only. | 0.143 |
+| use\_app\_display\_name | bool | Use the app display (if has any e.g [dock\_button\_title](/ow-native/reference/manifest/manifest-json#meta-dock) name when creating video folder. See [note](#use_app_display_name-notes) | 0.154 |
+| sources | [overwolf.media.replays.VideoSource](/ow-native/reference/media/replays#videosource-object)[] | Add sources to video. See [note](#sources-notes) | 0.159 |
+| base\_frame\_size\_source | [eVideoBaseFrameSizeSource](#evideobaseframesizesource-enum) Enum | See [note](#base_frame_size_source-notes) | 0.168 |
+| frame\_size\_method | [eVideoFrameSizeCalcMethod](#evideoframesizecalcmethod-enum) Enum | See [note](#frame_size_method-notes) | 0.168 |
+| game\_window\_capture | [GameWindowCapture](#gamewindowcapture-object) Object | Dedicate option for game window capture (when available). See [note](#game_window_capture-notes) | 0.176 |
+| keep\_game\_capture\_on\_lost\_focus | bool | Keep capturing the game when the game loses focus (i.e do not show "Be Right Back"). Note: if game is minimized, BRB will be shown. | 0.180 |
+| disable\_auto\_shutdown\_on\_game\_exit | bool | Should the recording engine stay running even after the relevant game was closed. | 0.236 |
+| color\_space | string | [overwolf.streaming.enums.VideoColorSpec](#videocolorspec-enum) | The default value is: **Rec709**. | 0.254 |
+| color\_format | string | [overwolf.streaming.enums.VideoColorFormat](#videocolorformat-enum) | The default value is: **NV12**. | 0.254 |
+| fragmented\_video\_file | bool | Splits the video to smaller fragments which allows for the immediate start of video playback after downloading only a small initial segment.  Defaults to **false**. | 0.254 |
+
+VideoColorSpec enum[](#videocolorspec-enum "Direct link to VideoColorSpec enum")
+-----------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254 "Direct link to Version added: 0.254")
+
+| Options | Description |
+| --- | --- |
+| Rec709 | Default. |
+| RecsRGB |  |
+| Rec601 |  |
+| Rec2100PQ | Requires one of the 10bit color format options |
+| Rec2100HLG | Requires one of the 10bit color format options |
+
+VideoColorFormat enum[](#videocolorformat-enum "Direct link to VideoColorFormat enum")
+-----------------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-1 "Direct link to Version added: 0.254")
+
+| Options | Description |
+| --- | --- |
+| NV12 | Default.  8bit color format. |
+| I420 | 8bit color format. |
+| I444 | 8bit color format. |
+| P010 | 10bit color format. |
+| I010 | 10bit color format. |
+| P216 | 16bit color format. |
+| P416 | 16bit color format. |
+| BGRA | 8bit color format. |
+
+#### base\_frame\_size\_source notes[](#base_frame_size_source-notes "Direct link to base_frame_size_source notes")
+
+Possible values:
+
+* If not set, "Setting" (setting configuration) is the default. This means that it will look at what method has been selected in the [eVideoFrameSizeCalcMethod](#evideoframesizecalcmethod-enum) field.
+* "Auto" is logical width\height (if in-game, take the game, otherwise take monitor).
+
+#### frame\_size\_method notes[](#frame_size_method-notes "Direct link to frame_size_method notes")
+
+If the above base\_frame\_size\_source was set as "Setting", the bellow values are available:
+
+* "Original": Original calculation to get the output resolution for the needed quality keeping the aspect ratio.
+* "ExactOrKeepRatio" (Recommended): Get the exact resolution from a resolutions list for the needed quality; if not found in the list, then calculate a new resolution keeping the aspect ratio.
+* "ExactOrClosestResolution": Find the closer resolution from a resolutions list for the needed quality.
+
+#### game\_window\_capture notes[](#game_window_capture-notes "Direct link to game_window_capture notes")
+
+Dedicate option for specific games (CSGO, Warzone, Destiny 2) that requires [exclusive mode](/ow-native/guides/general-tech/exclusive-mode-overlay) to interact with the OW windows.
+
+Up until now when we recorded these games in windowed mode, it resulted in a recording of the whole desktop.  
+We now provide the option to record only the game window. This feature is disabled by default, but you can enable it with these recording settings properties:
+
+```
+"video": {  
+   "game_window_capture": {  
+     "enable_when_available": bool,    // Disabled by default  
+     "capture_overwolf_windows": bool  // Default value is taken from the Overwolf Settings  
+   }  
+}  
+
+```
+
+Note that we added a new `is_game_window_capture` property to [onStartStreaming](#onstartstreaming) event to inform the app Creator if this new capturing feature was used or not on the current OW window.
+
+#### sources notes[](#sources-notes "Direct link to sources notes")
+
+warning
+
+The streaming API **does not** support webcam capture. For webcam capture, use the [`overwolf.media.replays`](/ow-native/reference/media/replays#videosource-object) API!
+
+#### use\_app\_display\_name notes[](#use_app_display_name-notes "Direct link to use_app_display_name notes")
+
+If this flag in on, when creating a video capture folder, it will use the app "short name" as the folder name, instead of using the app name from the manifest.  
+The app "short name" is defined in the [dock\_button\_title](/ow-native/reference/manifest/manifest-json#meta-dock) manifest flag.
+
+#### sub\_folder\_name notes[](#sub_folder_name-notes "Direct link to sub_folder_name notes")
+
+* Defines Sub folder for video file path destination (Optional):  
+  `OverwolfVideoFolder\\AppName\\|sub_folder_name\\|file_name|`
+* In case [folder\_name] is empty:  
+  `OverwolfVideoFolder\\AppName\\|sub_folder_name|`
+
+#### enable\_on\_demand\_split notes[](#enable_on_demand_split-notes "Direct link to enable_on_demand_split notes")
+
+* When calling [split()](#splitstreamid-callback), the recorder will flush the video file to the local disk.
+* When the recorder encoded the key frame with presentation time stamp thats is equal to grater than split() timestamps.
+* When |max\_file\_size\_bytes| is set, this flag is ignored.
+* [onVideoFileSplit](#onvideofilesplit) event will be fired.
+
+#### max\_kbps notes[](#max_kbps-notes "Direct link to max_kbps notes")
+
+increase the **max\_kbps** of the encoder configuration may help the performance, but increase the video file size.
+
+* For video recording, we recommend using a value of higher than 8000.
+* For streaming, we recommend using a value smaller than 3000.
+
+StreamingVideoEncoderSettings Object[](#streamingvideoencodersettings-object "Direct link to StreamingVideoEncoderSettings Object")
+--------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-21 "Direct link to Version added: 0.78")
+
+Stream video options.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| name | [streamEncoder](#streamencoder-enum) enum | Defines which video encoder to use. Default: X264 | 0.83 |
+| config | one of the [settings objects below](#see-also) | Defines the settings of the specific encoder | 0.83 |
+
+#### See also:[](#see-also "Direct link to See also:")
+
+* [StreamingVideoEncoderNVIDIA\_NVENCSettings](#streamingvideoencodernvidia_nvencsettings-object)
+* [StreamingVideoEncoderIntelSettings](#streamingvideoencoderintelsettings-object)
+* [StreamingVideoEncoderx264Settings](#streamingvideoencoderx264settings-object)
+* [StreamingVideoEncoderAMD\_AMFSettings](#streamingvideoencodernvidia_nvencsettings-object)
+
+StreamEncoder enum[](#streamencoder-enum "Direct link to StreamEncoder enum")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-22 "Direct link to Version added: 0.78")
+
+| Options | Description |
+| --- | --- |
+| INTEL | Use the Intel Quick Sync encoder. Only available on supporting devices |
+| X264 | Use the x264 encoder. This is the default encoder |
+| NVIDIA\_NVENC | Uses the nVidia encoder |
+| AMD\_AMF | Uses the AMD AMF encoder |
+| NVIDIA\_NVENC\_NEW | Uses the New nVidia encoder |
+
+StreamingVideoEncoderNVIDIA\_NVENCSettings Object[](#streamingvideoencodernvidia_nvencsettings-object "Direct link to StreamingVideoEncoderNVIDIA_NVENCSettings Object")
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-1 "Direct link to Version added: 0.83")
+
+Defines the configuration for the NVIDIA NVENC encoder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| preset | [streamEncoderPreset\_NVIDIA](#streamencoderpreset_nvidia-enum) enum | Defines which preset the encoder should use | 0.83 |
+| rate\_control | [streamEncoderRateControl\_NVIDIA](#streamencoderratecontrol_nvidia-enum) enum | Defines the rate control mode the encoder should use | 0.83 |
+| keyframe\_interval | int | Defines the time, in seconds, after which to send a keyframe. See [notes](#keyframe_interval-notes). | 0.83 |
+
+#### keyframe\_interval notes[](#keyframe_interval-notes "Direct link to keyframe_interval notes")
+
+Keyframes are points in the video where the entire frame is sent instead of just the differences from the previous frame.
+
+* Having a keyframe interval of 2 means that it takes at most 2 seconds for the viewers to catch up to a point where they can properly display the feed.
+* Streaming services would allow it to be 1, but setting it to 0 usually ends up making it somewhere around 8.5s between keyframes.
+* 2 offers a better balance between picture quality and viewer join speed.
+
+Increasing the keyframe\_interval of the encoder configuration may help the performance but decrease in quality or inability to seek a specific resolution (if you want to slice the video, for example).
+
+streamEncoderPreset\_NVIDIA enum[](#streamencoderpreset_nvidia-enum "Direct link to streamEncoderPreset_NVIDIA enum")
+------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-2 "Direct link to Version added: 0.83")
+
+| Options | Description |
+| --- | --- |
+| AUTOMATIC |  |
+| DEFAULT |  |
+| HIGH\_QUALITY |  |
+| HIGH\_PERFORMANCE |  |
+| BLURAY\_DISK |  |
+| LOW\_LATENCY |  |
+| HIGH\_PERFORMANCE\_LOW\_LATENCY |  |
+| HIGH\_QUALITY\_LOW\_LATENCY |  |
+| LOSSLESS |  |
+| HIGH\_PERFORMANCE\_LOSSLESS |  |
+
+streamEncoderRateControl\_NVIDIA enum[](#streamencoderratecontrol_nvidia-enum "Direct link to streamEncoderRateControl_NVIDIA enum")
+---------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-3 "Direct link to Version added: 0.83")
+
+| Options | Description |
+| --- | --- |
+| RC\_CBR |  |
+| RC\_CQP |  |
+| RC\_VBR |  |
+| RC\_VBR\_MINQP |  |
+| RC\_2\_PASS\_QUALITY |  |
+
+StreamingVideoEncoderIntelSettings Object[](#streamingvideoencoderintelsettings-object "Direct link to StreamingVideoEncoderIntelSettings Object")
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-4 "Direct link to Version added: 0.83")
+
+TBA
+
+StreamingVideoEncoderx264Settings Object[](#streamingvideoencoderx264settings-object "Direct link to StreamingVideoEncoderx264Settings Object")
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-5 "Direct link to Version added: 0.83")
+
+Defines the configuration for an x264 encoder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| preset | [streamEncoderPreset\_x264](#streamencoderratecontrol_x264-enum-enum) enum | Defines which preset the encoder should use | 0.83 |
+| rate\_control | [streamEncoderRateControl\_x264](#streamencoderratecontrol_x264-enum) enum | Defines the rate control mode the encoder should use | 0.83 |
+| keyframe\_interval | int | Defines the time, in seconds, after which to send a keyframe. See [notes](#keyframe_interval-notes). | 0.83 |
+
+streamEncoderPreset\_x264 enum[](#streamencoderpreset_x264-enum "Direct link to streamEncoderPreset_x264 enum")
+------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-6 "Direct link to Version added: 0.83")
+
+| Options | Description |
+| --- | --- |
+| ULTRAFAST |  |
+| SUPERFAST |  |
+| VERYFAST |  |
+| FASTER |  |
+| FAST |  |
+| MEDIUM |  |
+| SLOW |  |
+| SLOWER |  |
+| VERYSLOW |  |
+| PLACEBO |  |
+
+streamEncoderRateControl\_x264 enum[](#streamencoderratecontrol_x264-enum "Direct link to streamEncoderRateControl_x264 enum")
+---------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-7 "Direct link to Version added: 0.83")
+
+| Options | Description |
+| --- | --- |
+| RC\_CBR |  |
+| RC\_CQP |  |
+| RC\_VBR |  |
+| RC\_VBR\_MINQP |  |
+| RC\_2\_PASS\_QUALITY |  |
+
+StreamingVideoEncoderAMD\_AMFSettings Object[](#streamingvideoencoderamd_amfsettings-object "Direct link to StreamingVideoEncoderAMD_AMFSettings Object")
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.84[](#version-added-084 "Direct link to Version added: 0.84")
+
+Defines the configuration for an x264 encoder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| preset | [streamEncoderPreset\_AMD\_AMF](#streamencoderpreset_amd_amf-enum) enum | Defines which preset the encoder should use | 0.84 |
+| rate\_control | [streamEncoderRateControl\_AMD\_AMF](#streamencoderratecontrol_amd_amf-enum) enum | Defines the rate control mode the encoder should use | 0.84 |
+| keyframe\_interval | int | Defines the time, in seconds, after which to send a keyframe. See [notes](#keyframe_interval-notes). | 0.83 |
+
+streamEncoderPreset\_AMD\_AMF enum[](#streamencoderpreset_amd_amf-enum "Direct link to streamEncoderPreset_AMD_AMF enum")
+----------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.84[](#version-added-084-1 "Direct link to Version added: 0.84")
+
+| Options | Description |
+| --- | --- |
+| AUTOMATIC |  |
+| BALANCED |  |
+| SPEED |  |
+| QUALITY |  |
+| ULTRA\_LOW\_LATENCY |  |
+| LOW\_LATENCY |  |
+
+streamEncoderRateControl\_AMD\_AMF enum[](#streamencoderratecontrol_amd_amf-enum "Direct link to streamEncoderRateControl_AMD_AMF enum")
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.84[](#version-added-084-2 "Direct link to Version added: 0.84")
+
+| Options | Description |
+| --- | --- |
+| RC\_CBR |  |
+| RC\_CQP |  |
+| RC\_VBR |  |
+| RC\_VBR\_MINQP |  |
+
+StreamDesktopCaptureOptions Object[](#streamdesktopcaptureoptions-object "Direct link to StreamDesktopCaptureOptions Object")
+--------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-23 "Direct link to Version added: 0.78")
+
+Defines the configuration for an x264 encoder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable | bool | Defines if to capture the desktop while game is not running or not in focus | 0.78 |
+| monitor\_id | uint | Defines which monitor to stream when streaming desktop. Use the index of the requested monitor in the monitor's array that returned from [overwolf.utils.getMonitorList()](/ow-native/reference/utils/ow-utils#getmonitorslistcallback). | 0.78 |
+| force\_capture | bool | Defines if to force desktop streaming even when a game is in foreground | 0.78 |
+
+StreamAudioOptions Object[](#streamaudiooptions-object "Direct link to StreamAudioOptions Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-8 "Direct link to Version added: 0.83")
+
+Defines the configuration for an x264 encoder.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| mic | [StreamDeviceVolume](#streamdevicevolume-object) | Defines the microphone volume as applied to the stream | 0.83 |
+| game | [GameAudioDevice](#gameaudiodevice-object) | Defines the game volume as applied to the stream | 0.83 |
+| separate\_tracks | bool | Enable multiple audio tracks. See [notes](#separate_tracks-notes) | 0.156 |
+| devices | [AudioDeviceOptions[]](#audiodeviceoptions-object) | An array of devices to capture.  **MUST** disable the **mic + game** audio options when using this feature. | 0.254 |
+| process\_audio\_capture | [ProcessAudioCapture[]](#processaudiocapture-object) | Add and control processâ audio capture.  **MUST** disable the **game** audio options when using this feature. | 0.254 |
+| tracks | int | [overwolf.streaming.enums.AudioTracks](#audiotracks-enum) | Specify how many tracks you want to create for your captured video.  Defaults to **âAllTracksâ** (255). | 0.254 |
+| sample\_rate | string | [overwolf.streaming.enums.AudioSampleRate](#audiosamplerate-enum) | Control the audio sample rate.  Defaults to **kHz441**. | 0.254 |
+
+AudioSampleRate enum[](#audiosamplerate-enum "Direct link to AudioSampleRate enum")
+--------------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-2 "Direct link to Version added: 0.254")
+
+| Options | Description |
+| --- | --- |
+| kHz441 | Default. |
+| kHz48 |  |
+
+#### separate\_tracks notes[](#separate_tracks-notes "Direct link to separate_tracks notes")
+
+When disabled (default), the video (mp4) will be created with a single track.
+When enabled, it is possible to record videos that support multiple audio tracks:  
+The Video will be created with three different audio tracks (when both Mic + Desktop is enabled):
+
+* Track 1: Microphone + Desktop
+* Track 2: Desktop output
+* Track 3: Microphone input
+
+AudioDeviceOptions Object[](#audiodeviceoptions-object "Direct link to AudioDeviceOptions Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-3 "Direct link to Version added: 0.254")
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| device\_id | string | Defines the device\_id to use.  Can be passed **âdefaultâ**. | 0.254 |
+| type (optional) | string | [overwolf.streaming.enums.AudioDeviceType](#audiodevicetype-enum) | Specify the type of the device (output/input)  When passing **âdefaultâ** to device\_id, you **MUST** specify the device type.  Defaults to type **0** (output). | 0.254 |
+| volume | int | Defines the volume of the device from 0 to 2000. | 0.254 |
+| use\_device\_timing (optional) | bool | Can be used to try fix sync issues between video and sound.  On input devices defaults to **false**. On output devices defaults to **true**. | 0.254 |
+| filters | [Filters objects](#filters-objects)[] | Supported audio filters and parameters. | 0.263 |
+
+Example:
+
+```
+{  
+  provider: 'VideoRecorder',  
+  settings: {  
+    audio: {  
+      devices: [  
+        // Microphone  
+        // When device is a microphone and device_id is set to âdefaultâ, you MUST set the type to Input.  
+        {  
+          device_id: 'default',  
+          type: overwolf.streaming.enums.AudioDeviceType.Input,  
+          use_device_timing: false,  
+          filters: [  
+            {  
+              filter_id: "noise_gate_filter",  
+              parameters: {  
+                close_threshold: -32.0  
+              }  
+            },  
+          ]  
+        },  
+        // Headset  
+        { device_id: 'default', volume: 100, use_device_timing: false },  
+      ],  
+      // mic && game MUST be set to false to use devices[]  
+      mic: {  
+        enable: false,  
+      },  
+      game: {  
+        enable: false,  
+      },  
+    },  
+    video: {  
+      include_full_size_video: false,  
+      frame_size_method: 'Original',  
+      base_frame_size_source: 'Setting',  
+      enable_on_demand_split: true,  
+      use_app_display_name: false,  
+      capture_desktop: {  
+        enable: true,  
+      },  
+      keep_game_capture_on_lost_focus: false,  
+      override_overwolf_setting: false,  
+    },  
+    peripherals: {  
+      capture_mouse_cursor: 'both',  
+    },  
+    quota: {  
+      max_quota_gb: 1,  
+    },  
+  },  
+};  
+
+```
+
+#### Filters objects[](#filters-objects "Direct link to Filters objects")
+
+The following sample array shows the available filters and parameters that are supported.
+
+Supported filters and parameters
+
+```
+[  
+    {  
+        "filter_id": "compressor_filter",  
+        "parameters": {  
+            "ratio": 10.0, # range [1.00, 32.00]  
+            "threshold": -18, # range [-60.0, 0.00]  
+            "attack_time": 6, # range [1, 500]  
+            "release_time": 60, # range [1, 1000]  
+            "output_gain": 0.0, # range [-32.00, 32.00]  
+        }  
+    },  
+    {  
+        "filter_id": "expander_filter",  
+        "parameters": {  
+            "presets": "expander", # choose  ["expander"| "gate"]  
+            "ratio": 2.0, # range [1.00, 20.00]  
+            "threshold": -40.0,# range [-60.00, 0.00]  
+            "attack_time": 10, # range [1, 100]  
+            "release_time": 50, # range [1, 1000]  
+            "output_gain": 0.0, # range [-32.00, 32.00]  
+            "detector": "RMS" # choose ["RMS" | "peak"]  
+        }  
+    },  
+    {  
+        "filter_id": "gain_filter",  
+        "parameters": {  
+            "db": 0.0 # range [-30.00, 30.00]  
+        }  
+    },  
+    {  
+        "filter_id": "invert_polarity_filter",  
+        "parameters": {  
+        }  
+    },  
+    {  
+        "filter_id": "limiter_filter",  
+        "parameters": {  
+            "threshold": -6.0, # range [-60.00, 0.00]  
+            "release_time": 60 # range [1, 1000]  
+        }  
+    },  
+    {  
+        "filter_id": "noise_gate_filter",  
+        "parameters": {  
+            "close_threshold": -32.0, # range [-96.00, 0.00]  
+            "open_threshold": -26, # range [-96.00, 0.00]  
+            "attack_time": 25, # range [0, 10000]  
+            "hold_time": 200, # range [0, 10000]  
+            "release_time": 150 # range [0, 10000]  
+        }  
+    },  
+    {  
+        "filter_id": "noise_suppress_filter_v2",  
+        "parameters": {  
+            "method": "rnnoise", # choose ["rnnoise" | "speex"]  
+            "suppress_level": -30 # range [-60.00, 0.00] available when choosing 'speex' method  
+        }  
+    }  
+]  
+  
+
+```
+
+AudioDeviceType enum[](#audiodevicetype-enum "Direct link to AudioDeviceType enum")
+--------------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-4 "Direct link to Version added: 0.254")
+
+| Options | Description |
+| --- | --- |
+| Output | Default. |
+| Input |  |
+
+ProcessAudioCapture Object[](#processaudiocapture-object "Direct link to ProcessAudioCapture Object")
+--------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-5 "Direct link to Version added: 0.254")
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| process\_name | string | Specify the process name that should be recorded. | 0.254 |
+| volume | int | Defines the volume of the recorded process from 0 to 2000. | 0.254 |
+| mono | bool | Specify whether the process should be recorded as mono or not.  Defaults to false (stereo). | 0.254 |
+| tracks | int | [overwolf.streaming.enums.AudioTracks](#audiotracks-enum) | Specify which track the process should be recorded on. Can select multiple tracks by using | .  Defaults to **âAllTracksâ** (255). | 0.254 |
+
+```
+{  
+  provider: 'VideoRecorder',  
+  settings: {  
+    audio: {  
+      mic: {  
+        device_id: 'default',  
+        enable: true,  
+        volume: 75,  
+      },  
+      game: {  
+        device_id: 'default',  
+        // Must be false to prevent unwanted sounds from the background to be captured  
+        enable: false,  
+        volume: 75,  
+      },  
+      process_audio_capture: [  
+        { process_name: 'gw.exe', volume: 50, mono: false },  
+        // { "process_name": "chrome.exe", "volume": 50, "mono": false },  
+      ],  
+    },  
+  
+  
+    video: {  
+      include_full_size_video: false,  
+      frame_size_method: 'Original',  
+      base_frame_size_source: 'Setting',  
+      enable_on_demand_split: true,  
+      use_app_display_name: false,  
+      capture_desktop: {  
+        enable: true,  
+      },  
+      keep_game_capture_on_lost_focus: false,  
+      override_overwolf_setting: false,  
+    },  
+    peripherals: {  
+      capture_mouse_cursor: 'both',  
+    },  
+    quota: {  
+      max_quota_gb: 1,  
+    },  
+  },  
+};  
+
+```
+
+StreamDeviceVolume Object[](#streamdevicevolume-object "Direct link to StreamDeviceVolume Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-24 "Direct link to Version added: 0.78")
+
+Defines a device volume and enablement settings.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable | bool | Defines if the device is enabled | 0.78 |
+| mono | bool | Whether or not this device should be recorded as in `mono` or `stereo` mode. Defaults to `false` | 0.224 |
+| volume | int | Defines the device volume in the range of 0 to 2000 | 0.78 |
+| device\_id | string | Defines the device ID to use | 0.78 |
+| tracks | int | [overwolf.streaming.enums.AudioTracks](#audiotracks-enum) | Specify which track the input device should be recorded on. Can select multiple tracks by using | .  Defaults to **âAllTracksâ** (255). | 0.254 |
+| use\_device\_timing (optional) | bool | Can be used to try fix sync issues between video and sound. On input devices defaults to **false**. On output devices defaults to **true**. | 0.254 |
+
+#### Example data: Tracks Settings[](#example-data-tracks-settings "Direct link to Example data: Tracks Settings")
+
+```
+{  
+  provider: 'VideoRecorder',  
+  settings: {  
+    audio: {  
+      mic: {  
+        device_id: 'default',  
+        enable: true,  
+        volume: 75,  
+        // Sets input to Audio tracks 1 and 2  
+        tracks:  
+          overwolf.streaming.enums.AudioTracks.AudioTrack1 |  
+          overwolf.streaming.enums.AudioTracks.AudioTrack2,  
+      },  
+      game: {  
+        device_id: 'default',  
+        enable: true,  
+        volume: 75,  
+        // Sets output on Audio tracks 1 and 3  
+        tracks:  
+          overwolf.streaming.enums.AudioTracks.AudioTrack1 |  
+          overwolf.streaming.enums.AudioTracks.AudioTrack3,  
+      },  
+      process_audio_capture: [  
+        // Sets the process audio capture to Audio tracks 1 and 4  
+        {  
+          process_name: 'gw.exe',  
+          volume: 50,  
+          mono: false,  
+          tracks:  
+            overwolf.streaming.enums.AudioTracks.AudioTrack1 |  
+            overwolf.streaming.enums.AudioTracks.AudioTrack4,  
+        },  
+      ],  
+      // Sets the overall amount of tracks  
+      tracks:  
+        overwolf.streaming.enums.AudioTracks.AudioTrack1 |  
+        overwolf.streaming.enums.AudioTracks.AudioTrack2 |  
+        overwolf.streaming.enums.AudioTracks.AudioTrack3 |  
+        overwolf.streaming.enums.AudioTracks.AudioTrack4,  
+    },  
+    video: {  
+      include_full_size_video: false,  
+      frame_size_method: 'Original',  
+      base_frame_size_source: 'Setting',  
+      enable_on_demand_split: true,  
+      use_app_display_name: false,  
+      capture_desktop: {  
+        enable: true,  
+      },  
+      keep_game_capture_on_lost_focus: false,  
+      override_overwolf_setting: false,  
+    },  
+    peripherals: {  
+      capture_mouse_cursor: 'both',  
+    },  
+    quota: {  
+      max_quota_gb: 1,  
+    },  
+  },  
+};  
+
+```
+
+AudioTracks enum[](#audiotracks-enum "Direct link to AudioTracks enum")
+--------------------------------------------------------------------------
+
+#### Version added: 0.254[](#version-added-0254-6 "Direct link to Version added: 0.254")
+
+| Options | Description |
+| --- | --- |
+| AudioTrack1 |  |
+| AudioTrack2 |  |
+| AudioTrack3 |  |
+| AudioTrack4 |  |
+| AudioTrack5 |  |
+| AudioTrack6 |  |
+| AudioTrackAll | Default. |
+
+GameAudioDevice Object[](#gameaudiodevice-object "Direct link to GameAudioDevice Object")
+--------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199-4 "Direct link to Version added: 0.199")
+
+Defines a game's volume and enablement settings.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable | bool | Defines if game audio is enabled | 0.78 |
+| volume | int | Defines the game's volume in the range of 0 to 2000 | 0.78 |
+| device\_id | string | Defines the device ID to use | 0.78 |
+| filtered\_capture | [GameCaptureOptions](#gamecaptureoptions-object) | If enabled, only audio from the game and the specifically marked processes will be captured. See [notes](#filtered_capture-notes) | 0.199 |
+| tracks | int | [overwolf.streaming.enums.AudioTracks](#audiotracks-enum) | Specify which track the game audio should be recorded on. Can select multiple tracks by using | .  Defaults to **âAllTracksâ** (255). | 0.254 |
+| use\_device\_timing (optional) | bool | Can be used to try fix possible sync issues between video and sound. On input devices defaults to **false**. On output devices defaults to **true**. | 0.254 |
+
+#### filtered\_capture notes[](#filtered_capture-notes "Direct link to filtered_capture notes")
+
+warning
+
+This feature is experimental, proceed with caution!
+
+When enabling `filtered_capture`, only audio from the currently detected game, and from any other process in the specific list of processes defined under `additional_process_names`, will be captured.
+
+GameCaptureOptions Object[](#gamecaptureoptions-object "Direct link to GameCaptureOptions Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.199[](#version-added-0199-5 "Direct link to Version added: 0.199")
+
+If enabled, only audio from the current game, as well as from any strictly specified process in this list, will be captured. Requires [audioProcessCaptureSupported](#getcapabilitiescallback) to return true in `audioProcessCaptureSupported` (this depends on the running machine, so make sure to verify it!)
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable | bool | Defines if filtered capture is enabled. See [note](#filtered-capture-notes) | 0.199 |
+| additional\_process\_names | string[] | The array of process names to be affected | 0.199 |
+
+#### filtered capture notes[](#filtered-capture-notes "Direct link to filtered capture notes")
+
+In order for [`filtered_capture`](#gameaudiodevice-object) to work, the user must be running one of the following:
+
+* windows 11
+* windows 10 2004 (released 2020-05-27) or later
+
+`enable` Checks whether or not [`filtered_capture`](#gameaudiodevice-object) is supported on this system.
+
+StreamPeripheralsCaptureOptions Object[](#streamperipheralscaptureoptions-object "Direct link to StreamPeripheralsCaptureOptions Object")
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-9 "Direct link to Version added: 0.83")
+
+Stream capture options for peripheral devices.
+
+Note: To turn off `capture_mouse_cursor`, set `peripherals` to `null`
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| capture\_mouse\_cursor | [streamMouseCursor](#streammousecursor-enum) enum | Defines when to capture the mouse cursor while streaming is on | 0.83 |
+
+VideoSource Object[](#videosource-object "Direct link to VideoSource Object")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159 "Direct link to Version added: 0.159")
+
+> Container for secondary video sources' settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| source\_type | [overwolf.media.enums.eSourceType](/ow-native/reference/media/ow-media#esourcetype-enum) | The video source type |
+| name | string | The name of the source |
+| secondary\_file | boolean | Source will be saved to a secondary video file (i.e. another ow-obs.exe process will be created with the same settings as the original one. |
+| transform | [overwolf.media.enums.eVideoSourceTransform](/ow-native/reference/media/ow-media#evideosourcetransform-enum) | How should the video's source be transformed to fit the declared size |
+| parameters | [overwolf.media.replays.WebCamParam](#webcamparam-object) | Parameters specific to the selected `source_type`. Currently only "WebCam" is supported |
+| position | 2DPoint`{x, y}` | The position (in pixels) of the secondary source in the video |
+| size\_scale | 2DPoint`{x, y}` | The size of the video source in the final video (on a scale of 0-1, relative to the screen size) |
+
+ImageSource Object[](#imagesource-object "Direct link to ImageSource Object")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159-1 "Direct link to Version added: 0.159")
+
+> Parameters for a ImageSource's image
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| file | string | Path and name of file |
+| transform | enum | [overwolf.media.enums.eVideoSourceTransform](/ow-native/reference/media/ow-media#evideosourcetransform-enum) |
+| scale | object `{"units": "<px | scale>", "width": "<int>", "height": "<int>"}` | The size of the image. `scale` is a percentage of the original image size (use a number between 0-1. e.g .25). `px` will be render the image in the size you chose. |
+| position | 2DPoint `{x y}` |  |
+
+StreamMouseCursor enum[](#streammousecursor-enum "Direct link to StreamMouseCursor enum")
+--------------------------------------------------------------------------------------------
+
+#### Version added: 0.83[](#version-added-083-10 "Direct link to Version added: 0.83")
+
+| Options | Description |
+| --- | --- |
+| both | Always capture the mouse cursor |
+| gameOnly | Capture the mouse cursor only when a game is focued |
+| desktopOnly | Capture the mouse cursor only when on the desktop |
+| none | Never capture the mouse cursor |
+
+StreamIngestServer Object[](#streamingestserver-object "Direct link to StreamIngestServer Object")
+-----------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-25 "Direct link to Version added: 0.78")
+
+Information on the server that is being streamed to.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| name | string | The server name that is being streamed to | 0.78 |
+| template\_url | string | The serverâs url template. Use the token `{stream_key}` to specify the stream key in the url | 0.78 |
+
+WatermarkSettings Object[](#watermarksettings-object "Direct link to WatermarkSettings Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-26 "Direct link to Version added: 0.78")
+
+The basic stream information.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| showWatermark | bool | Determines whether or not to display the Overwolf watermark on the stream | 0.78 |
+
+StreamingMode enum[](#streamingmode-enum "Direct link to StreamingMode enum")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-27 "Direct link to Version added: 0.78")
+
+| Options | Description |
+| --- | --- |
+| WhenVisible | Stream the window when it is visible. This is the default behavior. The viewers will see what you see |
+| Always | Always stream the window, even when it is hidden or minimized. The viewers will continue to see it while you donât |
+| Never | Never stream the window. The viewers will not see the window even if you do see it. |
+
+ObsStreamingMode enum[](#obsstreamingmode-enum "Direct link to ObsStreamingMode enum")
+-----------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-28 "Direct link to Version added: 0.78")
+
+| Options | Description |
+| --- | --- |
+| OBSNoAwareness | The default Overwolf window style |
+| OBSAwareness | Allows to capture the window using Overwolf OBS plugin and will not be visible ingame or by Overwolf capturing apps (will still be visible in desktop) |
+| OBSAwarenessHideFromDeskTop | Same as OBSAwareness but also not visible in desktop (hidden) |
+
+SplitResult Object[](#splitresult-object "Direct link to SplitResult Object")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.141[](#version-added-0141-1 "Direct link to Version added: 0.141")
+
+Returns with the result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+
+indication\_position enum[](#indication_position-enum "Direct link to indication_position enum")
+---------------------------------------------------------------------------------------------------
+
+#### Version added: 0.143[](#version-added-0143 "Direct link to Version added: 0.143")
+
+| Options | Description |
+| --- | --- |
+| None |  |
+| TopLeftCorner |  |
+| TopRightCorner |  |
+| BottomLeftCorner |  |
+| BottomRightCorner |  |
+
+indication\_type enum[](#indication_type-enum "Direct link to indication_type enum")
+---------------------------------------------------------------------------------------
+
+#### Version added: 0.143[](#version-added-0143-1 "Direct link to Version added: 0.143")
+
+| Options | Description |
+| --- | --- |
+| NoIndication |  |
+| Dot |  |
+| DotAndTimer |  |
+
+StreamResult Object[](#streamresult-object "Direct link to StreamResult Object")
+-----------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| activeRecordingApps | [ActiverecordingApps](#activerecordingapps-object)[] | other apps that are already using the streaming api |
+| stream\_id | number | optional |
+| errorCode | [CaptureErrorCode](#captureerrorcode) |  |
+| errorDescription | string |  |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+```
+{ "status": "success", "stream_id": 3 }  
+  
+
+```
+
+#### Example data: Failure[](#example-data-failure "Direct link to Example data: Failure")
+
+```
+{ "status": "error", "error": "something went wrong...", "SubErrorMessage": "already running" }  
+
+```
+
+GetActiveRecordingAppsResult Object[](#getactiverecordingappsresult-object "Direct link to GetActiveRecordingAppsResult Object")
+-----------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| streaming | [ActiverecordingApps](#activerecordingapps-object)[] | The apps currently using the `overwolf.streaming` recording engine |
+
+ActiveRecordingApps Object[](#activerecordingapps-object "Direct link to ActiveRecordingApps Object")
+--------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| uid | string | the uid of the app |
+| displayName | string | the display name of the app |
+
+StreamEvent Object[](#streamevent-object "Direct link to StreamEvent Object")
+--------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| stream\_id | number |  |
+| SubErrorMessage | string |  |
+| is\_game\_window\_capture | bool | See [game\_window\_capture](#game_window_capture-notes) |
+
+StopStreamingEvent Object[](#stopstreamingevent-object "Direct link to StopStreamingEvent Object")
+-----------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| stream\_id | number |  |
+| url | string |  |
+| file\_path | string |  |
+| duration | number |  |
+| last\_file\_path | string |  |
+| split | boolean |  |
+| extra | object |  |
+| total\_frames | number |  |
+| osVersion | string |  |
+| osBuild | string |  |
+| error | string | *(Optional)* error given if the recording engine errored (but still created a recording) |
+
+#### Event data example[](#event-data-example-1 "Direct link to Event data example")
+
+```
+{  
+   "stream_id":3,  
+   "url":"overwolf://media/recordings/Game+Events+Simulator/Desktop+02-27-2020+14-37-13-913.mp4",  
+   "file_path":"C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913.mp4",  
+   "duration":61045,  
+   "last_file_path":"C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913",  
+   "split": true,  
+   "extra":"{"drawn": 856,"dropped": 0,"lagged": 0,"percentage_dropped": 0,"percentage_lagged": 0,"system_info": {"game_dvr_enabled": true,"game_mode_enabled": true}",  
+   "total_frames": 1835,  
+   "osVersion": "10.0.18362.650",  
+   "osBuild":"1903"  
+}  
+
+```
+
+#### Event Data Example: Stopped Streaming due to Low Disk Space[](#event-data-example-stopped-streaming-due-to-low-disk-space "Direct link to Event Data Example: Stopped Streaming due to Low Disk Space")
+
+> Notice the `error` param in the returned result.
+
+```
+{  
+    "success": true,  
+    "stream_id": 1,  
+    "url": "overwolf://media/recordings/Game+Events+Simulator/Desktop+02-27-2020+14-37-13-913.mp4",  
+    "file_path": "C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913.mp4",  
+    "duration": 180928,  
+    "last_file_path": "C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913.mp4",  
+    "split": false,  
+    "splitCount": 0,  
+    "extra": "{"drawn": 4440, "dropped": 0,"lagged": 0,"percentage_dropped": 0,"percentage_lagged": 0,"system_info": {  "game_bar_enabled": true,  "game_dvr_enabled": true,  "game_mode_enabled": false,  "hw_sch_mode": true},"total_frames": 5431}",  
+    "osVersion": "10.0.22621.3155",  
+    "osBuild": "2009",  
+    "error": "no disk space"  
+}  
+
+```
+
+tip
+
+To use the `file_path` and not the `url` (as a source for a video player, for example) - you should add the `allow_local_file_access : true` flag to your app manifest, under the relevant window section.
+
+StopStreamingResult Object[](#stopstreamingresult-object "Direct link to StopStreamingResult Object")
+--------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| stream\_id | number |  |
+| url | string |  |
+| file\_path | string |  |
+| duration | number |  |
+| last\_file\_path | string |  |
+| split | boolean |  |
+| extra | object |  |
+| total\_frames | number |  |
+| osVersion | string |  |
+| osBuild | string |  |
+
+#### Callback argument: Success[](#callback-argument-success "Direct link to Callback argument: Success")
+
+```
+{  
+   "success":true,  
+   "stream_id":3,  
+   "url":"overwolf://media/recordings/Game+Events+Simulator/Desktop+02-27-2020+14-37-13-913.mp4",  
+   "file_path":"C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913.mp4",  
+   "duration":61045,  
+   "last_file_path":"C:\\Users\\Hal9000\\Videos\\Overwolf\\Game Events Simulator\\Desktop 02-27-2020 14-37-13-913",  
+   "split": true,  
+   "extra":"{"drawn": 856,"dropped": 0,"lagged": 0,"percentage_dropped": 0,"percentage_lagged": 0,"system_info": {"game_dvr_enabled": true,"game_mode_enabled": true}",  
+   "total_frames": 1835,  
+   "osVersion": "10.0.18362.650",  
+   "osBuild":"1903"  
+}  
+
+```
+
+tip
+
+To use the `file_path` and not the `url` (as a source for a video player, for example) - you should add the `allow_local_file_access : true` flag to your app manifest, under the relevant window section.
+
+GetWatermarkSettingsResult Object[](#getwatermarksettingsresult-object "Direct link to GetWatermarkSettingsResult Object")
+-----------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| showWatermark | boolean |  |
+
+#### Callback argument: Success[](#callback-argument-success-1 "Direct link to Callback argument: Success")
+
+A function that will be called with a JSON containing the status and the watermark settings if successful
+
+```
+{ "status": "success" , "showWatermark": true }  
+
+```
+
+GetWindowStreamingModeResult Object[](#getwindowstreamingmoderesult-object "Direct link to GetWindowStreamingModeResult Object")
+-----------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| streaming\_mode | string |  |
+
+#### Callback argument: Success[](#callback-argument-success-2 "Direct link to Callback argument: Success")
+
+A callback function which will be called with the status of the request and the windowâs streaming mode as a parameter
+
+```
+{ "status": "success", "streaming_mode": "WhenVisible" }  
+
+```
+
+GetStreamEncodersResult Object[](#getstreamencodersresult-object "Direct link to GetStreamEncodersResult Object")
+--------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| encoders | [EncoderData](#encoderdata-object)[] | List of supported encoders. The latest version of supported video encoders can be found [here](/ow-native/reference/obs) |
+
+#### Callback argument: Success[](#callback-argument-success-3 "Direct link to Callback argument: Success")
+
+A callback function which will be called with the status of the request
+
+```
+{  
+    "status": "success",  
+    "encoders": [  
+        {  
+            "name" : "INTEL",  
+            "display_name" : "IntelÂ® Quick Sync (uses iGPU)",  
+            "enabled" : true,  
+            "presets" : ["LOW", "MEDIUM", "HIGH"]  
+        },  
+        ...  
+    ]  
+}  
+
+```
+
+EncoderData Object[](#encoderdata-object "Direct link to EncoderData Object")
+--------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| name | string |  |
+| display\_name | string |  |
+| enabled | boolean |  |
+| presets | string[] | See [notes](#endoder-preset-notes) |
+| valid | boolean | Is the encoder valid for usage. The encoder can be supported but not valid |
+| vendor\_error | string | "Invalid version", for example. The data will guide us for solutions for problems we didn't have enough information about until now |
+| error\_description | string | "Not supported", for example, The data will guide us for solutions for problems we didn't have enough information about until now |
+
+#### Endoder Preset notes[](#endoder-preset-notes "Direct link to Endoder Preset notes")
+
+For each encoder in the list, a preset enum returns. For example:
+
+1. The NVIDIA encoder returns [StreamEncoderPreset\_NVIDIA](#streamencoderpreset_nvidia-enum) enum.
+2. The X264 encoder returns [StreamEncoderPreset\_x264](#streamencoderpreset_x264-enum) enum.
+3. The AMD encoder returns [StreamEncoderPreset\_AMD\_AMF](#streamencoderpreset_amd_amf-enum) enum.
+
+AudioDeviceData Object[](#audiodevicedata-object "Direct link to AudioDeviceData Object")
+--------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| display\_name | string | The display name of the device |
+| device\_id | string | The device ID |
+| can\_record | boolean | Can the device record |
+| can\_playback | boolean | Can the device play a playback |
+| device\_state | string | The device's state |
+| device\_setting\_id | string |  |
+
+GetAudioDevicesResult Object[](#getaudiodevicesresult-object "Direct link to GetAudioDevicesResult Object")
+--------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| devices | [AudioDeviceData](#audiodevicedata-object)[] | An array of connected audio devices |
+| default\_recording\_device\_id | [AudioDeviceData](#audiodevicedata-object) | The default recording device |
+| default\_playback\_device\_id | [AudioDeviceData](#audiodevicedata-object) | The default playback device |
+
+#### Callback argument: Success[](#callback-argument-success-4 "Direct link to Callback argument: Success")
+
+A callback function which will be called with the status of the request
+
+```
+{  
+    "status": "success",  
+    "devices": [  
+        {  
+            "display_name" : "Speakers (USB Ear-Microphone)",  
+            "display_id" : "{0.0.0.00000000}.{ec2a6c4b-f750-4045-bb93-d745ecc76937}",  
+            "device_state" : "Active",  
+            "can_record" : false,  
+            "can_playback" : true  
+        },  
+        ...  
+    ],  
+    "default_recording_device_id": "{0.0.0.00000000}.{ec2a6c4b-f750-4045-bb93-d745ecc76937}",  
+    "default_playback_device_id": "{0.0.1.00000000}.{39da502b-2b96-4b76-83ae-9841f0b46570}"  
+}  
+
+```
+
+StreamingSourceImageChangedEvent Object[](#streamingsourceimagechangedevent-object "Direct link to StreamingSourceImageChangedEvent Object")
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| stream\_id | number |  |
+| old\_source | string |  |
+| new\_source | string |  |
+
+VideoFileSplitedEvent Object[](#videofilesplitedevent-object "Direct link to VideoFileSplitedEvent Object")
+--------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| stream\_id | number |  |
+| file\_name | string |  |
+| duration | number |  |
+| count | number |  |
+| next\_file | string |  |
+
+SupportedEncodersUpdatedEvent Object[](#supportedencodersupdatedevent-object "Direct link to SupportedEncodersUpdatedEvent Object")
+--------------------------------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| encoders | [EncoderData](#encoderdata-object)[] |  |
+
+eVideoBaseFrameSizeSource enum[](#evideobaseframesizesource-enum "Direct link to eVideoBaseFrameSizeSource enum")
+--------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.168[](#version-added-0168 "Direct link to Version added: 0.168")
+
+| Options | Description |
+| --- | --- |
+| Auto | logical width\height (if in game, take game, otherwhise take monitor) |
+| Setting | setting configuraion |
+
+eVideoFrameSizeCalcMethod enum[](#evideoframesizecalcmethod-enum "Direct link to eVideoFrameSizeCalcMethod enum")
+--------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.168[](#version-added-0168-1 "Direct link to Version added: 0.168")
+
+| Options | Description |
+| --- | --- |
+| Original | Original calculation to get the output resolution for the needed quality keeping the aspect ratio |
+| ExactOrKeepRatio | (Recommended) Get the exact resolution from a resolutions list for the needed quality, if not found in the list then calculate a new resolution keeping the aspect ratio. |
+| ExactOrClosestResolution | Original calculation to get the output resolution for the needed quality keeping the aspect ratio |
+
+GameWindowCapture Object[](#gamewindowcapture-object "Direct link to GameWindowCapture Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.176[](#version-added-0176 "Direct link to Version added: 0.176")
+
+Game window capture options.
+
+| Name | Type | Description | Since |
+| --- | --- | --- | --- |
+| enable\_when\_available | bool | Disabled by default | 0.176 |
+| capture\_overwolf\_windows | bool | Default value is taken from the Overwolf Settings | 0.176 |
+
+#### Example data[](#example-data "Direct link to Example data")
+
+```
+"game_window_capture": {  
+     "enable_when_available": bool,    // Disabled by default  
+     "capture_overwolf_windows": bool  // Default value is taken from the Overwolf Settings  
+   }  
+
+```

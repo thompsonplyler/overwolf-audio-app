@@ -1,0 +1,216 @@
+Title: overwolf.social API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/social/ow-social
+
+overwolf.social API
+===================
+
+Provides sharing services to different social networks like Reddit, Twitter, etc. and also information about the currently disabled services.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.social.getDisabledServices()](#getdisabledservicescallback)
+* [overwolf.social.uploadVideo()](#uploadvideovideouploadparams-callback-callback)
+* [overwolf.social.cancelUpload()](#canceluploadstring-callback)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [GetDisabledServicesResult](#getDisabledServicesResult-object) Object
+* [GetUserInfoResult](#getuserinforesult-object) Object
+* [overwolf.social.VideoUploadParams](#videouploadparams-object) Object
+* [overwolf.social.VideoUploadResult](#videouploadresult-object) Object
+* [overwolf.social.VideoUploadProgress](#videouploadprogress-object) Object
+* [overwolf.social.LoginState](#loginstate-enum) enum
+* [overwolf.social.LoginStateChangedEvent](#loginstatechangedevent-object) Object
+
+getDisabledServices(callback)[](#getdisabledservicescallback "Direct link to getDisabledServices(callback)")
+---------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.126[](#version-added-0126 "Direct link to Version added: 0.126")
+
+> Checks which of the supported sharing services are disabled or enabled.
+
+Note: You canât disable or enable sharing service from your app. Itâs done from the Overwolf servers.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetDisabledServicesResult)](#getdisabledservicesresult-object) => void | returns a list of disabled services |
+
+uploadVideo(VideoUploadParams, callback, callback)[](#uploadvideovideouploadparams-callback-callback "Direct link to uploadVideo(VideoUploadParams, callback, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203 "Direct link to Version added: 0.203")
+
+> Upload a video to the buffer server.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| uploadParams | [VideoUploadParams](#videouploadparams-object) | Parameters for the video being uploaded |
+| resultCallback | [(Result: VideoUploadResult)](#videouploadresult-object) => void | A callback function which will be called with the resulting status of the request |
+| progressCallback | [(Result: VideoUploadProgress)](#videouploadprogress-object) => void | A callback function which will be called whenever upload progress is made |
+
+cancelUpload(string, callback)[](#canceluploadstring-callback "Direct link to cancelUpload(string, callback)")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203-1 "Direct link to Version added: 0.203")
+
+> Cancels an upload to the buffer server mid-way.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| id | string | The request ID |
+| callback | (Result) => void | Called with the result of the cancellation |
+
+VideoUploadParams Object[](#videouploadparams-object "Direct link to VideoUploadParams Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203-2 "Direct link to Version added: 0.203")
+
+> This object defines all parameters that should be passed to the [`overwolf.social.cancelUpload()`](#canceluploadstring-callback).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| id | string | The ID for the current upload. See [note](#id-note) |
+| filePath | string | The path to the file to upload |
+
+#### id note[](#id-note "Direct link to id note")
+
+When calling [`overwolf.social.uploadVideo()`](#uploadvideovideouploadparams-callback-callback), it is required to supply it with a request ID. This ID will also be used in case you wish to cancel this share using [`overwolf.social.cancelUpload()`](#canceluploadstring-callback).
+
+VideoUploadResult Object[](#videouploadresult-object "Direct link to VideoUploadResult Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203-3 "Direct link to Version added: 0.203")
+
+> Container for the url created in a successful upload.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| url | string | The url of the generated result |
+
+VideoUploadProgress Object[](#videouploadprogress-object "Direct link to VideoUploadProgress Object")
+--------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203-4 "Direct link to Version added: 0.203")
+
+> The current progress of the share request
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| progress | int | The current precentage of upload progress |
+| id | string | The id of the share request |
+| state | [ShareState](#sharestate-enum) | The current state of the share request |
+
+#### Example data[](#example-data "Direct link to Example data")
+
+```
+{  
+  "progress": 60,  
+  "id": "7",  
+  "state": "Uploading"  
+}  
+
+```
+
+ShareState Enum[](#sharestate-enum "Direct link to ShareState Enum")
+-----------------------------------------------------------------------
+
+#### Version added: 0.203[](#version-added-0203-5 "Direct link to Version added: 0.203")
+
+> The current state of the [`overwolf.social.uploadVideo()`](#uploadvideovideouploadparams-callback-callback) operation.
+
+| Options | Description |
+| --- | --- |
+| Started | The upload has started |
+| Uploading | The upload is in progress |
+| Finished | The upload has finished |
+
+GetDisabledServicesResult Object[](#getdisabledservicesresult-object "Direct link to GetDisabledServicesResult Object")
+--------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.126[](#version-added-0126-1 "Direct link to Version added: 0.126")
+
+> Container for GetDisabledServices result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| disabled\_services | string[] |  |
+
+#### Callback argument: Success[](#callback-argument-success "Direct link to Callback argument: Success")
+
+```
+{"success":true,"disabled_services":["youtube"]}  
+
+```
+
+GetUserInfoResult Object[](#getuserinforesult-object "Direct link to GetUserInfoResult Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.128[](#version-added-0128 "Direct link to Version added: 0.128")
+
+> Container for get user info result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| userInfo | object |  |
+
+#### Example data: Reddit / Youtube / Twitter[](#example-data-reddit--youtube--twitter "Direct link to Example data: Reddit / Youtube / Twitter")
+
+```
+{	  
+  "status": "success",	  
+  "userInfo": {	  
+     "avatar": "http://abs.twimg.com/sticky/...", 	  
+     "id": "111111111112222222", 	  
+     "name": "full name", 	  
+     "screenName": "screenname123"	  
+  }	  
+}	  
+
+```
+
+#### Example data: Discord user[](#example-data-discord-user "Direct link to Example data: Discord user")
+
+```
+{	  
+  "status": "success",	  
+  "userInfo": {	  
+    "id": "1111111111111",	  
+    "discriminator": 9999,	  
+    "username": "itay",	  
+    "email": "itay@overwolf.com",	  
+    "avatar": null,	  
+    "verified": true	  
+  }	  
+}	  
+
+```
+
+LoginStateChangedEvent Object[](#loginstatechangedevent-object "Direct link to LoginStateChangedEvent Object")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.128[](#version-added-0128-1 "Direct link to Version added: 0.128")
+
+> Container object.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| state | [LoginState](#loginstate-enum) enum |  |
+
+#### Event Data Example: Success[](#event-data-example-success "Direct link to Event Data Example: Success")
+
+```
+{ "state": "connected"/"disconnected" }  
+
+```
+
+LoginState enum[](#loginstate-enum "Direct link to LoginState enum")
+-----------------------------------------------------------------------
+
+#### Version added: 0.128[](#version-added-0128-2 "Direct link to Version added: 0.128")
+
+| Options | Description |
+| --- | --- |
+| Connected | "connected" |
+| Disconnected | "disconnected" |

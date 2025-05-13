@@ -1,0 +1,587 @@
+Title: overwolf.media API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/media/ow-media
+
+overwolf.media API
+==================
+
+Use this API to capture a screenshot of the currently running game.
+
+**Permissions required: Media**
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.media.takeScreenshot()](#takescreenshotcallback)
+* [overwolf.media.takeScreenshot()](#takescreenshottargetfolder-callback)
+* [overwolf.media.takeScreenshotEx()](#takescreenshotextargetpath-options-callback)
+* [overwolf.media.takeWindowsScreenshotByHandle()](#takewindowsscreenshotbyhandlewindowhandle-postmediaevent-callback)
+* [overwolf.media.takeWindowsScreenshotByHandle()](#takewindowsscreenshotbyhandlewindowhandle-postmediaevent-targetfolder-callback)
+* [overwolf.media.takeWindowsScreenshotByName()](#takewindowsscreenshotbynamewindowname-postmediaevent-callback)
+* [overwolf.media.takeWindowsScreenshotByName()](#takewindowsscreenshotbynamewindowname-postmediaevent-targetfolder-callback)
+* [overwolf.media.getScreenshotUrl()](#getscreenshoturlscreenshotparams-callback)
+* [overwolf.media.shareImage()](#shareimageimage-description-callback)
+* [overwolf.media.postMediaEvent()](#postmediaeventmediatype-jsoninfo-callback)
+* [overwolf.media.getAppVideoCaptureFolderSize()](#getappvideocapturefoldersizecallback)
+* [overwolf.media.getAppScreenCaptureFolderSize()](#getappscreencapturefoldersizecallback)
+* [overwolf.media.getWebcams()](#getwebcamscallback)
+* overwolf.media.startGifBuffer() - Deprecated
+* overwolf.media.stopGifBuffer() - Deprecated
+* overwolf.media.generateGif() - Deprecated
+* overwolf.media.deleteOldGifs() - Deprecated
+* overwolf.media.getGifsSize() - Deprecated
+
+Events Reference[](#events-reference "Direct link to Events Reference")
+--------------------------------------------------------------------------
+
+* [overwolf.media.onMediaEvent](#onmediaevent)
+* [overwolf.media.onScreenshotTaken](#onscreenshottaken)
+* overwolf.media.onSconGifGenerationError - Deprecated
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.media.ScreenshotOptions](#screenshotoptions-object) Object
+* [overwolf.media.MemoryScreenshotParams](#memoryscreenshotparams-object) Object
+* [overwolf.media.RescaleParams](#rescaleparams-object) Object
+* [overwolf.media.CropParams](#cropparams-object) Object
+* [overwolf.media.enums.ImageFormat](#imageformat-enum) enum
+* [overwolf.media.enums.eMediaType](#emediatype-enum) enum
+* [overwolf.media.enums.eSourceType](#esourcetype-enum) enum
+* [overwolf.media.enums.eVideoSourceTransform](#evideosourcetransform-enum) enum
+* [overwolf.media.FileResult](#fileresult-object) Object
+* [overwolf.media.GetAppVideoCaptureFolderSizeResult](#getappvideocapturefoldersizeresult-object) Object
+* [overwolf.media.ScreenshotTakenEvent](#screenshottakenevent-object) Object
+* [overwolf.media.GetWebcamsResult](#getwebcamsresult-object) Object
+* [overwolf.media.Webcam](#webcam-object) Object
+* overwolf.media.GifGenerationErrorEvent - Deprecated
+
+In-memory screenshot overview[](#in-memory-screenshot-overview "Direct link to In-memory screenshot overview")
+-----------------------------------------------------------------------------------------------------------------
+
+Some methods in the overwold.media API allows you to take in-memory screenshot.
+
+For example, the [`takeScreenshot(callback)`](#takescreenshotcallback) method returns in a callback argument a screenshot URL that looks like this:
+
+```
+overwolf://media/screenshots/custom/E:/Desktop%20Capture-07-15-2018%2014-15-22-793.jpg  
+
+```
+
+You can use the retrieved URL later in order to serve the stated screenshot: for example, to upload it to remote server, you can use [HTML canvas](https://discuss.overwolf.com/t/how-can-i-send-a-screenshot-to-an-external-server-without-saving-it-to-a-file/109).
+
+Sample app[](#sample-app "Direct link to Sample app")
+--------------------------------------------------------
+
+[Download here](https://github.com/overwolf/in-memory-screenshot) a Sample app for using the In-Memory Screenshot API.
+
+takeScreenshot(callback)[](#takescreenshotcallback "Direct link to takeScreenshot(callback)")
+------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078 "Direct link to Version added: 0.78")
+
+> Takes a screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback (Optional) | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+takeScreenshot(targetFolder, callback)[](#takescreenshottargetfolder-callback "Direct link to takeScreenshot(targetFolder, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117 "Direct link to Version added: 0.117")
+
+> Takes a screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| targetFolder | string | Target screen shot folder path |
+| callback | [(Result: FileResult)](#fileresult-object) => void | A callback function which will be called with the status of the request and the screenshot URL. |
+
+takeScreenshotEx(targetPath, options, callback)[](#takescreenshotextargetpath-options-callback "Direct link to takeScreenshotEx(targetPath, options, callback)")
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.226[](#version-added-0226 "Direct link to Version added: 0.226")
+
+> Takes a screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| targetPath | string | Target screen shot file path |
+| options (Optional) | [ScreenshotOptions](#screenshotoptions-object) | Extra settings controlling the screenshot |
+| callback (Optional) | [(Result: FileResult)](#fileresult-object) => void | A callback function which will be called with the status of the request and the screenshot URL. |
+
+takeWindowsScreenshotByHandle(windowHandle, postMediaEvent, callback)[](#takewindowsscreenshotbyhandlewindowhandle-postmediaevent-callback "Direct link to takeWindowsScreenshotByHandle(windowHandle, postMediaEvent, callback)")
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.115[](#version-added-0115 "Direct link to Version added: 0.115")
+
+> Takes a window screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowHandle | int | The window handle number. The handle number can retrieved from [overwolf.games.launchers.getRunningLaunchersInfo()](/ow-native/reference/games/launchers#getrunninglaunchersinfocallback) |
+| postMediaEvent | bool | set true to post [(onMediaEvent)](#onmediaevent) |
+| callback | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+takeWindowsScreenshotByHandle(windowHandle, postMediaEvent, targetFolder, callback)[](#takewindowsscreenshotbyhandlewindowhandle-postmediaevent-targetfolder-callback "Direct link to takeWindowsScreenshotByHandle(windowHandle, postMediaEvent, targetFolder, callback)")
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.115[](#version-added-0115-1 "Direct link to Version added: 0.115")
+
+> Takes a window screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowHandle | int | The window handle number. The handle number can retrieved from [overwolf.games.launchers.getRunningLaunchersInfo()](/ow-native/reference/games/launchers#getrunninglaunchersinfocallback) |
+| postMediaEvent | bool | set true to post [(onMediaEvent)](#onmediaevent) |
+| targetFolder | string | Set target folder path for screenshot |
+| callback | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+takeWindowsScreenshotByName(windowTitle, postMediaEvent, callback)[](#takewindowsscreenshotbynamewindowtitle-postmediaevent-callback "Direct link to takeWindowsScreenshotByName(windowTitle, postMediaEvent, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.115[](#version-added-0115-2 "Direct link to Version added: 0.115")
+
+> Takes a window screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the screenshots folder.
+
+This function is to capture a native OS window by it's OS window Title - for example - "Untitled - Notepad".  
+To capture one of your app's windows you should use HTML5 [Canvas.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowTitle | string | The OS window title |
+| postMediaEvent | bool | set true to post [(onMediaEvent)](#onmediaevent) |
+| callback | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+takeWindowsScreenshotByName(windowTitle, postMediaEvent, targetFolder, callback)[](#takewindowsscreenshotbynamewindowtitle-postmediaevent-targetfolder-callback "Direct link to takeWindowsScreenshotByName(windowTitle, postMediaEvent, targetFolder, callback)")
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.117[](#version-added-0117-1 "Direct link to Version added: 0.117")
+
+> Takes a window screenshot and calls the callback with the success status and the screenshot URL. The screenshot is saved to the `targetFolder` folder.
+
+This function is to capture a native OS window by it's OS window Title - for example - "Untitled - Notepad".  
+To capture one of your app's windows you should use HTML5 [Canvas.toDataURL()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| windowTitle | string | The OS window title |
+| postMediaEvent | bool | set true to post [(onMediaEvent)](#onmediaevent) |
+| targetFolder | string | Set target folder path for screenshot |
+| callback | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+getScreenshotUrl(screenshotParams, callback)[](#getscreenshoturlscreenshotparams-callback "Direct link to getScreenshotUrl(screenshotParams, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.85[](#version-added-085 "Direct link to Version added: 0.85")
+
+> Takes a memory screenshot and calls the callback with the success status and the screenshot URL.
+
+* The screenshot will only be placed in the memory and will not be saved to a file (better performance).
+* Can only be used while in a game.
+* You can take a look at the in-memory screenshot [sample app](#sample-app).
+* You can read more about the in-memory screenshot [here](#in-memory-screenshot-overview).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| screenshotParams | [MemoryScreenshotParams](#memoryscreenshotparams-object) object | A JSON containing the parameters of the screenshot |
+| callback (optional) | [(Result: FileResult)](#fileresult-object) => void | A function called after the screenshot was taken |
+
+note
+
+Supported ***ONLY*** in games that are using DirectX 9 or DirectX 11. Currently unsupported in DirectX 12, Vulkan and openGL.
+
+#### Usage Example[](#usage-example "Direct link to Usage Example")
+
+```
+overwolf.media.getScreenshotUrl(  
+    {  
+        //Recommended for better rounding.  
+        roundAwayFromZero : "true",  
+        //Optional - Crop the screen (happens before the rescale, if both are used).  
+        //Positive values are absolute, negative values are relative (-1.0 - 0)  
+        crop: {  
+            x: -0.5, //Start cropping at the middle of the screen  
+            y: 0,  
+            width: 400,  
+            height: -0.5  
+        },  
+        //Optional - Rescale the final image to these dimensions  
+        rescale: {  
+            width: 1920,  
+            height: -0.4  
+        }  
+    },  
+    function(result) {  
+        if (result.status == "success")  
+        {  
+            console.log(result.url);  
+        }  
+    }  
+);  
+
+```
+
+shareImage(image, description, callback)[](#shareimageimage-description-callback "Direct link to shareImage(image, description, callback)")
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-1 "Direct link to Version added: 0.78")
+
+> Opens the social network sharing console to allow the user to share a picture.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| image | Object | A URL or image object to be shared |
+| description | string | The description to be used when posting to social networks |
+| callback | (Result) => void | Reports success or failure |
+
+postMediaEvent(mediaType, jsonInfo, callback)[](#postmediaeventmediatype-jsoninfo-callback "Direct link to postMediaEvent(mediaType, jsonInfo, callback)")
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.91[](#version-added-091 "Direct link to Version added: 0.91")
+
+> Posts a media event for other apps to receive.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| mediaType | [eMediaType](#emediatype-enum) enum | The type of the event |
+| jsonInfo | JObject | A json with additional info about the events |
+| callback | (Result) => void | Reports success or failure |
+
+getAppVideoCaptureFolderSize(callback)[](#getappvideocapturefoldersizecallback "Direct link to getAppVideoCaptureFolderSize(callback)")
+------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.106[](#version-added-0106 "Direct link to Version added: 0.106")
+
+> Returns the total size of the video capture folder created by the app. This includes all video/thumbnail and other files that are under the apps video folder.
+
+* The apps video folder is located inside the configured Overwolf video capture folder.
+* This function can take a long time to return if the folder contains a large amount of files (on some computers) â therefore, try to reduce the amount of times you call it.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetAppVideoCaptureFolderSizeResult)](#getappvideocapturefoldersizeresult-object) => void A callback with the size in MB |  |
+
+getAppScreenCaptureFolderSize(callback)[](#getappscreencapturefoldersizecallback "Direct link to getAppScreenCaptureFolderSize(callback)")
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.106[](#version-added-0106-1 "Direct link to Version added: 0.106")
+
+> Returns the total size of the screen capture folder created by the app. This includes all images/thumbnail and other files that are under the apps images folder.
+
+* The apps imagee folder is located inside the configured Overwolf image capture folder.
+* This function can take a long time to return if the folder contains a large amount of files (on some computers) â therefore, try to reduce the amount of times you call it.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetAppScreenCaptureFolderSizeResult)](#getappscreencapturefoldersizeresult-object) => void A callback with the size in MB |  |
+
+getWebcams(callback)[](#getwebcamscallback "Direct link to getWebcams(callback)")
+------------------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159 "Direct link to Version added: 0.159")
+
+> Get all connected Webcams.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| callback | [(Result: GetWebcamsResult)](#getwebcamsresult-object) => void A callback with the connected Webcams |  |
+
+onMediaEvent[](#onmediaevent "Direct link to onMediaEvent")
+--------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-2 "Direct link to Version added: 0.78")
+
+> Fired when a media event has been posted.
+
+#### Event Data Example: Success[](#event-data-example-success "Direct link to Event Data Example: Success")
+
+```
+ {  
+  "origin": "nafihghfcpikebhfhdhljejkcifgbdahdhngepfb",  
+  "triggerTime": "2018-10-22T16:56:39.000Z",  
+  "events": [  
+    "death"  
+  ],  
+  "rawEvents": [  
+    {  
+      "type": "death",  
+      "time": 15000  
+    }  
+  ],  
+  "mediaUrl": "overwolf://media/replays/Game+Summary/Fortnite/Fortnite_22-10-2018_19-53-40-1/Fortnite+10-22-2018+19-56-39-385.mp4",  
+  "thumbnailUrl": "overwolf://media/thumbnails/Game+Summary/Fortnite/Fortnite_22-10-2018_19-53-40-1/Fortnite+10-22-2018+19-56-39-385.mp4",  
+  "fullDuration": 20015,  
+  "eventsDuration": 5015  
+}   
+
+```
+
+onScreenshotTaken[](#onscreenshottaken "Direct link to onScreenshotTaken")
+-----------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-3 "Direct link to Version added: 0.78")
+
+> Fired when a screenshot was taken, with the following structure: [ScreenshotTakenEvent](#ScreenshotTakenEvent-object) Object
+
+ScreenshotOptions Object[](#screenshotoptions-object "Direct link to ScreenshotOptions Object")
+--------------------------------------------------------------------------------------------------
+
+#### Version added: 0.226[](#version-added-0226-1 "Direct link to Version added: 0.226")
+
+> Container for file screenshot settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| imageFormat | [ImageFormat](#imageformat-enum) | The file format to use for the taken image |
+
+MemoryScreenshotParams Object[](#memoryscreenshotparams-object "Direct link to MemoryScreenshotParams Object")
+-----------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-4 "Direct link to Version added: 0.78")
+
+> Container for memory screenshot settings.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| roundAwayFromZero | bool | When a number is halfway between two others, it is rounded toward the nearest number that is away from zero. Recommended for better precision |
+| rescale | [RescaleParams](#rescaleparams-object) Object | The rescale settings |
+| crop | [CropParams](#cropparams-object) Object | The crop settings |
+
+RescaleParams Object[](#rescaleparams-object "Direct link to RescaleParams Object")
+--------------------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-5 "Direct link to Version added: 0.78")
+
+> Describes rescale parameters for memory screenshot.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| width | double | The target width |
+| height | double | The target height |
+
+CropParams Object[](#cropparams-object "Direct link to CropParams Object")
+-----------------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-6 "Direct link to Version added: 0.78")
+
+> Describes rescale parameters for memory screenshot.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| x | double | The x offset. Positive value is considered absolute (0 â WIDTH) and negative is considered relative (-1.0 â 0) |
+| y | double | The y offset. Positive value is considered absolute (0 â HEIGHT) and negative is considered relative (-1.0 â 0) |
+| width | double | The target width |
+| height | double | The target height |
+
+ImageFormat enum[](#imageformat-enum "Direct link to ImageFormat enum")
+--------------------------------------------------------------------------
+
+#### Version added: 0.226[](#version-added-0226-2 "Direct link to Version added: 0.226")
+
+> Image format to use for a file screenshot.
+
+| Option | Description |
+| --- | --- |
+| Jpeg | .jpeg |
+| Bmp | .bmp |
+
+Screenshot Formats
+
+Screenshots taken before version 0.226 were always saved as a `.jpg`. If your app needs to handle those screenshots as well, make sure it
+can handle both `.jpeg` **and** `.jpg` images (as well as `.bmp` if relevant)
+
+eMediaType enum[](#emediatype-enum "Direct link to eMediaType enum")
+-----------------------------------------------------------------------
+
+#### Version added: 0.78[](#version-added-078-7 "Direct link to Version added: 0.78")
+
+> Media type for the Media Event.
+
+| Option | Description |
+| --- | --- |
+| Video |  |
+| Image |  |
+
+eSourceType enum[](#esourcetype-enum "Direct link to eSourceType enum")
+--------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159-1 "Direct link to Version added: 0.159")
+
+> Video source type.
+
+| Option | Description |
+| --- | --- |
+| Webcam |  |
+| Generic |  |
+| image\_source |  |
+
+eVideoSourceTransform enum[](#evideosourcetransform-enum "Direct link to eVideoSourceTransform enum")
+--------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159-2 "Direct link to Version added: 0.159")
+
+> Video transform type.
+
+| Option | Description |
+| --- | --- |
+| Stretch |  |
+| DockTopLeft |  |
+| DockTopMiddle |  |
+| DockTopRight |  |
+| DockMiddleLeft |  |
+| DockCenter |  |
+| DockMiddleRight |  |
+| DockBottomLeft |  |
+| DockBottomMiddle |  |
+| DockBottomRight |  |
+
+FileResult Object[](#fileresult-object "Direct link to FileResult Object")
+-----------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149 "Direct link to Version added: 0.149")
+
+> Container for get file URL result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| url | string |  |
+| path | string |  |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+```
+{  
+   "success": true,  
+   "status": "success", //deprecated and kept only for backward compatibility  
+   "url": "overwolf://media/replays/App+Name/Dota+2+06-28-2016+17-59-37-620.mp4",  
+   "path": "E://Video/Overwolf/App Name/Dota 2 06-28-2016 17-59-37-620.mp4"  
+}  
+
+```
+
+Note that the last part of the file name is the **replayId**. In the above example, it's 620.  
+The **replayId** is needed to finish capturing the replay by calling for example to [overwolf.media.replays.stopCapture()](/ow-native/reference/media/replays#stopcapturereplayid-callback). In the above example, it's 620.
+
+GetAppVideoCaptureFolderSizeResult Object[](#getappvideocapturefoldersizeresult-object "Direct link to GetAppVideoCaptureFolderSizeResult Object")
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149-1 "Direct link to Version added: 0.149")
+
+> Container for get file getAppVideoCaptureFolderSize result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| totalVideosSizeMB | number |  |
+
+#### Example data: Success[](#example-data-success-1 "Direct link to Example data: Success")
+
+```
+{  
+   "success": true,  
+   "status": "success", //deprecated and kept only for backward compatibility  
+   "totalVideosSizeMB": 12123,  
+}  
+
+```
+
+GetWebcamsResult Object[](#getwebcamsresult-object "Direct link to GetWebcamsResult Object")
+-----------------------------------------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159-3 "Direct link to Version added: 0.159")
+
+> Container for get Webcams result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| WebCams | [overwolf.media.Webcam](#webcam-object)[] |  |
+
+#### Example data: Success[](#example-data-success-2 "Direct link to Example data: Success")
+
+```
+{  
+   "success": true,  
+   "status": "success", //deprecated and kept only for backward compatibility  
+   "webCams ": [  
+      {  
+        "name":"Webcam C170",  
+        "path":"\\\\?\\usb#vid_046d&pid_082b&mi_00#7&2c79cd0&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",  
+        "id":"Webcam C170:\\\\?\\usb#vid_046d&pid_082b&mi_00#7&2c79cd0&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global"  
+      },  
+      {  
+        "name":"USB2.0 HD UVC WebCam",  
+        "path":"\\\\?\\usb#vid_13d3&pid_5666&mi_00#6&2f2fc667&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",  
+        "id":"USB2.0 HD UVC WebCam:\\\\?\\usb#vid_13d3&pid_5666&mi_00#6&2f2fc667&1&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global"  
+      },  
+      {  
+        "name":"OBS Virtual Camera",  
+        "path":"",  
+        "id":"OBS Virtual Camera:"  
+      }  
+   ],  
+}  
+
+```
+
+Webcam Object[](#webcam-object "Direct link to Webcam Object")
+-----------------------------------------------------------------
+
+#### Version added: 0.159[](#version-added-0159-4 "Direct link to Version added: 0.159")
+
+> Container for Webcam proporties.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| name | string |  |
+| path | string |  |
+| id | string |  |
+
+#### Data example[](#data-example "Direct link to Data example")
+
+```
+{  
+  "name":"Webcam C170",  
+  "path":"\\\\?\\usb#vid_046d&pid_082b&mi_00#7&2c79cd0&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",  
+  "id":"Webcam C170:\\\\?\\usb#vid_046d&pid_082b&mi_00#7&2c79cd0&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global"  
+},  
+
+```
+
+GetAppScreenCaptureFolderSizeResult Object[](#getappscreencapturefoldersizeresult-object "Direct link to GetAppScreenCaptureFolderSizeResult Object")
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.149[](#version-added-0149-2 "Direct link to Version added: 0.149")
+
+> Container for get file getAppVideoCaptureFolderSize result.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| screenCaptureSizeMB | number |  |
+
+#### Example data: Success[](#example-data-success-3 "Direct link to Example data: Success")
+
+```
+{  
+   "success": true,  
+   "status": "success", //deprecated and kept only for backward compatibility  
+   "screenCaptureSizeMB": 12123,  
+}  
+
+```
+
+ScreenshotTakenEvent Object[](#screenshottakenevent-object "Direct link to ScreenshotTakenEvent Object")
+-----------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| url | string |  |
+
+#### Event data example: Success[](#event-data-example-success-1 "Direct link to Event data example: Success")
+
+```
+{  
+  "success": true,  
+  "url": ""  
+}  
+
+```

@@ -1,0 +1,6 @@
+---
+description: using or asking questions about the Overwolf API
+globs: 
+alwaysApply: false
+---
+- Use reference documentation over assumed internal knowledge. Docs are currently in overwolf_docs/txt

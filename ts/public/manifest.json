@@ -57,8 +57,8 @@
           "height": 699
         },
         "min_size": {
-          "width": 1212,
-          "height": 699
+          "width": 150,
+          "height": 50
         }
       },
       "in_game": {
@@ -74,8 +74,8 @@
           "height": 699
         },
         "min_size": {
-          "width": 1212,
-          "height": 699
+          "width": 150,
+          "height": 50
         }
       },
       "toggler_button": {

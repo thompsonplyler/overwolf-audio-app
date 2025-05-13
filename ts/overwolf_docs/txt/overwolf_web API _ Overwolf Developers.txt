@@ -1,0 +1,253 @@
+Title: overwolf.web API | Overwolf Developers
+Source URL: https://dev.overwolf.com/ow-native/reference/web/ow-web
+
+overwolf.web API
+================
+
+Use this API to open a local HTTP web-server and a WebSocket.
+
+Methods Reference[](#methods-reference "Direct link to Methods Reference")
+-----------------------------------------------------------------------------
+
+* [overwolf.web.createServer()](#createserverport-callback)
+* [overwolf.web.sendHttpRequest()](#sendhttprequesturl-method-headers-data-callback)
+* [overwolf.web.createWebSocket()](#createwebsocketconnectionparams-callback)
+
+Types Reference[](#types-reference "Direct link to Types Reference")
+-----------------------------------------------------------------------
+
+* [overwolf.web.WebSocketConnectionParams](#websocketconnectionparams-object) Object
+* [overwolf.web.enums.HttpRequestMethods](#httprequestmethods-enum) enum
+* [overwolf.web.enums.MessageType](#messagetype-enum) enum
+* [overwolf.web.FetchHeader](#fetchheader-object) Object
+* [overwolf.web.CreateServerResult](#createserverresult-object) Object
+* [overwolf.web.SendHttpRequestResult](#sendhttprequestresult-object) Object
+* [overwolf.web.CreateWebSocketResult](#createwebsocketresult-object) Object
+
+createServer(port, callback)[](#createserverport-callback "Direct link to createServer(port, callback)")
+-----------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.93[](#version-added-093 "Direct link to Version added: 0.93")
+
+#### Permissions required: Web[](#permissions-required-web "Direct link to Permissions required: Web")
+
+> Creates a web server.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| port | int | The port to use |
+| callback | [CreateServerResult](#createserverresult-object) Object | Container for the server object |
+
+#### Usage Example[](#usage-example "Direct link to Usage Example")
+
+Here you can see a sample code for using the overwolf.web and overwolf.web.webserver APIs:
+
+```
+let _port = 61234;  
+  
+overwolf.web.createServer(_port, serverInfo => {  
+    if (serverInfo.status == "error") {  
+        console.log("Failed to create server");  
+        return;  
+    } else {  
+        _server = serverInfo.server;  
+        // it is always good practice to removeListener before adding it  
+        _server.onRequest.removeListener(onRequest);  
+        _server.onRequest.addListener(onRequest);  
+  
+        _server.listen(info => {  
+            console.log("Server listening status on port " + _port + " : " + info);  
+            //info = { "status": "success", "url": "http://localhost:61234/"}  
+        });  
+    }  
+});  
+  
+function onRequest(info) {  
+    console.log(info.content);  
+    // info = { "content": "{'hello': 'world'}", "contentType": "application/json", "url": "http://localhost:59873/"}  
+}  
+  
+...  
+  
+_server.close();  
+
+```
+
+sendHttpRequest(url, method, headers, data, callback)[](#sendhttprequesturl-method-headers-data-callback "Direct link to sendHttpRequest(url, method, headers, data, callback)")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.126[](#version-added-0126 "Direct link to Version added: 0.126")
+
+#### Permissions required: Web[](#permissions-required-web-1 "Direct link to Permissions required: Web")
+
+> Send an https request (of different methods) to localhost/127.0.0.1 while by-passing a valid certificate verification.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| url | string |  |
+| method | [HttpRequestMethods](#httprequestmethods-enum) enum |  |
+| headers | [FetchHeader](#fetchheader-object)[] | an array of http headers (key,value) pairs. See [notes](#headers-notes) below |
+| data | string (Optional) | The data being sent to the server (relevant for POST/PUT requests) |
+| callback | [SendHttpRequestResult](#sendhttprequestresult-object) Object | Container for the send requests |
+
+#### `headers` notes[](#headers-notes "Direct link to headers-notes")
+
+An example of [FetchHeader](#fetchheader-object) objects array: `[{ key: "Content-Type", value: "application/json" }]`.
+
+createWebSocket(connectionParams, callback)[](#createwebsocketconnectionparams-callback "Direct link to createWebSocket(connectionParams, callback)")
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.129[](#version-added-0129 "Direct link to Version added: 0.129")
+
+#### Permissions required: Web[](#permissions-required-web-2 "Direct link to Permissions required: Web")
+
+> Creates a WebSocket client to localhost/127.0.0.1.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| connectionParams | [WebSocketConnectionParams](#websocketconnectionparams-object) Object | connection params. See [notes](#connectionparams-notes) below |
+| callback | [CreateWebSocketResult](#createwebsocketresult-object) Object | A callback function which will be called with the status of the request |
+
+#### `connectionParams` notes[](#connectionparams-notes "Direct link to connectionparams-notes")
+
+An example:
+
+```
+{  
+    "secured":true,  
+    "port": int,  
+    "credentials": {  
+        "username": "riot",  
+        "password":  "string" (e.g lcuCredentialsoverw.native_token)  
+      },  
+      "protocols":["wamp"]  
+}  
+
+```
+
+WebSocketConnectionParams Object[](#websocketconnectionparams-object "Direct link to WebSocketConnectionParams Object")
+--------------------------------------------------------------------------------------------------------------------------
+
+#### Version added: 0.129[](#version-added-0129-1 "Direct link to Version added: 0.129")
+
+> Container for the connection params.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| secured | bool |  |
+| port | int | The port to use |
+| credentials | LoginCredentials |  |
+| protocols | string[] |  |
+
+HttpRequestMethods enum[](#httprequestmethods-enum "Direct link to HttpRequestMethods enum")
+-----------------------------------------------------------------------------------------------
+
+#### Version added: 0.129[](#version-added-0129-2 "Direct link to Version added: 0.129")
+
+> HTTP requests methods.
+
+| Option | Description |
+| --- | --- |
+| GET |  |
+| HEAD |  |
+| POST |  |
+| PUT |  |
+| DELETE |  |
+| PATCH |  |
+
+FetchHeader Object[](#fetchheader-object "Direct link to FetchHeader Object")
+--------------------------------------------------------------------------------
+
+#### Version added: 0.126[](#version-added-0126-1 "Direct link to Version added: 0.126")
+
+> Container for a key value pair that represent an HTTP header.
+
+Read more about http headers [here](https://flaviocopes.com/http-request-headers/).
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| key | string |  |
+| value | string |  |
+
+#### Object Data Example[](#object-data-example "Direct link to Object Data Example")
+
+```
+{ "key": "Content-Type", "value": "application/json" }  
+
+```
+
+MessageType enum[](#messagetype-enum "Direct link to MessageType enum")
+--------------------------------------------------------------------------
+
+#### Version added: 0.129[](#version-added-0129-3 "Direct link to Version added: 0.129")
+
+> Describes different types on messages.
+
+| Option | Description |
+| --- | --- |
+| ping |  |
+| binary |  |
+| text |  |
+
+#### Example data: Success[](#example-data-success "Direct link to Example data: Success")
+
+CreateServerResult Object[](#createserverresult-object "Direct link to CreateServerResult Object")
+-----------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| server | [WebServer](/ow-native/reference/web/webserver) object |  |
+
+#### Example data: Success[](#example-data-success-1 "Direct link to Example data: Success")
+
+A callback function which returns the status of the request and an object with two fields: A status string and a server object.
+
+```
+{  
+    "status": "success",  
+    "server": {  
+        "onRequest": {}  
+    }  
+}  
+
+```
+
+SendHttpRequestResult Object[](#sendhttprequestresult-object "Direct link to SendHttpRequestResult Object")
+--------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| statusCode | number |  |
+| data | string |  |
+
+#### Example data: Success[](#example-data-success-2 "Direct link to Example data: Success")
+
+```
+{ "status": "success" }  
+
+```
+
+CreateWebSocketResult Object[](#createwebsocketresult-object "Direct link to CreateWebSocketResult Object")
+--------------------------------------------------------------------------------------------------------------
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| *success* | boolean | inherited from the "Result" Object |
+| *error* | string | inherited from the "Result" Object |
+| client | [WebSocket](/ow-native/reference/web/websocket) object |  |
+
+#### Example data: Success[](#example-data-success-3 "Direct link to Example data: Success")
+
+This call returns a status and a WebSocket object.
+
+```
+{  
+     "status": "success",  
+     "client": "IOverwolfWebSocket"  
+}  
+
+```
