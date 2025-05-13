@@ -2,6 +2,8 @@
 
 **Project Goal:** To enhance the Overwolf sample TypeScript app to provide real-time audio cues for specific in-game events and states in League of Legends.
 
+**Special Note** The user does not have access to conventional DevTools. When you need to see information from the log, it can only come from a log that the user pulls up manually. But at no point should you ask the user to interact with the Developer Tools or other real-time logging interfaces.
+
 **Features Implemented:**
 
 1.  **Item Purchase Opportunity Cue:**
