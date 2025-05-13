@@ -25,3 +25,6 @@ yarn-error.log*
 # Audio files.
 *.mp3
 *.wav
+
+# Overwolf docs
+overwolf_docs/ 
