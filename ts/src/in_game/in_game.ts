@@ -32,8 +32,8 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 
 // --- Item Definitions (Based on user input/logic) ---
 const PRICE = {
-  lichbane: 3200,
-  rabadons: 3600,
+  lichbane: 2900,
+  rabadons: 3500,
   void: 3000,
   zhonyas: 3250, // Using standard cost based on previous discussion
   armguard: 1600,
@@ -77,7 +77,7 @@ const VERDANT_BARRIER: ItemComponent = { id: 4632, cost: PRICE.verdant };
 const ALL_TRACKED_ITEMS: Record<string, ItemDefinition> = {
   LICH_BANE: {
     id: 3100, name: 'Lich Bane', cost: PRICE.lichbane,
-    components: [SHEEN, AETHER_WISP, NEEDLESSLY_LARGE_ROD],
+    components: [SHEEN, AETHER_WISP, BLASTING_WAND],
     audioCue: 'getlichbane.mp3', requiresComponentCheck: true,
   },
   RABADONS: {
