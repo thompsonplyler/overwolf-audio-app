@@ -243,5 +243,6 @@ export const kWindowNames = {
 };
 
 export const kHotkeys = {
-  toggle: 'sample_app_ts_showhide'
+  toggle: 'sample_app_ts_showhide',
+  toggleLogs: 'sample_app_ts_togglelogs'
 };

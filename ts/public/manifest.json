@@ -24,6 +24,11 @@
         "title": "Show/Hide In-Game Window",
         "action-type": "toggle",
         "default": "Ctrl+F"
+      },
+      "sample_app_ts_togglelogs": {
+        "title": "Show/Hide Logs",
+        "action-type": "custom",
+        "default": "Ctrl+K"
       }
     },
     "protocol_override_domains": {

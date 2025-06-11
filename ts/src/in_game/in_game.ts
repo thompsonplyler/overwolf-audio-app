@@ -801,74 +801,47 @@ class InGame extends AppWindow {
   }
 
   private setupToggleLogsDisplay(): void {
-    if (
-      this._toggleLogsDisplayBtn && // Check only button; other elements are handled by _updateUIVisibility
-      this._mainElement &&
-      this._currentWindowId &&
-      typeof this._originalWindowWidth === 'number' &&
-      typeof this._originalWindowHeight === 'number'
-      // Removed checks for individual header elements here as _updateUIVisibility handles them
-    ) {
+    if (this._toggleLogsDisplayBtn) {
       this._toggleLogsDisplayBtn.addEventListener('click', () => {
         this._areLogsVisible = !this._areLogsVisible;
-        console.log(`Toggle button clicked. _areLogsVisible is now: ${this._areLogsVisible}`);
-
-        // Update all UI elements based on the new state
-        this._updateUIVisibility();
-
-        // Perform window resizing
-        let targetWidth: number;
-        let targetHeight: number;
-        let logMessage: string;
-
-        if (this._areLogsVisible) {
-          targetWidth = this._originalWindowWidth;
-          targetHeight = this._originalWindowHeight;
-          logMessage = `Window restoring to original size: ${targetWidth}x${targetHeight}.`;
-        } else {
-          targetWidth = COLLAPSED_WINDOW_WIDTH;
-          targetHeight = COLLAPSED_WINDOW_HEIGHT;
-          logMessage = `Window collapsing to ${targetWidth}x${targetHeight}.`;
-        }
-
-        const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
-          window_id: this._currentWindowId,
-          width: targetWidth,
-          height: targetHeight,
-          auto_dpi_resize: true
-        };
-
-        overwolf.windows.changeSize(sizeParams, (result) => {
-          if (result && result.success) {
-            console.log(logMessage, 'Success.');
-          } else {
-            console.error('Failed to change window size:', result, logMessage);
-          }
-        });
+        console.log(`Button clicked: _areLogsVisible is now ${this._areLogsVisible}`);
+        this._updateUIVisibility(); // This method handles UI and window size changes
       });
+      console.log('setupToggleLogsDisplay: Click listener added to button.');
     } else {
-      console.error("setupToggleLogsDisplay: Prerequisites not met for base elements.", {
-        btn: !!this._toggleLogsDisplayBtn,
-        main: !!this._mainElement,
-        id: this._currentWindowId,
-        width: this._originalWindowWidth,
-        height: this._originalWindowHeight
-      });
-      // Log if specific header elements were not found during constructor (they won't be logged here anymore)
-      // This part of the log might be less relevant if the _updateUIVisibility uses its internal checks.
+      console.error('setupToggleLogsDisplay: _toggleLogsDisplayBtn is not defined.');
     }
+
+    // Listen for the new hotkey
+    overwolf.settings.hotkeys.onPressed.addListener(async (hotkeyResult) => {
+      if (hotkeyResult && hotkeyResult.name === kHotkeys.toggleLogs) {
+        console.log('Hotkey Ctrl+K pressed: Toggle Logs display');
+        this._areLogsVisible = !this._areLogsVisible;
+        this._updateUIVisibility(); // This method handles UI and window size changes
+      }
+    });
+    console.log(`setupToggleLogsDisplay: Hotkey listener added for ${kHotkeys.toggleLogs}.`);
   }
 
   // NEW: Centralized UI update logic based on visibility state
   private _updateUIVisibility(): void {
     console.log(`_updateUIVisibility called, _areLogsVisible: ${this._areLogsVisible}`);
+
+    let targetWidth: number;
+    let targetHeight: number;
+    let logMessageSuffix: string;
+
     if (this._areLogsVisible) {
       if (this._mainElement) this._mainElement.style.display = 'flex';
       if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Hide Logs';
-      if (this._headerIcon) this._headerIcon.style.display = ''; // Revert to stylesheet default
+      if (this._headerIcon) this._headerIcon.style.display = '';
       if (this._headerTitle) this._headerTitle.style.display = '';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = '';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = '';
+
+      targetWidth = this._originalWindowWidth;
+      targetHeight = this._originalWindowHeight;
+      logMessageSuffix = 'UI expanded, window restoring to original size.';
     } else {
       if (this._mainElement) this._mainElement.style.display = 'none';
       if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Activate App';
@@ -876,8 +849,37 @@ class InGame extends AppWindow {
       if (this._headerTitle) this._headerTitle.style.display = 'none';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = 'none';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = 'none';
+
+      targetWidth = COLLAPSED_WINDOW_WIDTH;
+      targetHeight = COLLAPSED_WINDOW_HEIGHT;
+      logMessageSuffix = 'UI collapsed, window shrinking.';
     }
-    // Diagnostic for button text after update
+
+    if (this._currentWindowId && typeof targetWidth === 'number' && typeof targetHeight === 'number' &&
+      typeof this._originalWindowWidth === 'number' && typeof this._originalWindowHeight === 'number') {
+      const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
+        window_id: this._currentWindowId,
+        width: targetWidth,
+        height: targetHeight,
+        auto_dpi_resize: true
+      };
+      overwolf.windows.changeSize(sizeParams, (result) => {
+        if (result && result.success) {
+          console.log(`_updateUIVisibility: ${logMessageSuffix} Size changed to ${targetWidth}x${targetHeight}. Success.`);
+        } else {
+          console.error(`_updateUIVisibility: Failed to change window size for ${logMessageSuffix}`, result);
+        }
+      });
+    } else {
+      console.error('_updateUIVisibility: Prerequisites for changeSize not met or original dimensions not set. Cannot resize.', {
+        currentWindowId: this._currentWindowId,
+        targetWidth,
+        targetHeight,
+        originalWidth: this._originalWindowWidth,
+        originalHeight: this._originalWindowHeight
+      });
+    }
+
     if (this._toggleLogsDisplayBtn) console.log(`_updateUIVisibility - Button text is now: ${this._toggleLogsDisplayBtn.innerText}`);
   }
 }
