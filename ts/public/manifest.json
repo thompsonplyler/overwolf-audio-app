@@ -25,10 +25,10 @@
         "action-type": "toggle",
         "default": "Ctrl+F"
       },
-      "sample_app_ts_togglelogs": {
-        "title": "Show/Hide Logs",
-        "action-type": "custom",
-        "default": "Ctrl+K"
+      "toggle_clicker_window": {
+        "title": "Toggle Clicker Window",
+        "action-type": "toggle",
+        "default": "Ctrl+G"
       }
     },
     "protocol_override_domains": {
@@ -83,8 +83,8 @@
           "height": 50
         }
       },
-      "toggler_button": {
-        "file": "toggler_button.html",
+      "clicker": {
+        "file": "clicker.html",
         "in_game_only": true,
         "start_visible": true,
         "size": {

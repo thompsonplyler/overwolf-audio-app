@@ -81,6 +81,11 @@ class BackgroundController {
     if (info.isRunning) {
       this._windows[kWindowNames.desktop].close();
       this._windows[kWindowNames.inGame].restore();
+      overwolf.windows.obtainDeclaredWindow('clicker', (result) => {
+        if (result.success && result.window && result.window.id) {
+          overwolf.windows.restore(result.window.id);
+        }
+      });
     } else {
       this._windows[kWindowNames.desktop].restore();
       this._windows[kWindowNames.inGame].close();

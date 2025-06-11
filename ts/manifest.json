@@ -1,0 +1,128 @@
+{
+    "author": "Overwolf",
+    "version": "1.0.0",
+    "minimum-overwolf-version": "0.148.0",
+    "manifest_version": 2,
+    "type": "WebApp",
+    "permissions": [
+        "Hotkeys",
+        "GameInfo",
+        "ProcessManager"
+    ],
+    "data": {
+        "game_ids": [
+            5426
+        ],
+        "windows": {
+            "background": {
+                "file": "background.html",
+                "background_optimization": true,
+                "is_background_page": true
+            },
+            "in_game": {
+                "file": "in_game.html",
+                "transparent": true,
+                "resizable": true,
+                "show_in_taskbar": true,
+                "size": {
+                    "width": 1212,
+                    "height": 699
+                },
+                "min_size": {
+                    "width": 150,
+                    "height": 50
+                }
+            },
+            "desktop": {
+                "file": "desktop.html",
+                "resizable": true,
+                "show_in_taskbar": true,
+                "size": {
+                    "width": 1212,
+                    "height": 699
+                }
+            },
+            "clicker": {
+                "file": "clicker.html",
+                "transparent": true,
+                "resizable": false,
+                "show_in_taskbar": false,
+                "size": {
+                    "width": 150,
+                    "height": 50
+                },
+                "start_visible": true
+            }
+        },
+        "game_events": [
+            {
+                "game_id": 5426,
+                "name": "match_clock",
+                "required": true
+            }
+        ],
+        "launch_events": [
+            {
+                "event": "GameLaunch",
+                "event_data": {
+                    "game_ids": [
+                        5426
+                    ]
+                },
+                "start_minimized": false
+            }
+        ],
+        "user_agent": "ts-sample-app",
+        "protocol_override_domains": {
+            "googlesyndication": "http"
+        },
+        "developer": {
+            "enable_auto_refresh": true,
+            "popup_blocker": false,
+            "windows": {
+                "in_game": {
+                    "show_fps": true
+                }
+            }
+        },
+        "block_top_window_navigation": true,
+        "relaunch_for_all_users": true,
+        "single_instance": true,
+        "disable_rightclick": {
+            "in_game": true
+        },
+        "start_window": "background",
+        "stat_models": {
+            "in_game_duration": {
+                "name": "in_game_duration",
+                "features": {
+                    "in_game_duration": true
+                }
+            }
+        },
+        "defaults": {
+            "in_game_window": "in_game",
+            "desktop_window": "desktop"
+        },
+        "hotkeys": {
+            "toggle_in_game_window": {
+                "title": "Toggle In-Game Window",
+                "action-type": "toggle",
+                "target_window": "in_game",
+                "hotkey": "Ctrl+F"
+            },
+            "toggle_clicker_window": {
+                "title": "Toggle Clicker Window",
+                "action-type": "toggle",
+                "target_window": "clicker",
+                "hotkey": "Ctrl+G"
+            }
+        },
+        "extra-objects": {
+            "com-overwolf-procmgr-ext": {
+                "file": "ProcMgr-ext.dll",
+                "class": "ProcMgr_ext.ProcMgr"
+            }
+        }
+    }
+}

@@ -10,7 +10,7 @@ module.exports = env => ({
         background: './src/background/background.ts',
         desktop: './src/desktop/desktop.ts',
         in_game: './src/in_game/in_game.ts',
-        toggler_button: './src/toggler_button/toggler_button.ts'
+        clicker: './src/clicker/clicker.ts'
     },
     devtool: 'inline-source-map',
     module: {
@@ -48,13 +48,13 @@ module.exports = env => ({
         }),
         new HtmlWebpackPlugin({
             template: './src/in_game/in_game.html',
-            filename: path.resolve(__dirname, './dist/in_game.html'),
+            filename: 'in_game.html',
             chunks: ['in_game']
         }),
         new HtmlWebpackPlugin({
-            template: './src/toggler_button/toggler_button.html',
-            filename: path.resolve(__dirname, './dist/toggler_button.html'),
-            chunks: ['toggler_button']
+            template: './src/clicker/clicker.html',
+            filename: 'clicker.html',
+            chunks: ['clicker']
         }),
         new OverwolfPlugin(env)
     ]
