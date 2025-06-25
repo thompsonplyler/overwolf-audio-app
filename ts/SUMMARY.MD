@@ -113,3 +113,34 @@ This project modifies the standard Overwolf TypeScript sample app (`overwolf/sam
   - Resizes the window to the small, collapsed dimensions (150x50), leaving only the "Activate App" button visible and interactive.
 - Clicking "Activate App" correctly restores the large size and all visual elements.
 - Audio cues play correctly after the initial button interaction.
+
+## Session on "Let's Go!" Button Implementation (Current Session)
+
+**Objective:** Add a new, small, interactive window named "clicker" to serve as the primary user interaction point for enabling audio, eventually replacing the need to interact with the main log window.
+
+**Key Challenges & Learnings:**
+
+1.  **The "Ghost" Manifest (`toggler_button` error):**
+
+    - **Problem:** After seemingly removing all traces of an old `toggler_button` window, the app repeatedly failed to load, throwing a `manifest.json` error that the `toggler_button.html` file couldn't be found.
+    - **Debugging Journey:** This led to a long and frustrating chase. We correctly verified that the root `manifest.json` and `webpack.config.js` were clean. We tried clearing the `dist` folder and bumping the app version number, which are standard procedures for clearing a stubborn Overwolf client cache. Nothing worked.
+    - **Assumption Overturned:** The core, incorrect assumption was that the root `manifest.json` file was the source of truth for the build.
+    - **The Breakthrough:** We discovered that the build process was actually configured to use a **`public/manifest.json`** file. This file still contained the old, incorrect reference to `toggler_button`. This was the true source of the error, as the build was overwriting our correct manifest with this incorrect one.
+
+2.  **Programmatic Window Launching:**
+    - **Problem:** After fixing the manifest issue, the new "clicker" window was defined and the app loaded without error, but the window itself did not appear.
+    - **Assumption Overturned:** Simply defining a window in the manifest with `"start_visible": true` is **not sufficient** to make it appear automatically. Standard windows (that aren't the special `desktop` or `in_game` start windows) must be programmatically launched.
+    - **Solution:** We added logic to the `background.ts` script. Specifically, in the `toggleWindows` function (which correctly fires when a game starts), we added calls to `overwolf.windows.obtainDeclaredWindow('clicker', ...)` followed by `overwolf.windows.restore(...)`. This successfully creates and displays the window.
+
+**Future Approach for Similar Issues:**
+
+1.  **Verify the Real Manifest:** If a manifest-related error appears that doesn't match the root `manifest.json`, immediately check for other manifests in the project (especially in `public/`) and inspect the `overwolf.webpack.js` or equivalent build script to confirm which file is being used as the source.
+2.  **Launch Windows Explicitly:** Do not rely on `"start_visible": true` for custom windows. Always write explicit logic in a background script to obtain and restore any windows you need to appear. The `onGameStarted` or `onRunningGameInfoChanged` event handlers are the correct place for in-game windows.
+3.  **Surgical Edits:** When modifying a complex, working manifest, it's safer to make small, targeted changes (like renaming a key) rather than rewriting large sections, which can inadvertently remove critical, non-obvious configurations.
+
+**Final State (after this session):**
+
+- A new "Let's Go!" button now correctly appears in-game.
+- All previous functionality of the main log window is preserved (`Ctrl+F` toggle, hide/show button).
+- **Persistent Problem:** The `Ctrl+G` hotkey assigned to the new "clicker" window does **not** work.
+- **Next Focus:** Investigate why the `Ctrl+G` hotkey is non-functional. The next step will be to compare its implementation in `public/manifest.json` with the working `Ctrl+F` hotkey's implementation.

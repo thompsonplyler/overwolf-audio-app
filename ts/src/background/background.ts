@@ -50,7 +50,9 @@ class BackgroundController {
   public async run() {
     this._gameListener.start();
 
-    const currWindowName = (await this.isSupportedGameRunning())
+    const isGameRunning = await this.isSupportedGameRunning();
+
+    const currWindowName = isGameRunning
       ? kWindowNames.inGame
       : kWindowNames.desktop;
 
@@ -95,7 +97,11 @@ class BackgroundController {
   private async isSupportedGameRunning(): Promise<boolean> {
     const info = await OWGames.getRunningGameInfo();
 
-    return info && info.isRunning && this.isSupportedGame(info);
+    if (!info) {
+      return false;
+    }
+
+    return info.isRunning && this.isSupportedGame(info);
   }
 
   // Identify whether the RunningGameInfo object we have references a supported game

@@ -87,6 +87,7 @@
         "file": "clicker.html",
         "in_game_only": true,
         "start_visible": true,
+        "focus_game_takeover_release_hotkey": "toggle_clicker_window",
         "size": {
           "width": 150,
           "height": 50
