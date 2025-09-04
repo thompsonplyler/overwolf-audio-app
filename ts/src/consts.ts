@@ -244,5 +244,6 @@ export const kWindowNames = {
 
 export const kHotkeys = {
   toggle: 'sample_app_ts_showhide',
-  toggleLogs: 'sample_app_ts_togglelogs'
+  toggleLogs: 'sample_app_ts_togglelogs',
+  toggleCompact: 'toggle_clicker_window',
 };

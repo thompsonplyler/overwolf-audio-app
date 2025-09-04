@@ -170,6 +170,14 @@ class InGame extends AppWindow {
   // Stores previous ward count for each enemy champion
   private _enemyWardCounts: Record<string, number> = {}; // Key: ChampionName, Value: Count
 
+  // --- WebSocket/Game session state ---
+  private _ws: WebSocket | null = null;
+  private _wsReady: boolean = false;
+  private _currentMatchId: string | null = null;
+  private _gameActive: boolean = false;
+  private _emittedRabadon: boolean = false;
+  private _emittedVillain: boolean = false;
+
   private constructor() {
     super(kWindowNames.inGame);
 
@@ -258,6 +266,9 @@ class InGame extends AppWindow {
       this.setToggleHotkeyBehavior();
       this.setupToggleLogsDisplay();
 
+      // Initialize WebSocket connection for outbound events
+      this.connectWebSocket();
+
       const gameClassId = await this.getCurrentGameClassId();
       const gameFeatures = kGamesFeatures.get(gameClassId);
       if (gameFeatures && gameFeatures.length) {
@@ -272,9 +283,28 @@ class InGame extends AppWindow {
   private onInfoUpdates(info) {
     let goldChanged = false;
     let itemsChanged = false;
-    let nameFound = false;
+    let nameFound = false; // Flag for the *entire* all_players array
     let allPlayersChanged = false; // Flag for the *entire* all_players array
     let teamFound = false; // Flag for initial team discovery
+
+    // --- Also try to capture match_id from match_info if available ---
+    try {
+      const matchInfoString = info?.match_info;
+      if (typeof matchInfoString === 'string') {
+        try {
+          const matchInfo = JSON.parse(matchInfoString);
+          const possibleMatchId = matchInfo?.matchId || matchInfo?.match_id || matchInfo?.gameId || matchInfo?.game_id;
+          if (possibleMatchId && possibleMatchId !== this._currentMatchId) {
+            this._currentMatchId = String(possibleMatchId);
+            console.log(`[WS][Match] matchId detected/updated: ${this._currentMatchId}`);
+          }
+        } catch (_) {
+          console.log('[WS][Match] match_info present but not parsable as JSON');
+        }
+      }
+    } catch (e) {
+      console.warn('[WS][Match] Error reading match_info:', e);
+    }
 
     // --- 1. Update State from Parsed Nested JSON --- 
     try {
@@ -306,6 +336,21 @@ class InGame extends AppWindow {
               this._playerState.gold = currentGoldNum;
               goldChanged = true;
             }
+          }
+          // Detect level (some payloads use level on root, others under championStats)
+          try {
+            const detectedLevelRaw = activePlayerData?.level ?? activePlayerData?.championStats?.level;
+            const detectedLevel = Number(detectedLevelRaw);
+            if (!isNaN(detectedLevel)) {
+              // Keep gameTime-driven state but allow level-based villain trigger from info updates too
+              if (this._gameActive && !this._emittedVillain && detectedLevel >= 6) {
+                console.log('[WS][Event] Detected level >= 6 via info updates (active_player). Emitting villain once for this match. Level=', detectedLevel);
+                this.sendEventOncePerMatch('villain');
+                this._emittedVillain = true;
+              }
+            }
+          } catch (levErr) {
+            console.log('[WS][Event] Level parse from active_player failed:', levErr);
           }
         } catch (parseError) {
           // Log the string that failed parsing
@@ -397,6 +442,22 @@ class InGame extends AppWindow {
       console.error('Error processing info update:', e);
     }
 
+    // Emit 'rabadon' once per match when Rabadon's Deathcap (id: 3089) is acquired
+    try {
+      if (itemsChanged && this._gameActive && Array.isArray(this._playerState.items)) {
+        const ownsRabadons = this._playerState.items.some((it: any) => it && Number(it.itemID) === 3089 && Number(it.count) > 0);
+        const shouldEmit = ownsRabadons && !this._emittedRabadon;
+        console.log('[WS][Event][Rabadon] itemsChanged=', itemsChanged, 'ownsRabadons=', ownsRabadons, 'alreadyEmitted=', this._emittedRabadon, 'willEmit=', shouldEmit);
+        if (shouldEmit) {
+          console.log('[WS][Event] Detected Rabadon acquisition (item 3089). Emitting once for this match.');
+          this.sendEventOncePerMatch('rabadon');
+          this._emittedRabadon = true;
+        }
+      }
+    } catch (e) {
+      console.warn('[WS][Event] Rabadon detection error:', e);
+    }
+
     // --- 2. Update UI Log --- 
     const goldChangedForUI = this._playerState.gold !== this._lastLoggedGold;
     const itemsChangedForUI = JSON.stringify(this._playerState.items) !== this._lastLoggedInventoryString;
@@ -461,6 +522,10 @@ class InGame extends AppWindow {
   private onNewEvents(e) {
     // --- Handle match_clock event --- 
     if (e.events) {
+      try {
+        const names = e.events.map(ev => ev && ev.name).filter(Boolean).join(',');
+        console.log('[Events] Incoming names:', names);
+      } catch (_) { }
       for (const event of e.events) {
         if (event.name === 'match_clock') {
           try {
@@ -471,11 +536,52 @@ class InGame extends AppWindow {
                 console.log(`[onNewEvents] GameTime updated via match_clock: ${newGameTime}`);
               }
               this._playerState.gameTime = newGameTime;
+              if (!this._gameActive) {
+                // Fallback: treat presence of match_clock as match started
+                this._gameActive = true;
+                this._emittedRabadon = false;
+                this._emittedVillain = false;
+                console.log('[WS][Lifecycle] match_clock observed while inactive. Emitting fallback game_start with game_id:', this._currentMatchId || 'unknown');
+                this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+              }
             }
           } catch (err) {
             console.error("Error parsing match_clock data:", event.data, err);
           }
           break;
+        }
+
+        // Start/end and level handling for WebSocket emissions
+        if (event.name === 'match_start' || event.name === 'matchStart') {
+          this._gameActive = true;
+          this._emittedRabadon = false;
+          this._emittedVillain = false;
+          // Send game_start with matchId if known
+          console.log('[WS][Lifecycle] Emitting game_start with game_id:', this._currentMatchId || 'unknown');
+          this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+          console.log('[WS][Lifecycle] game_start emitted');
+        }
+        if (event.name === 'match_end' || event.name === 'matchEnd') {
+          console.log('[WS][Lifecycle] Emitting game_end');
+          this.sendOp('game_end');
+          console.log('[WS][Lifecycle] game_end emitted');
+          this._gameActive = false;
+          this._emittedRabadon = false;
+          this._emittedVillain = false;
+          this._currentMatchId = this._currentMatchId; // keep last known until next updates
+        }
+        if (event.name === 'level' || event.name === 'playerLevel' || event.name === 'leveled_up') {
+          try {
+            const lvl = Number(event.data);
+            console.log('[WS][Event][Level] level event name=', event.name, 'data=', event.data, 'parsed=', lvl);
+            if (this._gameActive && !this._emittedVillain && !isNaN(lvl) && lvl >= 6) {
+              console.log('[WS][Event] Detected level >= 6 (', lvl, '). Emitting villain once for this match.');
+              this.sendEventOncePerMatch('villain');
+              this._emittedVillain = true;
+            }
+          } catch (_) {
+            console.log('[WS][Event][Level] failed to parse level from event:', event);
+          }
         }
       }
     }
@@ -526,6 +632,9 @@ class InGame extends AppWindow {
 
     OWHotkeys.onHotkeyDown(kHotkeys.toggle, toggleInGameWindow);
   }
+
+  // (removed) legacy clicker hotkey behavior
+
 
   // Appends a new line to the specified log
   private logLine(log: HTMLElement, data: any, highlight: boolean) {
@@ -812,15 +921,15 @@ class InGame extends AppWindow {
       console.error('setupToggleLogsDisplay: _toggleLogsDisplayBtn is not defined.');
     }
 
-    // Listen for the new hotkey
+    // Listen for both hotkeys
     overwolf.settings.hotkeys.onPressed.addListener(async (hotkeyResult) => {
-      if (hotkeyResult && hotkeyResult.name === kHotkeys.toggleLogs) {
-        console.log('Hotkey Ctrl+K pressed: Toggle Logs display');
+      if (hotkeyResult && (hotkeyResult.name === kHotkeys.toggleLogs || hotkeyResult.name === kHotkeys.toggleCompact)) {
+        console.log(`Hotkey ${hotkeyResult.name} pressed: Toggle Logs display`);
         this._areLogsVisible = !this._areLogsVisible;
         this._updateUIVisibility(); // This method handles UI and window size changes
       }
     });
-    console.log(`setupToggleLogsDisplay: Hotkey listener added for ${kHotkeys.toggleLogs}.`);
+    console.log(`setupToggleLogsDisplay: Hotkey listeners added for ${kHotkeys.toggleLogs} and ${kHotkeys.toggleCompact}.`);
   }
 
   // NEW: Centralized UI update logic based on visibility state
@@ -881,6 +990,79 @@ class InGame extends AppWindow {
     }
 
     if (this._toggleLogsDisplayBtn) console.log(`_updateUIVisibility - Button text is now: ${this._toggleLogsDisplayBtn.innerText}`);
+  }
+
+  // --- WebSocket helpers ---
+  private connectWebSocket(): void {
+    try {
+      const url = 'ws://localhost:5001/api/ws';
+      console.log('[WS] Connecting to', url);
+      this._ws = new WebSocket(url);
+      this._wsReady = false;
+
+      this._ws.addEventListener('open', () => {
+        this._wsReady = true;
+        console.log('[WS] Connected. readyState=', this._ws?.readyState);
+        // If a game is already active and matchId known, notify server
+        if (this._gameActive) {
+          console.log('[WS] On connect, game already active. Emitting game_start.');
+          this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+        }
+
+        // Heartbeat to keep connection visible
+        try {
+          const heartbeat = { op: 'ping', ts: Date.now() };
+          console.log('[WS] Sending heartbeat:', heartbeat);
+          this._ws?.send(JSON.stringify(heartbeat));
+        } catch (e) {
+          console.log('[WS] Heartbeat send failed:', e);
+        }
+      });
+
+      this._ws.addEventListener('close', (ev) => {
+        this._wsReady = false;
+        console.log('[WS] Disconnected. code=', (ev as any)?.code, 'reason=', (ev as any)?.reason);
+      });
+
+      this._ws.addEventListener('error', (err) => {
+        console.error('[WS] Error:', err);
+      });
+
+      this._ws.addEventListener('message', (msg) => {
+        // Optional: handle inbound messages
+        console.log('[WS] Message from server:', msg.data);
+      });
+    } catch (e) {
+      console.error('[WS] Failed to connect:', e);
+    }
+  }
+
+  private sendOp(op: string, payload?: any): void {
+    try {
+      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+        if (!this._wsReady) {
+          console.warn('[WS] readyState OPEN but _wsReady=false. Forcing true.');
+          this._wsReady = true;
+        }
+        const message = payload ? { op, ...payload } : { op };
+        console.log('[WS] Sending op:', op, 'payload:', payload ?? {});
+        this._ws.send(JSON.stringify(message));
+        console.log('[WS] Sent op:', op);
+      } else {
+        console.warn('[WS] Not ready to send. op=', op, 'ready=', this._wsReady, 'state=', this._ws?.readyState);
+      }
+    } catch (e) {
+      console.error('[WS] sendOp error:', e);
+    }
+  }
+
+  private sendEventOncePerMatch(name: 'rabadon' | 'villain'): void {
+    if (!this._gameActive) {
+      console.log('[WS][Event] Skipping event because game not active:', name);
+      return;
+    }
+    console.log('[WS][Event] Emitting event:', name);
+    this.sendOp('event', { name });
   }
 }
 

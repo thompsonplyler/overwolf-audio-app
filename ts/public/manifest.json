@@ -26,8 +26,8 @@
         "default": "Ctrl+F"
       },
       "toggle_clicker_window": {
-        "title": "Toggle Clicker Window",
-        "action-type": "toggle",
+        "title": "Toggle Compact Mode",
+        "action-type": "custom",
         "default": "Ctrl+G"
       }
     },
@@ -81,32 +81,6 @@
         "min_size": {
           "width": 150,
           "height": 50
-        }
-      },
-      "clicker": {
-        "file": "clicker.html",
-        "in_game_only": true,
-        "start_visible": true,
-        "focus_game_takeover_release_hotkey": "toggle_clicker_window",
-        "size": {
-          "width": 150,
-          "height": 50
-        },
-        "resizable": false,
-        "show_in_taskbar": false,
-        "clickthrough": false,
-        "transparent": true,
-        "always_on_top": true,
-        "focus_game_takeover": "None",
-        "desktop_placement": {
-          "location_type": "TopLeft",
-          "margin_x": 20,
-          "margin_y": 20
-        },
-        "in_game_position": {
-          "Top": 20,
-          "Left": 20,
-          "force_in_game_position": true
         }
       }
     },

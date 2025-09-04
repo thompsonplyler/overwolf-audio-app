@@ -21,6 +21,8 @@ class BackgroundController {
   private _gameListener: OWGameListener;
 
   private constructor() {
+    console.log('NEW BackgroundController constructor');
+
     // Populating the background controller's window dictionary
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
     this._windows[kWindowNames.inGame] = new OWWindow(kWindowNames.inGame);
@@ -83,11 +85,6 @@ class BackgroundController {
     if (info.isRunning) {
       this._windows[kWindowNames.desktop].close();
       this._windows[kWindowNames.inGame].restore();
-      overwolf.windows.obtainDeclaredWindow('clicker', (result) => {
-        if (result.success && result.window && result.window.id) {
-          overwolf.windows.restore(result.window.id);
-        }
-      });
     } else {
       this._windows[kWindowNames.desktop].restore();
       this._windows[kWindowNames.inGame].close();
