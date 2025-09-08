@@ -270,11 +270,10 @@ class InGame extends AppWindow {
       this.connectWebSocket();
 
       const gameClassId = await this.getCurrentGameClassId();
-      const gameFeatures = kGamesFeatures.get(gameClassId);
-      if (gameFeatures && gameFeatures.length) {
-        this._gameEventsListener = new OWGamesEvents({ onInfoUpdates: this.onInfoUpdates.bind(this), onNewEvents: this.onNewEvents.bind(this) }, gameFeatures);
-        this._gameEventsListener.start();
-      }
+      const gameFeatures = kGamesFeatures.get(gameClassId) || [];
+      console.log('[Events] Subscribing features for classId:', gameClassId, 'features:', gameFeatures);
+      this._gameEventsListener = new OWGamesEvents({ onInfoUpdates: this.onInfoUpdates.bind(this), onNewEvents: this.onNewEvents.bind(this) }, gameFeatures);
+      this._gameEventsListener.start();
     } catch (e) {
       console.error("Failed to initialize InGame window essentials:", e);
     }
@@ -286,6 +285,21 @@ class InGame extends AppWindow {
     let nameFound = false; // Flag for the *entire* all_players array
     let allPlayersChanged = false; // Flag for the *entire* all_players array
     let teamFound = false; // Flag for initial team discovery
+
+    // High-level visibility into categories present on each info update
+    try {
+      const rootKeys = Object.keys(info || {});
+      if (rootKeys.length) {
+        console.log('[Info] Root keys:', rootKeys.join(','));
+      }
+      const inf = (info as any)?.info;
+      if (inf) {
+        const catKeys = Object.keys(inf);
+        if (catKeys.length) {
+          console.log('[Info] Categories present:', catKeys.join(','));
+        }
+      }
+    } catch (_) { }
 
     // --- Also try to capture match_id from match_info if available ---
     try {
@@ -304,6 +318,31 @@ class InGame extends AppWindow {
       }
     } catch (e) {
       console.warn('[WS][Match] Error reading match_info:', e);
+    }
+
+    // --- Parse level from info updates (top-level or nested) ---
+    try {
+      const top = info as any;
+      const levelCandidate = top?.level ?? top?.info?.level;
+      if (levelCandidate !== undefined) {
+        let lvlNum: number | null = null;
+        if (typeof levelCandidate === 'number' || typeof levelCandidate === 'string') {
+          const n = Number(levelCandidate);
+          lvlNum = isNaN(n) ? null : n;
+        } else if (levelCandidate && typeof levelCandidate === 'object') {
+          const candidate = (levelCandidate as any).level ?? (levelCandidate as any).value ?? (levelCandidate as any).current;
+          const n = Number(candidate);
+          lvlNum = isNaN(n) ? null : n;
+        }
+        console.log('[WS][Event][Level][info] raw=', JSON.stringify(levelCandidate), 'parsed=', lvlNum);
+        if (lvlNum !== null && this._gameActive && !this._emittedVillain && lvlNum >= 6) {
+          console.log('[WS][Event] Detected level >= 6 via info.level. Emitting villain once for this match. Level=', lvlNum);
+          this.sendEventOncePerMatch('villain');
+          this._emittedVillain = true;
+        }
+      }
+    } catch (levCatErr) {
+      console.log('[WS][Event][Level][info] parse error:', levCatErr);
     }
 
     // --- 1. Update State from Parsed Nested JSON --- 
@@ -356,6 +395,21 @@ class InGame extends AppWindow {
           // Log the string that failed parsing
           console.error("[active_player parse ERROR] Failed to parse string:", liveClientData.active_player, "Error:", parseError);
         }
+      } else if (liveClientData && typeof liveClientData.active_player === 'object' && liveClientData.active_player !== null) {
+        // Some clients may already have parsed objects
+        try {
+          const ap: any = liveClientData.active_player;
+          const detectedLevelRaw = ap?.level ?? ap?.championStats?.level;
+          const detectedLevel = Number(detectedLevelRaw);
+          console.log('[WS][Event][Level][active_player:object] raw=', JSON.stringify(detectedLevelRaw), 'parsed=', detectedLevel);
+          if (!isNaN(detectedLevel) && this._gameActive && !this._emittedVillain && detectedLevel >= 6) {
+            console.log('[WS][Event] Detected level >= 6 via active_player object. Emitting villain once for this match. Level=', detectedLevel);
+            this.sendEventOncePerMatch('villain');
+            this._emittedVillain = true;
+          }
+        } catch (e2) {
+          console.log('[WS][Event][Level] active_player object parse error:', e2);
+        }
       }
 
       // --- Process all_players (stringified JSON Array) --- 
@@ -401,6 +455,20 @@ class InGame extends AppWindow {
                   this._playerState.teamId = playerData.team;
                   teamFound = true;
                   console.log(`Player team ID set to: ${this._playerState.teamId}`);
+                }
+
+                // --- Fallback villain-level detection via all_players entry ---
+                try {
+                  const levelRaw = playerData?.level ?? playerData?.championStats?.level ?? playerData?.scores?.level;
+                  const levelParsed = Number(levelRaw);
+                  console.log('[WS][Event][Level][all_players] raw=', JSON.stringify(levelRaw), 'parsed=', levelParsed);
+                  if (this._gameActive && !this._emittedVillain && !isNaN(levelParsed) && levelParsed >= 6) {
+                    console.log('[WS][Event] Detected level >= 6 via all_players. Emitting villain once for this match. Level=', levelParsed);
+                    this.sendEventOncePerMatch('villain');
+                    this._emittedVillain = true;
+                  }
+                } catch (levelFromAllPlayersErr) {
+                  console.log('[WS][Event][Level][all_players] parse error:', levelFromAllPlayersErr);
                 }
               } else {
                 console.warn("[ItemUpdate] Player data NOT found in all_players array for name:", this._playerState.summonerName);
@@ -552,7 +620,7 @@ class InGame extends AppWindow {
         }
 
         // Start/end and level handling for WebSocket emissions
-        if (event.name === 'match_start' || event.name === 'matchStart') {
+        if (event.name === 'match_start' || event.name === 'matchStart' || event.name === 'gameStart' || event.name === 'match_detected') {
           this._gameActive = true;
           this._emittedRabadon = false;
           this._emittedVillain = false;
@@ -561,7 +629,7 @@ class InGame extends AppWindow {
           this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
           console.log('[WS][Lifecycle] game_start emitted');
         }
-        if (event.name === 'match_end' || event.name === 'matchEnd') {
+        if (event.name === 'match_end' || event.name === 'matchEnd' || event.name === 'match_ended' || event.name === 'gameEnd') {
           console.log('[WS][Lifecycle] Emitting game_end');
           this.sendOp('game_end');
           console.log('[WS][Lifecycle] game_end emitted');
@@ -1058,8 +1126,9 @@ class InGame extends AppWindow {
 
   private sendEventOncePerMatch(name: 'rabadon' | 'villain'): void {
     if (!this._gameActive) {
-      console.log('[WS][Event] Skipping event because game not active:', name);
-      return;
+      console.log('[WS][Event] Game not marked active. Emitting fallback game_start before event:', name, 'game_id=', this._currentMatchId || 'unknown');
+      this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+      this._gameActive = true;
     }
     console.log('[WS][Event] Emitting event:', name);
     this.sendOp('event', { name });
