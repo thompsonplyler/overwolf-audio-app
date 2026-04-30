@@ -33,7 +33,7 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 
 // Define target dimensions for the "small button" state
 const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
-const COLLAPSED_WINDOW_HEIGHT = 50;  // Example height, adjust as needed (ensure manifest.json min_size allows this)
+const COLLAPSED_WINDOW_HEIGHT = 110; // Two stacked buttons in compact widget (Let's Go! / GLHF! + Show logs)
 
 // The window displayed in-game while a game is running.
 // It listens to all info events and to the game events listed in the consts.ts file
@@ -48,13 +48,20 @@ class InGame extends AppWindow {
   private _logsContainer: HTMLElement;
   private _mainElement: HTMLElement;
   private _toggleLogsDisplayBtn: HTMLButtonElement;
-  private _areLogsVisible: boolean = true;
+  private _areLogsVisible: boolean = false;
 
   // --- Header elements to toggle ---
   private _headerIcon: HTMLImageElement;
   private _headerTitle: HTMLHeadingElement;
   private _headerHotkeyText: HTMLHeadingElement;
   private _windowControlsGroup: HTMLDivElement;
+
+  // --- Compact widget (visible only in compact mode) ---
+  private _compactWidget: HTMLDivElement;
+  private _letsGoBtn: HTMLButtonElement;
+  private _showLogsBtn: HTMLButtonElement;
+  // Per-session: true after the first Let's Go! click, never resets until window reload
+  private _hasActivated: boolean = false;
 
   // --- State Variables ---
   private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null } =
@@ -107,6 +114,10 @@ class InGame extends AppWindow {
     this._headerTitle = document.querySelector('#header > h1:not(.hotkey-text)') as HTMLHeadingElement;
     this._headerHotkeyText = document.querySelector('#header > .hotkey-text') as HTMLHeadingElement;
     this._windowControlsGroup = document.querySelector('#header > .window-controls-group') as HTMLDivElement;
+
+    this._compactWidget = document.getElementById('compactWidget') as HTMLDivElement;
+    this._letsGoBtn = document.getElementById('letsGoBtn') as HTMLButtonElement;
+    this._showLogsBtn = document.getElementById('showLogsBtn') as HTMLButtonElement;
 
     console.log('Constructor: All base elements queried.');
     // _updateUIVisibility will be called in run() after initial size is forced.
@@ -173,7 +184,7 @@ class InGame extends AppWindow {
       console.log(`Run: Effective original dimensions: ${this._originalWindowWidth}x${this._originalWindowHeight}.`);
 
       // Now apply initial UI visibility based on the (now hopefully correct) size
-      this._updateUIVisibility(); // _areLogsVisible is true by default
+      this._updateUIVisibility(); // _areLogsVisible is false by default (compact-first launch)
 
       this.setToggleHotkeyText();
       this.setToggleHotkeyBehavior();
@@ -878,6 +889,32 @@ class InGame extends AppWindow {
       console.error('setupToggleLogsDisplay: _toggleLogsDisplayBtn is not defined.');
     }
 
+    if (this._letsGoBtn) {
+      this._letsGoBtn.addEventListener('click', () => {
+        if (!this._hasActivated) {
+          this._hasActivated = true;
+          this._letsGoBtn.innerText = 'GLHF!';
+          console.log("Lets Go button clicked: _hasActivated=true. Audio gating gesture registered.");
+        } else {
+          console.log('Lets Go button clicked while already activated. No-op.');
+        }
+      });
+      console.log('setupToggleLogsDisplay: Click listener added to letsGoBtn.');
+    } else {
+      console.error('setupToggleLogsDisplay: _letsGoBtn is not defined.');
+    }
+
+    if (this._showLogsBtn) {
+      this._showLogsBtn.addEventListener('click', () => {
+        this._areLogsVisible = !this._areLogsVisible;
+        console.log(`Show logs (compact widget) clicked: _areLogsVisible is now ${this._areLogsVisible}`);
+        this._updateUIVisibility();
+      });
+      console.log('setupToggleLogsDisplay: Click listener added to showLogsBtn.');
+    } else {
+      console.error('setupToggleLogsDisplay: _showLogsBtn is not defined.');
+    }
+
     // Listen for both hotkeys
     overwolf.settings.hotkeys.onPressed.addListener(async (hotkeyResult) => {
       if (hotkeyResult && (hotkeyResult.name === kHotkeys.toggleLogs || hotkeyResult.name === kHotkeys.toggleCompact)) {
@@ -904,17 +941,20 @@ class InGame extends AppWindow {
       if (this._headerTitle) this._headerTitle.style.display = '';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = '';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = '';
+      if (this._compactWidget) this._compactWidget.style.display = 'none';
 
       targetWidth = this._originalWindowWidth;
       targetHeight = this._originalWindowHeight;
       logMessageSuffix = 'UI expanded, window restoring to original size.';
     } else {
       if (this._mainElement) this._mainElement.style.display = 'none';
-      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Activate App';
+      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Show logs';
       if (this._headerIcon) this._headerIcon.style.display = 'none';
       if (this._headerTitle) this._headerTitle.style.display = 'none';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = 'none';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = 'none';
+      if (this._compactWidget) this._compactWidget.style.display = 'flex';
+      if (this._letsGoBtn) this._letsGoBtn.innerText = this._hasActivated ? 'GLHF!' : "Let's Go!";
 
       targetWidth = COLLAPSED_WINDOW_WIDTH;
       targetHeight = COLLAPSED_WINDOW_HEIGHT;

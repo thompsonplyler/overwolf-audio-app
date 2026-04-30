@@ -138,3 +138,17 @@ button.logCopy:hover {
   background: #8d8d8d;
   color: #ffffff;
 }
+
+#compactWidget {
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  flex: 1 1 auto;
+}
+
+.compact-button {
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 13px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
