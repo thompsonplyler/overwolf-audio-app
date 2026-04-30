@@ -8,6 +8,10 @@ import { AppWindow } from "../AppWindow";
 import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
 
 import WindowState = overwolf.windows.WindowStateEx;
+import { SettingsManager } from "../config/settings";
+import { playAudioFile } from "../audio/audio";
+import { ITEM_PRIORITY, calculateRemainingCost } from "../items/items";
+import { WSClient } from "../ws/wsClient";
 
 // Define these at a higher scope or pass them in if they vary,
 // for now, using manifest values.
@@ -16,106 +20,16 @@ const MANIFEST_ORIGINAL_HEIGHT = 699;
 
 // --- Constants --- 
 const HEADER_HEIGHT = 54; // Assumed height of the header in pixels
-const PURCHASE_REMINDER_DELAY_SECONDS_CONFIG = 30; // 30 seconds (Original)
-const TEST_REMINDER_DELAY_SECONDS = 30; // 5 seconds for testing (longer than 2 to avoid rapid fire)
-const CURRENT_REMINDER_DELAY_SECONDS = TEST_REMINDER_DELAY_SECONDS; // Use this constant
 
-// --- High Gold Constants ---
-const HIGH_GOLD_THRESHOLD = 3000;
-const HIGH_GOLD_INTERVAL_SECONDS = 60;
-const HIGH_GOLD_AUDIO_FILE = 'icarus_song_001.mp3';
+// Settings-backed constants
+const settings = SettingsManager.instance();
 
 // --- Ward Constants ---
 const CONTROL_WARD_ID = 2055;
 const ENEMY_WARD_PURCHASED_AUDIO = '<champion_name>_ward_purchased.mp3'; // Placeholder template
 const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholder template
 
-// --- Item Definitions (Based on user input/logic) ---
-const PRICE = {
-  lichbane: 2900,
-  rabadons: 3500,
-  void: 3000,
-  zhonyas: 3250, // Using standard cost based on previous discussion
-  armguard: 1600,
-  jewel: 1100,
-  wand: 850,
-  rod: 1200,
-  sheen: 900,
-  wisp: 850,
-  alt: 1100,
-  banshees: 3000,
-  shadowflame: 3200,
-  verdant: 1600, // Standard cost
-  codex: 850,    // Standard cost
-}
-
-interface ItemComponent {
-  id: number;
-  cost: number; // Cost of the component itself
-}
-
-interface ItemDefinition {
-  id: number; // Final item ID
-  name: string;
-  cost: number; // Final item cost
-  components: ItemComponent[];
-  audioCue: string; // Filename like 'getrabadons.mp3'
-  requiresComponentCheck: boolean;
-}
-
-const NEEDLESSLY_LARGE_ROD: ItemComponent = { id: 1058, cost: PRICE.rod };
-const SHEEN: ItemComponent = { id: 3057, cost: PRICE.sheen };
-const AETHER_WISP: ItemComponent = { id: 3113, cost: PRICE.wisp };
-const FIENDISH_CODEX: ItemComponent = { id: 3108, cost: PRICE.codex };
-const SEEKERS_ARMGUARD: ItemComponent = { id: 2420, cost: PRICE.armguard };
-const BLIGHTING_JEWEL: ItemComponent = { id: 4630, cost: PRICE.jewel };
-const BLASTING_WAND: ItemComponent = { id: 1026, cost: PRICE.wand };
-const HEXTECH_ALTERNATOR: ItemComponent = { id: 3145, cost: PRICE.alt };
-const VERDANT_BARRIER: ItemComponent = { id: 4632, cost: PRICE.verdant };
-
-// --- Define All Tracked Items (Unordered initially) ---
-const ALL_TRACKED_ITEMS: Record<string, ItemDefinition> = {
-  LICH_BANE: {
-    id: 3100, name: 'Lich Bane', cost: PRICE.lichbane,
-    components: [SHEEN, AETHER_WISP, BLASTING_WAND],
-    audioCue: 'getlichbane.mp3', requiresComponentCheck: true,
-  },
-  RABADONS: {
-    id: 3089, name: "Rabadon's Deathcap", cost: PRICE.rabadons,
-    components: [NEEDLESSLY_LARGE_ROD, NEEDLESSLY_LARGE_ROD],
-    audioCue: 'getrabadons.mp3', requiresComponentCheck: true,
-  },
-  BANSHEES: {
-    id: 3102, name: "Banshee's Veil", cost: PRICE.banshees,
-    components: [VERDANT_BARRIER, FIENDISH_CODEX],
-    audioCue: 'getbanshees.mp3', requiresComponentCheck: true,
-  },
-  ZHONYAS: {
-    id: 3157, name: "Zhonya's Hourglass", cost: PRICE.zhonyas,
-    components: [SEEKERS_ARMGUARD, NEEDLESSLY_LARGE_ROD],
-    audioCue: 'getzhonyas.mp3', requiresComponentCheck: true,
-  },
-  SHADOWFLAME: {
-    id: 4645, name: "Shadowflame", cost: PRICE.shadowflame,
-    components: [HEXTECH_ALTERNATOR, NEEDLESSLY_LARGE_ROD],
-    audioCue: 'getshadowflame.mp3', requiresComponentCheck: true,
-  },
-  VOID_STAFF: {
-    id: 3135, name: 'Void Staff', cost: PRICE.void,
-    components: [BLIGHTING_JEWEL, BLASTING_WAND],
-    audioCue: 'getvoidstaff.mp3', requiresComponentCheck: true,
-  },
-};
-
-// --- Define Item Priority --- 
-const ITEM_PRIORITY: ItemDefinition[] = [
-  ALL_TRACKED_ITEMS.LICH_BANE,
-  ALL_TRACKED_ITEMS.RABADONS,
-  ALL_TRACKED_ITEMS.BANSHEES,
-  ALL_TRACKED_ITEMS.ZHONYAS,
-  ALL_TRACKED_ITEMS.SHADOWFLAME,
-  ALL_TRACKED_ITEMS.VOID_STAFF
-];
+// Item priority now imported from items module
 
 // Define target dimensions for the "small button" state
 const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
@@ -171,8 +85,7 @@ class InGame extends AppWindow {
   private _enemyWardCounts: Record<string, number> = {}; // Key: ChampionName, Value: Count
 
   // --- WebSocket/Game session state ---
-  private _ws: WebSocket | null = null;
-  private _wsReady: boolean = false;
+  private _wsClient: WSClient | null = null;
   private _currentMatchId: string | null = null;
   private _gameActive: boolean = false;
   private _emittedRabadon: boolean = false;
@@ -292,7 +205,7 @@ class InGame extends AppWindow {
       if (rootKeys.length) {
         console.log('[Info] Root keys:', rootKeys.join(','));
       }
-      const inf = (info as any)?.info;
+      const inf = (info as any)?.info; ``
       if (inf) {
         const catKeys = Object.keys(inf);
         if (catKeys.length) {
@@ -778,20 +691,8 @@ class InGame extends AppWindow {
         }
       }
 
-      // Calculate remaining cost
-      let remainingCost = itemDef.cost;
-      const requiredComponentCounts = new Map<number, number>();
-      itemDef.components.forEach(comp => {
-        requiredComponentCounts.set(comp.id, (requiredComponentCounts.get(comp.id) || 0) + 1);
-      });
-      let componentValueOwned = 0;
-      for (const [reqCompId, reqCount] of requiredComponentCounts.entries()) {
-        const ownedCount = playerItemCounts.get(reqCompId) || 0;
-        const countToDiscount = Math.min(reqCount, ownedCount);
-        const componentCost = itemDef.components.find(c => c.id === reqCompId)?.cost || 0;
-        if (componentCost > 0) componentValueOwned += countToDiscount * componentCost;
-      }
-      remainingCost -= componentValueOwned;
+      // Calculate remaining cost via helper
+      const remainingCost = calculateRemainingCost(itemDef, playerItemCounts);
 
       const canAfford = playerGold >= remainingCost;
 
@@ -828,7 +729,7 @@ class InGame extends AppWindow {
         // It's the SAME target as before - check reminder
         console.log(`[TargetCheck] Target is still ${potentialTargetItemId}. Checking reminder.`);
         if (this._currentTargetSuggestionTime !== null) {
-          const delay = CURRENT_REMINDER_DELAY_SECONDS;
+          const delay = settings.getSettings().intervals.targetReminderDelaySec;
           const reminderDue = currentGameTime >= (this._currentTargetSuggestionTime + delay);
           console.log(`[TargetCheck] Reminder check: ${currentGameTime} >= (${this._currentTargetSuggestionTime} + ${delay}) -> ${reminderDue}`);
           if (reminderDue) {
@@ -860,20 +761,7 @@ class InGame extends AppWindow {
 
   // Modify playAudio function
   private playAudio(fileName: string): void {
-    // Construct the path relative to the in_game.html file
-    const audioPath = `audio/${fileName}`;
-    console.log(`Attempting to play audio: ${audioPath}`);
-
-    const audio = new Audio(audioPath);
-
-    audio.play().catch(e => {
-      // Make error more prominent
-      console.error(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
-      console.error(`!!! ERROR PLAYING AUDIO FILE: ${fileName} !!!`);
-      console.error(`Path: ${audioPath}`);
-      console.error(`Error Details:`, e);
-      console.error(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
-    });
+    playAudioFile(fileName);
   }
 
   // --- High Gold Check Logic --- 
@@ -893,20 +781,21 @@ class InGame extends AppWindow {
 
     const playerGold = this._playerState.gold;
     const currentGameTime = this._playerState.gameTime;
-    const isCurrentlyHighGold = playerGold > HIGH_GOLD_THRESHOLD;
-    console.log(`[HighGold] Current Gold: ${playerGold}, Threshold: ${HIGH_GOLD_THRESHOLD}, Is High: ${isCurrentlyHighGold}`); // Log current state
+    const threshold = settings.getSettings().thresholds.highGoldThreshold;
+    const isCurrentlyHighGold = playerGold > threshold;
+    console.log(`[HighGold] Current Gold: ${playerGold}, Threshold: ${threshold}, Is High: ${isCurrentlyHighGold}`); // Log current state
 
     if (isCurrentlyHighGold) {
       // Check if it's the first time or if interval has passed
       const timeCheckPassed =
         this._lastHighGoldCueTime === null ||
-        currentGameTime >= (this._lastHighGoldCueTime + HIGH_GOLD_INTERVAL_SECONDS);
+        currentGameTime >= (this._lastHighGoldCueTime + settings.getSettings().intervals.highGoldIntervalSec);
 
-      console.log(`[HighGold] TimeCheck: ${currentGameTime} >= (${this._lastHighGoldCueTime} + ${HIGH_GOLD_INTERVAL_SECONDS}) -> ${timeCheckPassed}`);
+      console.log(`[HighGold] TimeCheck: ${currentGameTime} >= (${this._lastHighGoldCueTime} + ${settings.getSettings().intervals.highGoldIntervalSec}) -> ${timeCheckPassed}`);
 
       if (timeCheckPassed) {
         console.log(`[HighGold] >>> PLAYING HIGH GOLD CUE <<< (Time check passed)`); // Add reason
-        this.playAudio(HIGH_GOLD_AUDIO_FILE);
+        this.playAudio(settings.getSettings().audio.highGoldFile);
         this._lastHighGoldCueTime = currentGameTime;
       } else {
         console.log("[HighGold] Time check failed (on cooldown)."); // Log cooldown state
@@ -1064,64 +953,27 @@ class InGame extends AppWindow {
   private connectWebSocket(): void {
     try {
       const url = 'ws://localhost:5001/api/ws';
-      console.log('[WS] Connecting to', url);
-      this._ws = new WebSocket(url);
-      this._wsReady = false;
-
-      this._ws.addEventListener('open', () => {
-        this._wsReady = true;
-        console.log('[WS] Connected. readyState=', this._ws?.readyState);
-        // If a game is already active and matchId known, notify server
+      this._wsClient = new WSClient(url);
+      this._wsClient.connect(() => {
         if (this._gameActive) {
           console.log('[WS] On connect, game already active. Emitting game_start.');
           this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
         }
-
-        // Heartbeat to keep connection visible
         try {
-          const heartbeat = { op: 'ping', ts: Date.now() };
-          console.log('[WS] Sending heartbeat:', heartbeat);
-          this._ws?.send(JSON.stringify(heartbeat));
-        } catch (e) {
-          console.log('[WS] Heartbeat send failed:', e);
-        }
-      });
-
-      this._ws.addEventListener('close', (ev) => {
-        this._wsReady = false;
-        console.log('[WS] Disconnected. code=', (ev as any)?.code, 'reason=', (ev as any)?.reason);
-      });
-
-      this._ws.addEventListener('error', (err) => {
-        console.error('[WS] Error:', err);
-      });
-
-      this._ws.addEventListener('message', (msg) => {
-        // Optional: handle inbound messages
-        console.log('[WS] Message from server:', msg.data);
+          this.sendOp('ping', { ts: Date.now() });
+        } catch (_) { /* ignore */ }
       });
     } catch (e) {
       console.error('[WS] Failed to connect:', e);
     }
   }
 
-  private sendOp(op: string, payload?: any): void {
-    try {
-      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-        if (!this._wsReady) {
-          console.warn('[WS] readyState OPEN but _wsReady=false. Forcing true.');
-          this._wsReady = true;
-        }
-        const message = payload ? { op, ...payload } : { op };
-        console.log('[WS] Sending op:', op, 'payload:', payload ?? {});
-        this._ws.send(JSON.stringify(message));
-        console.log('[WS] Sent op:', op);
-      } else {
-        console.warn('[WS] Not ready to send. op=', op, 'ready=', this._wsReady, 'state=', this._ws?.readyState);
-      }
-    } catch (e) {
-      console.error('[WS] sendOp error:', e);
+  private sendOp(op: 'game_start' | 'event' | 'game_end' | 'ping', payload?: any): void {
+    if (!this._wsClient) {
+      console.warn('[WS] No ws client to send op.');
+      return;
     }
+    this._wsClient.sendOp(op, payload);
   }
 
   private sendEventOncePerMatch(name: 'rabadon' | 'villain'): void {
