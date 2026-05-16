@@ -30,6 +30,8 @@ export const PRICE = {
     shadowflame: 3200,
     verdant: 1600,
     codex: 850,
+    seal: 350,
+    mejais: 1500,
 };
 
 export const COMPONENTS = {
@@ -42,6 +44,7 @@ export const COMPONENTS = {
     BLASTING_WAND: { id: 1026, cost: PRICE.wand },
     HEXTECH_ALTERNATOR: { id: 3145, cost: PRICE.alt },
     VERDANT_BARRIER: { id: 4632, cost: PRICE.verdant },
+    DARK_SEAL: { id: 1082, cost: PRICE.seal }
 } as const;
 
 export const ITEMS: Record<string, ItemDef> = {
@@ -105,12 +108,21 @@ export function calculateRemainingCost(item: ItemDef, ownedCounts: Map<number, n
     return remainingCost;
 }
 
-// WebSocket emit mapping helper for future extensibility
+// WebSocket emit mapping: item id -> short event name.
+// Membership in this map is the opt-in for once-per-match WS emissions of the form
+// { op: "event", name: "<value>" }. Items tracked elsewhere (audio cues, etc.)
+// that are absent from this map will NOT produce a WS signal.
 export interface PurchaseEventMapping {
-    [itemId: number]: string; // item id -> short event name
+    [itemId: number]: string;
 }
 
 export const DEFAULT_PURCHASE_EVENT_MAP: PurchaseEventMapping = {
     3089: 'rabadon',
+    3100: 'lichbane',
+    3102: 'banshees',
+    3041: 'mejais',
+    3157: 'zhonyas',
+    // 4645: 'shadowflame',
+    // 3135: 'voidstaff',
 };
 

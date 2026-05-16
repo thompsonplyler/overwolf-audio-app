@@ -2,6 +2,23 @@
 
 export type WSOp = 'game_start' | 'event' | 'game_end' | 'ping';
 
+/**
+ * League of Legends GEP `kill` event → WebSocket `event` payload fields (merged with `{ op: "event" }` on send).
+ * `multikill` is normalized for easy server parsing; `gep_kill_label` is the raw GEP string when known.
+ */
+export type KillEventWSPayload = {
+  name: 'kill';
+  multikill: 'single' | 'double' | 'triple' | 'quadra' | 'penta';
+  /** Raw GEP `label` when present; `"unknown"` if missing (never null). */
+  gep_kill_label: string;
+  /** GEP `count` for this kill tier in the match; `0` if missing. */
+  gep_kill_type_count: number;
+  /** GEP `totalKills` for the match; `0` if missing. */
+  gep_total_champion_kills_match: number;
+  /** Unix ms at emission (same convention as `ping`). */
+  ts: number;
+};
+
 export class WSClient {
     private _ws: WebSocket | null = null;
     private _ready: boolean = false;
@@ -11,7 +28,7 @@ export class WSClient {
         this._url = url;
     }
 
-    public connect(onOpen?: () => void): void {
+    public connect(onOpen?: () => void, onClose?: () => void): void {
         console.log('[WS] Connecting to', this._url);
         this._ws = new WebSocket(this._url);
         this._ready = false;
@@ -25,6 +42,7 @@ export class WSClient {
         this._ws.addEventListener('close', (ev) => {
             this._ready = false;
             console.log('[WS] Disconnected. code=', (ev as any)?.code, 'reason=', (ev as any)?.reason);
+            onClose && onClose();
         });
 
         this._ws.addEventListener('error', (err) => {

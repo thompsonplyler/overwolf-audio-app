@@ -10,8 +10,8 @@ import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
 import WindowState = overwolf.windows.WindowStateEx;
 import { SettingsManager } from "../config/settings";
 import { playAudioFile } from "../audio/audio";
-import { ITEM_PRIORITY, calculateRemainingCost } from "../items/items";
-import { WSClient } from "../ws/wsClient";
+import { ITEM_PRIORITY, calculateRemainingCost, DEFAULT_PURCHASE_EVENT_MAP } from "../items/items";
+import { KillEventWSPayload, WSClient } from "../ws/wsClient";
 
 // Define these at a higher scope or pass them in if they vary,
 // for now, using manifest values.
@@ -34,6 +34,119 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 // Define target dimensions for the "small button" state
 const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
 const COLLAPSED_WINDOW_HEIGHT = 110; // Two stacked buttons in compact widget (Let's Go! / GLHF! + Show logs)
+
+/**
+ * When true: once per in-game window lifetime, logs the entire `onInfoUpdates` payload as expanded JSON
+ * (parses string blobs like live_client_data.active_player). Set false after you capture logs.
+ */
+const DUMP_FULL_INFO_UPDATES_ONCE = false;
+
+function circularReplacer(): (this: unknown, key: string, value: unknown) => unknown {
+  const seen = new WeakSet<object>();
+  return (_key: string, value: unknown): unknown => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value as object)) return '[Circular]';
+      seen.add(value as object);
+    }
+    return value;
+  };
+}
+
+function tryParseJsonString(s: string): unknown {
+  const t = s.trim();
+  if (!t.startsWith('{') && !t.startsWith('[')) return s;
+  try {
+    return JSON.parse(t);
+  } catch {
+    return s;
+  }
+}
+
+/** LoL GEP kill event `label` → normalized multikill tier for WebSocket consumers. */
+function multikillFromGeKillLabel(label: string | undefined): KillEventWSPayload['multikill'] {
+  switch (label) {
+    case 'double_kill':
+      return 'double';
+    case 'triple_kill':
+      return 'triple';
+    case 'quadra_kill':
+      return 'quadra';
+    case 'penta_kill':
+      return 'penta';
+    default:
+      return 'single';
+  }
+}
+
+function parseKillEventData(raw: unknown): Omit<KillEventWSPayload, 'name' | 'ts'> {
+  let obj: Record<string, unknown> | null = null;
+  if (raw != null && typeof raw === 'object' && !Array.isArray(raw)) {
+    obj = raw as Record<string, unknown>;
+  } else if (typeof raw === 'string') {
+    const parsed = tryParseJsonString(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) obj = parsed as Record<string, unknown>;
+  }
+  const label = obj && typeof obj.label === 'string' ? obj.label : undefined;
+  const multikill = multikillFromGeKillLabel(label);
+  const gep_kill_label = typeof label === 'string' ? label : 'unknown';
+
+  let gep_kill_type_count = 0;
+  let gep_total_champion_kills_match = 0;
+  if (obj) {
+    if (obj.count !== undefined && obj.count !== null) {
+      const n = Number(obj.count);
+      if (!isNaN(n)) gep_kill_type_count = n;
+    }
+    if (obj.totalKills !== undefined && obj.totalKills !== null) {
+      const n = Number(obj.totalKills);
+      if (!isNaN(n)) gep_total_champion_kills_match = n;
+    }
+  }
+
+  return { multikill, gep_kill_label, gep_kill_type_count, gep_total_champion_kills_match };
+}
+
+const LIVE_CLIENT_STRING_JSON_KEYS = ['active_player', 'all_players'] as const;
+
+function expandLiveClientRecord(lcd: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...lcd };
+  for (const key of LIVE_CLIENT_STRING_JSON_KEYS) {
+    const v = out[key];
+    if (typeof v === 'string') {
+      out[key] = tryParseJsonString(v);
+    }
+  }
+  return out;
+}
+
+/** Deep-enough copy for logging: expand known JSON strings so grep/search finds nested keys (e.g. stacks). */
+function expandInfoUpdateForDump(info: unknown): unknown {
+  if (!info || typeof info !== 'object') return info;
+  const root = { ...(info as Record<string, unknown>) };
+
+  if (root.live_client_data && typeof root.live_client_data === 'object') {
+    root.live_client_data = expandLiveClientRecord(root.live_client_data as Record<string, unknown>);
+  }
+
+  for (const topKey of ['match_info', 'game_info'] as const) {
+    const v = root[topKey];
+    if (typeof v === 'string') root[topKey] = tryParseJsonString(v);
+  }
+
+  if (root.info && typeof root.info === 'object') {
+    const inner = { ...(root.info as Record<string, unknown>) };
+    if (inner.live_client_data && typeof inner.live_client_data === 'object') {
+      inner.live_client_data = expandLiveClientRecord(inner.live_client_data as Record<string, unknown>);
+    }
+    for (const k of Object.keys(inner)) {
+      const iv = inner[k];
+      if (typeof iv === 'string') inner[k] = tryParseJsonString(iv);
+    }
+    root.info = inner;
+  }
+
+  return root;
+}
 
 // The window displayed in-game while a game is running.
 // It listens to all info events and to the game events listed in the consts.ts file
@@ -93,10 +206,12 @@ class InGame extends AppWindow {
 
   // --- WebSocket/Game session state ---
   private _wsClient: WSClient | null = null;
+  private _wsPingInterval: number | null = null;
   private _currentMatchId: string | null = null;
   private _gameActive: boolean = false;
-  private _emittedRabadon: boolean = false;
+  private _emittedItemSignals: Set<number> = new Set<number>();
   private _emittedVillain: boolean = false;
+  private _didFullInfoLeviathanDump: boolean = false;
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -203,7 +318,34 @@ class InGame extends AppWindow {
     }
   }
 
+  /** One-shot explorer dump for discovering undocumented fields (e.g. item stacks) in the raw League payload. */
+  private maybeDumpFullLiveGameInfo(info: unknown): void {
+    if (!DUMP_FULL_INFO_UPDATES_ONCE || this._didFullInfoLeviathanDump) return;
+    if (!info || typeof info !== 'object') return;
+    const rec = info as Record<string, unknown>;
+    const meaningful =
+      rec.live_client_data != null ||
+      rec.game_info != null ||
+      rec.match_info != null ||
+      rec.info != null;
+    if (!meaningful) return;
+
+    this._didFullInfoLeviathanDump = true;
+    try {
+      const expanded = expandInfoUpdateForDump(info);
+      const json = JSON.stringify(expanded, circularReplacer(), 2);
+      console.warn('[LiveGameLeviathan] Single expanded dump — search for 1082, 3041, stack, glory, charge:\n', json);
+    } catch (e) {
+      console.warn('[LiveGameLeviathan] stringify failed:', e);
+      try {
+        console.warn('[LiveGameLeviathan] Top-level keys:', Object.keys(rec));
+      } catch (_) { /* ignore */ }
+    }
+  }
+
   private onInfoUpdates(info) {
+    this.maybeDumpFullLiveGameInfo(info);
+
     let goldChanged = false;
     let itemsChanged = false;
     let nameFound = false; // Flag for the *entire* all_players array
@@ -216,7 +358,7 @@ class InGame extends AppWindow {
       if (rootKeys.length) {
         console.log('[Info] Root keys:', rootKeys.join(','));
       }
-      const inf = (info as any)?.info; ``
+      const inf = (info as any)?.info;
       if (inf) {
         const catKeys = Object.keys(inf);
         if (catKeys.length) {
@@ -434,20 +576,24 @@ class InGame extends AppWindow {
       console.error('Error processing info update:', e);
     }
 
-    // Emit 'rabadon' once per match when Rabadon's Deathcap (id: 3089) is acquired
+    // Emit a once-per-match WS event for every item registered in DEFAULT_PURCHASE_EVENT_MAP.
+    // Wire format per emission: { op: "event", name: "<mapped short name>" }.
     try {
       if (itemsChanged && this._gameActive && Array.isArray(this._playerState.items)) {
-        const ownsRabadons = this._playerState.items.some((it: any) => it && Number(it.itemID) === 3089 && Number(it.count) > 0);
-        const shouldEmit = ownsRabadons && !this._emittedRabadon;
-        console.log('[WS][Event][Rabadon] itemsChanged=', itemsChanged, 'ownsRabadons=', ownsRabadons, 'alreadyEmitted=', this._emittedRabadon, 'willEmit=', shouldEmit);
-        if (shouldEmit) {
-          console.log('[WS][Event] Detected Rabadon acquisition (item 3089). Emitting once for this match.');
-          this.sendEventOncePerMatch('rabadon');
-          this._emittedRabadon = true;
+        for (const [itemIdStr, eventName] of Object.entries(DEFAULT_PURCHASE_EVENT_MAP)) {
+          const itemId = Number(itemIdStr);
+          if (this._emittedItemSignals.has(itemId)) continue;
+          const owns = this._playerState.items.some((it: any) => it && Number(it.itemID) === itemId && Number(it.count) > 0);
+          console.log('[WS][Event][ItemSignal] itemId=', itemId, 'eventName=', eventName, 'owns=', owns, 'alreadyEmitted=', this._emittedItemSignals.has(itemId));
+          if (owns) {
+            console.log('[WS][Event] Detected acquisition of item', itemId, '. Emitting', eventName, 'once for this match.');
+            this.sendEventOncePerMatch(eventName);
+            this._emittedItemSignals.add(itemId);
+          }
         }
       }
     } catch (e) {
-      console.warn('[WS][Event] Rabadon detection error:', e);
+      console.warn('[WS][Event] Item-signal detection error:', e);
     }
 
     // --- 2. Update UI Log --- 
@@ -531,7 +677,7 @@ class InGame extends AppWindow {
               if (!this._gameActive) {
                 // Fallback: treat presence of match_clock as match started
                 this._gameActive = true;
-                this._emittedRabadon = false;
+                this._emittedItemSignals.clear();
                 this._emittedVillain = false;
                 console.log('[WS][Lifecycle] match_clock observed while inactive. Emitting fallback game_start with game_id:', this._currentMatchId || 'unknown');
                 this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
@@ -540,13 +686,13 @@ class InGame extends AppWindow {
           } catch (err) {
             console.error("Error parsing match_clock data:", event.data, err);
           }
-          break;
+          continue;
         }
 
         // Start/end and level handling for WebSocket emissions
         if (event.name === 'match_start' || event.name === 'matchStart' || event.name === 'gameStart' || event.name === 'match_detected') {
           this._gameActive = true;
-          this._emittedRabadon = false;
+          this._emittedItemSignals.clear();
           this._emittedVillain = false;
           // Send game_start with matchId if known
           console.log('[WS][Lifecycle] Emitting game_start with game_id:', this._currentMatchId || 'unknown');
@@ -558,7 +704,7 @@ class InGame extends AppWindow {
           this.sendOp('game_end');
           console.log('[WS][Lifecycle] game_end emitted');
           this._gameActive = false;
-          this._emittedRabadon = false;
+          this._emittedItemSignals.clear();
           this._emittedVillain = false;
           this._currentMatchId = this._currentMatchId; // keep last known until next updates
         }
@@ -574,6 +720,9 @@ class InGame extends AppWindow {
           } catch (_) {
             console.log('[WS][Event][Level] failed to parse level from event:', event);
           }
+        }
+        if (event.name === 'kill') {
+          this.emitKillOnWebSocket(event.data);
         }
       }
     }
@@ -667,9 +816,13 @@ class InGame extends AppWindow {
     const playerGold = this._playerState.gold;
     const currentGameTime = this._playerState.gameTime;
     const playerItemCounts = new Map<number, number>();
-    this._playerState.items.forEach(item => {
-      playerItemCounts.set(item.itemID, (playerItemCounts.get(item.itemID) || 0) + item.count);
-    });
+    for (const raw of this._playerState.items) {
+      const it = raw as { itemID?: unknown; itemId?: unknown; count?: unknown };
+      const id = Number(it.itemID ?? it.itemId);
+      const cnt = Number(it.count);
+      if (!Number.isFinite(id) || id <= 0 || !Number.isFinite(cnt) || cnt <= 0) continue;
+      playerItemCounts.set(id, (playerItemCounts.get(id) || 0) + cnt);
+    }
 
     let potentialTargetItemId: number | null = null;
 
@@ -687,7 +840,8 @@ class InGame extends AppWindow {
         console.log("[TargetCheck] --- Currently checking VOID STAFF --- ");
       }
 
-      const ownsFinalItem = playerItemCounts.has(itemDef.id);
+      const finalCount = playerItemCounts.get(itemDef.id) || 0;
+      const ownsFinalItem = finalCount > 0;
       if (ownsFinalItem) {
         console.log(`[TargetCheck] -> ${itemDef.name}: Already own final item. Skipping.`);
         continue; // Skip if already owned
@@ -695,7 +849,7 @@ class InGame extends AppWindow {
 
       let ownsAnyComponent = false;
       if (itemDef.requiresComponentCheck) {
-        ownsAnyComponent = itemDef.components.some(comp => playerItemCounts.has(comp.id));
+        ownsAnyComponent = itemDef.components.some(comp => (playerItemCounts.get(comp.id) || 0) > 0);
         if (!ownsAnyComponent) {
           console.log(`[TargetCheck] -> ${itemDef.name}: Component required but not owned. Skipping.`);
           continue; // Skip if component required but not owned
@@ -992,17 +1146,36 @@ class InGame extends AppWindow {
   // --- WebSocket helpers ---
   private connectWebSocket(): void {
     try {
-      const url = 'ws://localhost:5001/api/ws';
+      // Use IPv4 literal: "localhost" may resolve to ::1 first; Flask often binds IPv4 only.
+      const url = 'ws://127.0.0.1:5001/api/ws';
       this._wsClient = new WSClient(url);
-      this._wsClient.connect(() => {
-        if (this._gameActive) {
-          console.log('[WS] On connect, game already active. Emitting game_start.');
-          this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+      this._wsClient.connect(
+        () => {
+          if (this._wsPingInterval != null) {
+            window.clearInterval(this._wsPingInterval);
+            this._wsPingInterval = null;
+          }
+          this._wsPingInterval = window.setInterval(() => {
+            try {
+              this.sendOp('ping', { ts: Date.now() });
+            } catch (_) { /* ignore */ }
+          }, 5000);
+
+          if (this._gameActive) {
+            console.log('[WS] On connect, game already active. Emitting game_start.');
+            this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+          }
+          try {
+            this.sendOp('ping', { ts: Date.now() });
+          } catch (_) { /* ignore */ }
+        },
+        () => {
+          if (this._wsPingInterval != null) {
+            window.clearInterval(this._wsPingInterval);
+            this._wsPingInterval = null;
+          }
         }
-        try {
-          this.sendOp('ping', { ts: Date.now() });
-        } catch (_) { /* ignore */ }
-      });
+      );
     } catch (e) {
       console.error('[WS] Failed to connect:', e);
     }
@@ -1016,7 +1189,20 @@ class InGame extends AppWindow {
     this._wsClient.sendOp(op, payload);
   }
 
-  private sendEventOncePerMatch(name: 'rabadon' | 'villain'): void {
+  /** Every LoL GEP `kill` event → WebSocket `{ op: "event", name: "kill", multikill, ... }`. */
+  private emitKillOnWebSocket(rawData: unknown): void {
+    const fields = parseKillEventData(rawData);
+    if (!this._gameActive) {
+      console.log('[WS][Event][Kill] Game not active. Emitting fallback game_start before kill. game_id=', this._currentMatchId || 'unknown');
+      this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+      this._gameActive = true;
+    }
+    const payload: KillEventWSPayload = { name: 'kill', ...fields, ts: Date.now() };
+    console.log('[WS][Event][Kill] Emitting kill event:', JSON.stringify({ op: 'event', ...payload }));
+    this.sendOp('event', payload);
+  }
+
+  private sendEventOncePerMatch(name: string): void {
     if (!this._gameActive) {
       console.log('[WS][Event] Game not marked active. Emitting fallback game_start before event:', name, 'game_id=', this._currentMatchId || 'unknown');
       this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });

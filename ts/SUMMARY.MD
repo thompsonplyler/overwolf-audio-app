@@ -6,19 +6,19 @@
 
 **Features Implemented:**
 
-1.  **Item Purchase Opportunity Cue:**
-    - Plays an audio file (e.g., `getlichbane.mp3`) when the player owns at least one component of a prioritized item (Lich Bane, Rabadon's, Banshee's, Zhonya's, Shadowflame, Void Staff) and has enough gold to purchase the completed item.
+1. **Item Purchase Opportunity Cue:**
+  - Plays an audio file (e.g., `getlichbane.mp3`) when the player owns at least one component of a prioritized item (Lich Bane, Rabadon's, Banshee's, Zhonya's, Shadowflame, Void Staff) and has enough gold to purchase the completed item.
     - Uses a priority list (`ITEM_PRIORITY`) to only suggest the highest-priority available item at any given time.
     - Has a cooldown period (`CURRENT_REMINDER_DELAY_SECONDS`) after a suggestion is made for a specific item.
-2.  **Item Purchase Reminder Cue:**
-    - If the initial item cue played, and after a delay (`CURRENT_REMINDER_DELAY_SECONDS`) the player _still_ hasn't bought the item but _still_ can afford it, a reminder audio file (`idiot_song_001.mp3`) plays.
+2. **Item Purchase Reminder Cue:**
+  - If the initial item cue played, and after a delay (`CURRENT_REMINDER_DELAY_SECONDS`) the player *still* hasn't bought the item but *still* can afford it, a reminder audio file (`idiot_song_001.mp3`) plays.
     - This reminder resets its own timer but keeps the same item as the target.
-3.  **High Gold Cue:**
-    - Plays an audio file (`icarus_song_001.mp3`) when the player's gold exceeds a threshold (`HIGH_GOLD_THRESHOLD` = 3000).
+3. **High Gold Cue:**
+  - Plays an audio file (`icarus_song_001.mp3`) when the player's gold exceeds a threshold (`HIGH_GOLD_THRESHOLD` = 3000).
     - Plays immediately when crossing the threshold and then repeats every interval (`HIGH_GOLD_INTERVAL_SECONDS` = 60s) as long as gold remains high.
     - **Overrides** the item purchase/reminder cues (they are skipped if gold is high).
-4.  **Enemy Control Ward Cues:**
-    - Tracks the number of Control Wards (ID: 2055) in each enemy player's inventory.
+4. **Enemy Control Ward Cues:**
+  - Tracks the number of Control Wards (ID: 2055) in each enemy player's inventory.
     - Plays a champion-specific audio file (`<ChampionName>_ward_purchased.mp3`) when an enemy's Control Ward count increases.
     - Plays a champion-specific audio file (`<ChampionName>_ward_placed.mp3`) when an enemy's Control Ward count decreases.
     - This logic runs independently of the high gold override.
@@ -58,10 +58,10 @@ This project modifies the standard Overwolf TypeScript sample app (`overwolf/sam
 
 **Key Attempts & Learnings:**
 
-1.  **Content Hiding:** Successfully implemented logic in `src/in_game/in_game.ts` (`toggleLogsDisplayBtn`) to hide the main content area (`<main>`) by setting `style.display = 'none'` and changing button text to "Activate App".
-2.  **Window Resizing (`overwolf.windows.changeSize`)**: Introduced calls to `overwolf.windows.changeSize()` to resize the window to predefined small dimensions (`COLLAPSED_WINDOW_WIDTH`, `COLLAPSED_WINDOW_HEIGHT`) when hiding content, and restore to original size when showing content. This included fetching and storing initial window ID and dimensions.
-3.  **API Typing Resolution:** Iteratively corrected TypeScript type issues for `WindowResult` (confirming `success: boolean` not `status: string`) and for `changeSize` callbacks within the `getWindowInfo` helper and `setupToggleLogsDisplay` method in `src/in_game/in_game.ts`.
-4.  **Manifest `min_size`:** Identified that the `manifest.json` for the in-game window requires its `min_size` property to be set to dimensions that accommodate the desired collapsed state (e.g., `width: 150, height: 50`).
+1. **Content Hiding:** Successfully implemented logic in `src/in_game/in_game.ts` (`toggleLogsDisplayBtn`) to hide the main content area (`<main>`) by setting `style.display = 'none'` and changing button text to "Activate App".
+2. **Window Resizing (`overwolf.windows.changeSize`)**: Introduced calls to `overwolf.windows.changeSize()` to resize the window to predefined small dimensions (`COLLAPSED_WINDOW_WIDTH`, `COLLAPSED_WINDOW_HEIGHT`) when hiding content, and restore to original size when showing content. This included fetching and storing initial window ID and dimensions.
+3. **API Typing Resolution:** Iteratively corrected TypeScript type issues for `WindowResult` (confirming `success: boolean` not `status: string`) and for `changeSize` callbacks within the `getWindowInfo` helper and `setupToggleLogsDisplay` method in `src/in_game/in_game.ts`.
+4. **Manifest `min_size`:** Identified that the `manifest.json` for the in-game window requires its `min_size` property to be set to dimensions that accommodate the desired collapsed state (e.g., `width: 150, height: 50`).
 
 **Current State & Next Steps (as of end of this session):**
 
@@ -75,33 +75,27 @@ This project modifies the standard Overwolf TypeScript sample app (`overwolf/sam
 
 **Key Challenges & Learnings:**
 
-1.  **Persistent Small Window Size:**
-
-    - **Problem:** Despite `manifest.json` defining a large initial `size` (e.g., 1212x699) for the `in_game` window, the Overwolf API (`overwolf.windows.getCurrentWindow()`) at app startup consistently reported the window's dimensions as the small, collapsed size (150x50). This caused the app to start visually collapsed and prevented logic from correctly restoring to a "large" original size.
-    - **Assumption Challenged:** The initial assumption was that the manifest `size` property would be the definitive size reported by the API on fresh load, or that `_originalWindowWidth/Height` could be reliably captured from an early API call. However, Overwolf appears to prioritize restoring a window to its _last known size_ before it was closed, even across sessions, overriding the manifest's default `size`.
-    - **Solution:** Implemented a direct call to `overwolf.windows.changeSize()` at the beginning of the `InGame.run()` method to _explicitly force_ the window to the large dimensions (e.g., `MANIFEST_ORIGINAL_WIDTH = 1212`, `MANIFEST_ORIGINAL_HEIGHT = 699`) defined as constants. The application's internal `_originalWindowWidth` and `_originalWindowHeight` state variables were then set from these constants _after_ the successful forced resize, making these constants the source of truth for the "expanded" state.
-
-2.  **Incorrect Visual State in Collapsed Mode:**
-
-    - **Problem:** When the window was (or started) small, header elements (icon, title, hotkey text, window controls) remained visible, and the toggle button's text did not update correctly, making the intended "Activate App" button inaccessible or visually incorrect.
+1. **Persistent Small Window Size:**
+  - **Problem:** Despite `manifest.json` defining a large initial `size` (e.g., 1212x699) for the `in_game` window, the Overwolf API (`overwolf.windows.getCurrentWindow()`) at app startup consistently reported the window's dimensions as the small, collapsed size (150x50). This caused the app to start visually collapsed and prevented logic from correctly restoring to a "large" original size.
+    - **Assumption Challenged:** The initial assumption was that the manifest `size` property would be the definitive size reported by the API on fresh load, or that `_originalWindowWidth/Height` could be reliably captured from an early API call. However, Overwolf appears to prioritize restoring a window to its *last known size* before it was closed, even across sessions, overriding the manifest's default `size`.
+    - **Solution:** Implemented a direct call to `overwolf.windows.changeSize()` at the beginning of the `InGame.run()` method to *explicitly force* the window to the large dimensions (e.g., `MANIFEST_ORIGINAL_WIDTH = 1212`, `MANIFEST_ORIGINAL_HEIGHT = 699`) defined as constants. The application's internal `_originalWindowWidth` and `_originalWindowHeight` state variables were then set from these constants *after* the successful forced resize, making these constants the source of truth for the "expanded" state.
+2. **Incorrect Visual State in Collapsed Mode:**
+  - **Problem:** When the window was (or started) small, header elements (icon, title, hotkey text, window controls) remained visible, and the toggle button's text did not update correctly, making the intended "Activate App" button inaccessible or visually incorrect.
     - **Solution:**
       - Ensured that element selectors in the `InGame` constructor correctly targeted all individual header components.
       - Refined the `_updateUIVisibility()` method to explicitly set `display: 'none'` on these individual header elements when collapsing, and `display: ''` (to revert to stylesheet defaults) when expanding. This ensured that even in the small 150x50 window, only the intended `_toggleLogsDisplayBtn` would occupy space when collapsed.
       - Centralized UI state updates (button text, element visibility) within `_updateUIVisibility()`, which is called both after the initial forced resize in `run()` and during the button's click event.
-
-3.  **Troubleshooting `background.html` Not Found:**
-
-    - **Problem:** A separate issue arose where the app failed to load, erroring with `manifest.json window "background" file name "background.html" doesnt exist`.
+3. **Troubleshooting `background.html` Not Found:**
+  - **Problem:** A separate issue arose where the app failed to load, erroring with `manifest.json window "background" file name "background.html" doesnt exist`.
     - **Debugging:** This involved inspecting `manifest.json` (which correctly pointed to `background.html`) and then `webpack.config.js`. The issue was traced to a misconfiguration where `HtmlWebpackPlugin` was attempting to generate `background.html` from a template in `src/background/`, but the actual file was intended to be `src/background/background.html` itself. Reverting a previous incorrect modification to the Webpack config (which had removed this `HtmlWebpackPlugin` entry) and ensuring the template path was correct resolved this. This highlighted the importance of verifying build process outputs.
-
-4.  **Debugging Process & Future Approach:**
-    - **Extensive `console.log`:** Used detailed logging at various stages: element selection, state variable values, API call results, and critically, `getComputedStyle()` for DOM elements to verify if style changes were actually applying.
+4. **Debugging Process & Future Approach:**
+  - **Extensive `console.log`:** Used detailed logging at various stages: element selection, state variable values, API call results, and critically, `getComputedStyle()` for DOM elements to verify if style changes were actually applying.
     - **Iterative Refinement:** The solution for the initial window size and UI state was arrived at iteratively. Initial attempts to simply read the size or set it later in the lifecycle were insufficient due to Overwolf's behavior.
     - **Future Approach for Similar Issues:**
-      1.  When an Overwolf window's initial size is critical and might differ from the manifest `size` (due to being previously closed at a different size), **explicitly call `overwolf.windows.changeSize()` very early in the window's lifecycle (e.g., start of `run()`) to force the desired dimensions.**
-      2.  Store "original" or "default" dimensions from constants rather than relying solely on API calls at startup if the startup size is unpredictable.
-      3.  For complex UI visibility changes, ensure each distinct visual section/element is individually controlled and hidden/shown, especially within a constrained parent container.
-      4.  When debugging style issues, `getComputedStyle()` is invaluable for confirming if JavaScript style manipulations are effective or being overridden.
+  1. When an Overwolf window's initial size is critical and might differ from the manifest `size` (due to being previously closed at a different size), **explicitly call `overwolf.windows.changeSize()` very early in the window's lifecycle (e.g., start of `run()`) to force the desired dimensions.**
+  2. Store "original" or "default" dimensions from constants rather than relying solely on API calls at startup if the startup size is unpredictable.
+  3. For complex UI visibility changes, ensure each distinct visual section/element is individually controlled and hidden/shown, especially within a constrained parent container.
+  4. When debugging style issues, `getComputedStyle()` is invaluable for confirming if JavaScript style manipulations are effective or being overridden.
 
 **Final State (after this session):**
 
@@ -120,23 +114,21 @@ This project modifies the standard Overwolf TypeScript sample app (`overwolf/sam
 
 **Key Challenges & Learnings:**
 
-1.  **The "Ghost" Manifest (`toggler_button` error):**
-
-    - **Problem:** After seemingly removing all traces of an old `toggler_button` window, the app repeatedly failed to load, throwing a `manifest.json` error that the `toggler_button.html` file couldn't be found.
+1. **The "Ghost" Manifest (`toggler_button` error):**
+  - **Problem:** After seemingly removing all traces of an old `toggler_button` window, the app repeatedly failed to load, throwing a `manifest.json` error that the `toggler_button.html` file couldn't be found.
     - **Debugging Journey:** This led to a long and frustrating chase. We correctly verified that the root `manifest.json` and `webpack.config.js` were clean. We tried clearing the `dist` folder and bumping the app version number, which are standard procedures for clearing a stubborn Overwolf client cache. Nothing worked.
     - **Assumption Overturned:** The core, incorrect assumption was that the root `manifest.json` file was the source of truth for the build.
-    - **The Breakthrough:** We discovered that the build process was actually configured to use a **`public/manifest.json`** file. This file still contained the old, incorrect reference to `toggler_button`. This was the true source of the error, as the build was overwriting our correct manifest with this incorrect one.
-
-2.  **Programmatic Window Launching:**
-    - **Problem:** After fixing the manifest issue, the new "clicker" window was defined and the app loaded without error, but the window itself did not appear.
+    - **The Breakthrough:** We discovered that the build process was actually configured to use a `**public/manifest.json`** file. This file still contained the old, incorrect reference to `toggler_button`. This was the true source of the error, as the build was overwriting our correct manifest with this incorrect one.
+2. **Programmatic Window Launching:**
+  - **Problem:** After fixing the manifest issue, the new "clicker" window was defined and the app loaded without error, but the window itself did not appear.
     - **Assumption Overturned:** Simply defining a window in the manifest with `"start_visible": true` is **not sufficient** to make it appear automatically. Standard windows (that aren't the special `desktop` or `in_game` start windows) must be programmatically launched.
     - **Solution:** We added logic to the `background.ts` script. Specifically, in the `toggleWindows` function (which correctly fires when a game starts), we added calls to `overwolf.windows.obtainDeclaredWindow('clicker', ...)` followed by `overwolf.windows.restore(...)`. This successfully creates and displays the window.
 
 **Future Approach for Similar Issues:**
 
-1.  **Verify the Real Manifest:** If a manifest-related error appears that doesn't match the root `manifest.json`, immediately check for other manifests in the project (especially in `public/`) and inspect the `overwolf.webpack.js` or equivalent build script to confirm which file is being used as the source.
-2.  **Launch Windows Explicitly:** Do not rely on `"start_visible": true` for custom windows. Always write explicit logic in a background script to obtain and restore any windows you need to appear. The `onGameStarted` or `onRunningGameInfoChanged` event handlers are the correct place for in-game windows.
-3.  **Surgical Edits:** When modifying a complex, working manifest, it's safer to make small, targeted changes (like renaming a key) rather than rewriting large sections, which can inadvertently remove critical, non-obvious configurations.
+1. **Verify the Real Manifest:** If a manifest-related error appears that doesn't match the root `manifest.json`, immediately check for other manifests in the project (especially in `public/`) and inspect the `overwolf.webpack.js` or equivalent build script to confirm which file is being used as the source.
+2. **Launch Windows Explicitly:** Do not rely on `"start_visible": true` for custom windows. Always write explicit logic in a background script to obtain and restore any windows you need to appear. The `onGameStarted` or `onRunningGameInfoChanged` event handlers are the correct place for in-game windows.
+3. **Surgical Edits:** When modifying a complex, working manifest, it's safer to make small, targeted changes (like renaming a key) rather than rewriting large sections, which can inadvertently remove critical, non-obvious configurations.
 
 **Final State (after this session):**
 
