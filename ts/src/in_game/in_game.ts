@@ -1,17 +1,25 @@
 import {
   OWGames,
   OWGamesEvents,
-  OWHotkeys
+  OWHotkeys,
+  OWGameListener
 } from "@overwolf/overwolf-api-ts";
 
 import { AppWindow } from "../AppWindow";
-import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
+import { kHotkeys, kWindowNames, kGamesFeatures, kGameClassIds } from "../consts";
+
+import RunningGameInfo = overwolf.games.RunningGameInfo;
 
 import WindowState = overwolf.windows.WindowStateEx;
 import { SettingsManager } from "../config/settings";
 import { playAudioFile } from "../audio/audio";
-import { ITEM_PRIORITY, calculateRemainingCost, DEFAULT_PURCHASE_EVENT_MAP } from "../items/items";
-import { KillEventWSPayload, WSClient } from "../ws/wsClient";
+import {
+  ITEM_PRIORITY,
+  calculateRemainingCost,
+  DEFAULT_PURCHASE_EVENT_MAP,
+  shouldDeferToHigherPriorityItem,
+} from "../items/items";
+import { DeathEventWSPayload, KillEventWSPayload, RespawnEventWSPayload, WSClient } from "../ws/wsClient";
 
 // Define these at a higher scope or pass them in if they vary,
 // for now, using manifest values.
@@ -34,6 +42,11 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 // Define target dimensions for the "small button" state
 const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
 const COLLAPSED_WINDOW_HEIGHT = 110; // Two stacked buttons in compact widget (Let's Go! / GLHF! + Show logs)
+
+// Late game, low level audio sting (3:01+, level < 4, repeats every 60s game time)
+const WHATAREYOUDOING_GAME_TIME_SEC = 181; // 3:01 on match_clock
+const WHATAREYOUDOING_INTERVAL_SEC = 60;
+const WHATAREYOUDOING_AUDIO_FILE = 'whatareyoudoing_1.mp3';
 
 /**
  * When true: once per in-game window lifetime, logs the entire `onInfoUpdates` payload as expanded JSON
@@ -78,7 +91,7 @@ function multikillFromGeKillLabel(label: string | undefined): KillEventWSPayload
   }
 }
 
-function parseKillEventData(raw: unknown): Omit<KillEventWSPayload, 'name' | 'ts'> {
+function parseKillEventData(raw: unknown): Omit<KillEventWSPayload, 'name' | 'ts' | 'killstreak'> {
   let obj: Record<string, unknown> | null = null;
   if (raw != null && typeof raw === 'object' && !Array.isArray(raw)) {
     obj = raw as Record<string, unknown>;
@@ -104,6 +117,22 @@ function parseKillEventData(raw: unknown): Omit<KillEventWSPayload, 'name' | 'ts
   }
 
   return { multikill, gep_kill_label, gep_kill_type_count, gep_total_champion_kills_match };
+}
+
+function parseDeathEventData(raw: unknown): { gep_death_count: number } {
+  let obj: Record<string, unknown> | null = null;
+  if (raw != null && typeof raw === 'object' && !Array.isArray(raw)) {
+    obj = raw as Record<string, unknown>;
+  } else if (typeof raw === 'string') {
+    const parsed = tryParseJsonString(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) obj = parsed as Record<string, unknown>;
+  }
+  let gep_death_count = 0;
+  if (obj && obj.count !== undefined && obj.count !== null) {
+    const n = Number(obj.count);
+    if (!isNaN(n) && n >= 0) gep_death_count = n;
+  }
+  return { gep_death_count };
 }
 
 const LIVE_CLIENT_STRING_JSON_KEYS = ['active_player', 'all_players'] as const;
@@ -161,6 +190,7 @@ class InGame extends AppWindow {
   private _logsContainer: HTMLElement;
   private _mainElement: HTMLElement;
   private _toggleLogsDisplayBtn: HTMLButtonElement;
+  private _shoppingAudioToggleBtn: HTMLButtonElement | null = null;
   private _areLogsVisible: boolean = false;
 
   // --- Header elements to toggle ---
@@ -177,8 +207,8 @@ class InGame extends AppWindow {
   private _hasActivated: boolean = false;
 
   // --- State Variables ---
-  private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null } =
-    { gold: 0, items: [], summonerName: null, gameTime: 0, teamId: null };
+  private _playerState: { gold: number; items: any[]; summonerName: string | null; gameTime: number; teamId: string | null; level: number | null } =
+    { gold: 0, items: [], summonerName: null, gameTime: 0, teamId: null, level: null };
   private _lastLoggedInventoryString: string = '';
   private _lastLoggedGold: number = -1;
 
@@ -196,6 +226,9 @@ class InGame extends AppWindow {
   // Game time when the high gold cue was last played
   private _lastHighGoldCueTime: number | null = null;
 
+  // Game time when the late-game low-level sting was last played
+  private _lastWhatAreYouDoingCueTime: number | null = null;
+
   // State for all players' data
   private _allPlayersState: any[] = [];
   private _lastLoggedAllPlayersString: string = ''; // Track changes to this array
@@ -205,12 +238,18 @@ class InGame extends AppWindow {
   private _enemyWardCounts: Record<string, number> = {}; // Key: ChampionName, Value: Count
 
   // --- WebSocket/Game session state ---
+  private _gameListener: OWGameListener | null = null;
   private _wsClient: WSClient | null = null;
   private _wsPingInterval: number | null = null;
   private _currentMatchId: string | null = null;
   private _gameActive: boolean = false;
   private _emittedItemSignals: Set<number> = new Set<number>();
   private _emittedVillain: boolean = false;
+  private _emittedLevel9: boolean = false;
+  /** GEP session death count (from `death` event `count`). */
+  private _deathCount: number = 0;
+  /** Consecutive champion kills since last death (local player). */
+  private _consecutiveKills: number = 0;
   private _didFullInfoLeviathanDump: boolean = false;
 
   private constructor() {
@@ -233,6 +272,7 @@ class InGame extends AppWindow {
     this._compactWidget = document.getElementById('compactWidget') as HTMLDivElement;
     this._letsGoBtn = document.getElementById('letsGoBtn') as HTMLButtonElement;
     this._showLogsBtn = document.getElementById('showLogsBtn') as HTMLButtonElement;
+    this._shoppingAudioToggleBtn = document.getElementById('shoppingAudioToggleBtn') as HTMLButtonElement;
 
     console.log('Constructor: All base elements queried.');
     // _updateUIVisibility will be called in run() after initial size is forced.
@@ -304,9 +344,16 @@ class InGame extends AppWindow {
       this.setToggleHotkeyText();
       this.setToggleHotkeyBehavior();
       this.setupToggleLogsDisplay();
+      this.setupShoppingAudioToggle();
 
       // Initialize WebSocket connection for outbound events
       this.connectWebSocket();
+
+      this._gameListener = new OWGameListener({
+        onGameStarted: this.onSupportedGameStarted.bind(this),
+        onGameEnded: this.onSupportedGameEnded.bind(this),
+      });
+      this._gameListener.start();
 
       const gameClassId = await this.getCurrentGameClassId();
       const gameFeatures = kGamesFeatures.get(gameClassId) || [];
@@ -401,6 +448,9 @@ class InGame extends AppWindow {
           lvlNum = isNaN(n) ? null : n;
         }
         console.log('[WS][Event][Level][info] raw=', JSON.stringify(levelCandidate), 'parsed=', lvlNum);
+        if (lvlNum !== null) {
+          this.recordPlayerLevel(lvlNum, 'info.level');
+        }
         if (lvlNum !== null && this._gameActive && !this._emittedVillain && lvlNum >= 6) {
           console.log('[WS][Event] Detected level >= 6 via info.level. Emitting villain once for this match. Level=', lvlNum);
           this.sendEventOncePerMatch('villain');
@@ -447,6 +497,7 @@ class InGame extends AppWindow {
             const detectedLevelRaw = activePlayerData?.level ?? activePlayerData?.championStats?.level;
             const detectedLevel = Number(detectedLevelRaw);
             if (!isNaN(detectedLevel)) {
+              this.recordPlayerLevel(detectedLevel, 'active_player');
               // Keep gameTime-driven state but allow level-based villain trigger from info updates too
               if (this._gameActive && !this._emittedVillain && detectedLevel >= 6) {
                 console.log('[WS][Event] Detected level >= 6 via info updates (active_player). Emitting villain once for this match. Level=', detectedLevel);
@@ -468,6 +519,9 @@ class InGame extends AppWindow {
           const detectedLevelRaw = ap?.level ?? ap?.championStats?.level;
           const detectedLevel = Number(detectedLevelRaw);
           console.log('[WS][Event][Level][active_player:object] raw=', JSON.stringify(detectedLevelRaw), 'parsed=', detectedLevel);
+          if (!isNaN(detectedLevel)) {
+            this.recordPlayerLevel(detectedLevel, 'active_player:object');
+          }
           if (!isNaN(detectedLevel) && this._gameActive && !this._emittedVillain && detectedLevel >= 6) {
             console.log('[WS][Event] Detected level >= 6 via active_player object. Emitting villain once for this match. Level=', detectedLevel);
             this.sendEventOncePerMatch('villain');
@@ -528,6 +582,9 @@ class InGame extends AppWindow {
                   const levelRaw = playerData?.level ?? playerData?.championStats?.level ?? playerData?.scores?.level;
                   const levelParsed = Number(levelRaw);
                   console.log('[WS][Event][Level][all_players] raw=', JSON.stringify(levelRaw), 'parsed=', levelParsed);
+                  if (!isNaN(levelParsed)) {
+                    this.recordPlayerLevel(levelParsed, 'all_players');
+                  }
                   if (this._gameActive && !this._emittedVillain && !isNaN(levelParsed) && levelParsed >= 6) {
                     console.log('[WS][Event] Detected level >= 6 via all_players. Emitting villain once for this match. Level=', levelParsed);
                     this.sendEventOncePerMatch('villain');
@@ -624,27 +681,26 @@ class InGame extends AppWindow {
       !isNaN(this._playerState.gameTime) && this._playerState.gameTime > 0;
 
     if (canRunAudioChecks) {
-      // Check high gold condition first
-      const isHighGoldActive = this.checkHighGold();
-      console.log(`[AudioCheck Pre-Cond] isHighGoldActive: ${isHighGoldActive}`); // Log result
+      const shoppingAudioOn = this.isShoppingAudioEnabled();
+      const isHighGoldActive = shoppingAudioOn ? this.checkHighGold() : false;
+      console.log(`[AudioCheck Pre-Cond] shoppingAudioOn=${shoppingAudioOn} isHighGoldActive=${isHighGoldActive}`);
 
-      // Only check for item targets if high gold cue IS NOT active
-      if (!isHighGoldActive) {
-        console.log("[AudioCheck Pre-Cond] High gold NOT active, checking target item...");
+      if (shoppingAudioOn && !isHighGoldActive) {
         this.checkTargetItem();
-      } else {
-        console.log("[AudioCheck Pre-Cond] High gold IS active, skipping target item check.");
-        // Clear any existing item target if high gold takes priority
+      } else if (!shoppingAudioOn) {
         if (this._currentTargetItemId !== null) {
-          console.log("[AudioCheck Pre-Cond] Clearing existing item target due to high gold.");
           this._currentTargetItemId = null;
           this._currentTargetSuggestionTime = null;
         }
+      } else if (isHighGoldActive && this._currentTargetItemId !== null) {
+        this._currentTargetItemId = null;
+        this._currentTargetSuggestionTime = null;
       }
 
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
       // this.checkWardStatus(); 
       this.checkEnemyWardChanges(); // Call the new ward check function
+      this.checkLowLevelLateGame();
     } else {
       // Log specific reasons for skipping
       let skipReason = "SKIPPING audio checks due to invalid state: ";
@@ -675,12 +731,7 @@ class InGame extends AppWindow {
               }
               this._playerState.gameTime = newGameTime;
               if (!this._gameActive) {
-                // Fallback: treat presence of match_clock as match started
-                this._gameActive = true;
-                this._emittedItemSignals.clear();
-                this._emittedVillain = false;
-                console.log('[WS][Lifecycle] match_clock observed while inactive. Emitting fallback game_start with game_id:', this._currentMatchId || 'unknown');
-                this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
+                this.emitGameStartLifecycle('gep.match_clock');
               }
             }
           } catch (err) {
@@ -691,27 +742,18 @@ class InGame extends AppWindow {
 
         // Start/end and level handling for WebSocket emissions
         if (event.name === 'match_start' || event.name === 'matchStart' || event.name === 'gameStart' || event.name === 'match_detected') {
-          this._gameActive = true;
-          this._emittedItemSignals.clear();
-          this._emittedVillain = false;
-          // Send game_start with matchId if known
-          console.log('[WS][Lifecycle] Emitting game_start with game_id:', this._currentMatchId || 'unknown');
-          this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
-          console.log('[WS][Lifecycle] game_start emitted');
+          this.emitGameStartLifecycle(`gep.${event.name}`);
         }
         if (event.name === 'match_end' || event.name === 'matchEnd' || event.name === 'match_ended' || event.name === 'gameEnd') {
-          console.log('[WS][Lifecycle] Emitting game_end');
-          this.sendOp('game_end');
-          console.log('[WS][Lifecycle] game_end emitted');
-          this._gameActive = false;
-          this._emittedItemSignals.clear();
-          this._emittedVillain = false;
-          this._currentMatchId = this._currentMatchId; // keep last known until next updates
+          this.emitGameEndLifecycle(`gep.${event.name}`);
         }
         if (event.name === 'level' || event.name === 'playerLevel' || event.name === 'leveled_up') {
           try {
             const lvl = Number(event.data);
             console.log('[WS][Event][Level] level event name=', event.name, 'data=', event.data, 'parsed=', lvl);
+            if (!isNaN(lvl)) {
+              this.recordPlayerLevel(lvl, event.name);
+            }
             if (this._gameActive && !this._emittedVillain && !isNaN(lvl) && lvl >= 6) {
               console.log('[WS][Event] Detected level >= 6 (', lvl, '). Emitting villain once for this match.');
               this.sendEventOncePerMatch('villain');
@@ -723,6 +765,12 @@ class InGame extends AppWindow {
         }
         if (event.name === 'kill') {
           this.emitKillOnWebSocket(event.data);
+        }
+        if (event.name === 'death') {
+          this.emitDeathOnWebSocket(event.data);
+        }
+        if (event.name === 'respawn') {
+          this.emitRespawnOnWebSocket();
         }
       }
     }
@@ -738,6 +786,7 @@ class InGame extends AppWindow {
         case 'match_start':
         case 'matchEnd':
         case 'match_end':
+        case 'respawn':
           return true;
       }
 
@@ -805,9 +854,31 @@ class InGame extends AppWindow {
     return (info && info.isRunning && info.classId) ? info.classId : null;
   }
 
+  private isSupportedGame(info: RunningGameInfo): boolean {
+    return kGameClassIds.includes(info.classId);
+  }
+
+  private onSupportedGameStarted(info: RunningGameInfo): void {
+    if (!info || !this.isSupportedGame(info)) {
+      return;
+    }
+    console.log('[WS][Lifecycle] Supported live game detected (Overwolf). classId=', info.classId);
+    this.emitGameStartLifecycle('overwolf.game_started');
+  }
+
+  private onSupportedGameEnded(info: RunningGameInfo): void {
+    if (!info || !this.isSupportedGame(info)) {
+      return;
+    }
+    console.log('[WS][Lifecycle] Supported live game ended (Overwolf). classId=', info.classId);
+    this.emitGameEndLifecycle('overwolf.game_ended');
+  }
+
   // --- NEW Single Target Check Logic --- 
   private checkTargetItem(): void {
-    // Add validation at the start
+    if (!this.isShoppingAudioEnabled()) {
+      return;
+    }
     if (!this._playerState || isNaN(this._playerState.gold) || isNaN(this._playerState.gameTime) || !Array.isArray(this._playerState.items)) {
       console.warn("[TargetCheck] Invalid state detected, skipping check.", this._playerState);
       return;
@@ -860,11 +931,11 @@ class InGame extends AppWindow {
       const remainingCost = calculateRemainingCost(itemDef, playerItemCounts);
 
       const canAfford = playerGold >= remainingCost;
+      const deferToHigher = canAfford && shouldDeferToHigherPriorityItem(itemDef, playerItemCounts, playerGold);
 
-      // Ensure this log is active and prominent
-      console.log(`>>>> [TargetCheck] -> ${itemDef.name}: OwnsComponent=${ownsAnyComponent}, CanAfford=${canAfford} (${playerGold} >= ${remainingCost}) <<<<`);
+      console.log(`>>>> [TargetCheck] -> ${itemDef.name}: OwnsComponent=${ownsAnyComponent}, CanAfford=${canAfford}, DeferToHigher=${deferToHigher} (${playerGold} >= ${remainingCost}) <<<<`);
 
-      if (canAfford) {
+      if (canAfford && !deferToHigher) {
         potentialTargetItemId = itemDef.id; // Found highest priority target
         console.log(`[TargetCheck] Potential target identified: ${itemDef.name} (ID: ${potentialTargetItemId})`);
         break; // Stop checking lower priority items
@@ -929,19 +1000,81 @@ class InGame extends AppWindow {
     playAudioFile(fileName);
   }
 
+  private recordPlayerLevel(level: number, source: string): void {
+    if (isNaN(level) || level < 1) {
+      return;
+    }
+    if (this._playerState.level !== level) {
+      console.log(`[Level] Updated from ${source}: ${this._playerState.level} -> ${level}`);
+      this._playerState.level = level;
+    }
+    if (this._gameActive && !this._emittedLevel9 && level >= 9) {
+      console.log('[WS][Event] Detected level >= 9 (', level, '). Emitting level9 once for this match.');
+      this.sendEventOncePerMatch('level9');
+      this._emittedLevel9 = true;
+    }
+  }
+
+  private isShoppingAudioEnabled(): boolean {
+    return settings.getSettings().features.shoppingAudioEnabled;
+  }
+
+  private resetShoppingAudioForNewMatch(): void {
+    settings.update({ features: { shoppingAudioEnabled: true } });
+    this._lastHighGoldCueTime = null;
+    this._currentTargetItemId = null;
+    this._currentTargetSuggestionTime = null;
+    this.updateShoppingAudioToggleLabel();
+    console.log('[ShoppingAudio] Reset to enabled for new match.');
+  }
+
+  private updateShoppingAudioToggleLabel(): void {
+    if (!this._shoppingAudioToggleBtn) return;
+    const on = this.isShoppingAudioEnabled();
+    this._shoppingAudioToggleBtn.textContent = on ? 'Mute gold/items' : 'Unmute gold/items';
+    this._shoppingAudioToggleBtn.title = on
+      ? 'Stop high-gold and item purchase reminders (wards unchanged)'
+      : 'Resume high-gold and item purchase reminders';
+  }
+
+  private setupShoppingAudioToggle(): void {
+    if (!this._shoppingAudioToggleBtn) {
+      console.warn('[ShoppingAudio] shoppingAudioToggleBtn not found in DOM.');
+      return;
+    }
+    this.updateShoppingAudioToggleLabel();
+    this._shoppingAudioToggleBtn.addEventListener('click', () => {
+      const next = !this.isShoppingAudioEnabled();
+      settings.update({ features: { shoppingAudioEnabled: next } });
+      if (!next) {
+        this._lastHighGoldCueTime = null;
+        this._currentTargetItemId = null;
+        this._currentTargetSuggestionTime = null;
+      }
+      this.updateShoppingAudioToggleLabel();
+      console.log('[ShoppingAudio] Toggled shoppingAudioEnabled=', next);
+    });
+  }
+
+  private resetWhatAreYouDoingState(): void {
+    this._lastWhatAreYouDoingCueTime = null;
+    this._playerState.level = null;
+  }
+
   // --- High Gold Check Logic --- 
   /**
    * Checks if gold is above threshold and plays audio cue periodically.
    * @returns true if gold is high (regardless of whether audio played due to cooldown), false otherwise.
    */
   private checkHighGold(): boolean {
-    // Add validation at the start
+    if (!this.isShoppingAudioEnabled()) {
+      return false;
+    }
     if (!this._playerState || isNaN(this._playerState.gold) || isNaN(this._playerState.gameTime) || this._playerState.gameTime <= 0) {
       console.warn("[HighGold] Invalid state detected, skipping check.", this._playerState);
       return false;
     }
 
-    // Re-add entry log
     console.log("[HighGold] Running check...");
 
     const playerGold = this._playerState.gold;
@@ -973,6 +1106,49 @@ class InGame extends AppWindow {
         this._lastHighGoldCueTime = null; // Reset timer if gold drops
       }
       return false;
+    }
+  }
+
+  /**
+   * Plays whatareyoudoing_1.mp3 when match clock is at/after 3:01 and player level is below 4.
+   * Repeats every 60 game seconds while the condition holds (same loop pattern as high gold).
+   */
+  private checkLowLevelLateGame(): void {
+    if (!this._playerState || isNaN(this._playerState.gameTime) || this._playerState.gameTime <= 0) {
+      console.warn('[WhatAreYouDoing] Invalid gameTime, skipping check.', this._playerState);
+      return;
+    }
+
+    const level = this._playerState.level;
+    if (level === null || isNaN(level)) {
+      return;
+    }
+
+    const currentGameTime = this._playerState.gameTime;
+    const isLateAndLowLevel =
+      currentGameTime >= WHATAREYOUDOING_GAME_TIME_SEC && level < 4;
+
+    console.log(
+      `[WhatAreYouDoing] gameTime=${currentGameTime}s level=${level} active=${isLateAndLowLevel}`
+    );
+
+    if (isLateAndLowLevel) {
+      const timeCheckPassed =
+        this._lastWhatAreYouDoingCueTime === null ||
+        currentGameTime >= (this._lastWhatAreYouDoingCueTime + WHATAREYOUDOING_INTERVAL_SEC);
+
+      console.log(
+        `[WhatAreYouDoing] TimeCheck: ${currentGameTime} >= (${this._lastWhatAreYouDoingCueTime} + ${WHATAREYOUDOING_INTERVAL_SEC}) -> ${timeCheckPassed}`
+      );
+
+      if (timeCheckPassed) {
+        console.log('[WhatAreYouDoing] >>> PLAYING LATE LOW LEVEL CUE <<<');
+        this.playAudio(WHATAREYOUDOING_AUDIO_FILE);
+        this._lastWhatAreYouDoingCueTime = currentGameTime;
+      }
+    } else if (this._lastWhatAreYouDoingCueTime !== null) {
+      console.log('[WhatAreYouDoing] Condition cleared. Resetting timer.');
+      this._lastWhatAreYouDoingCueTime = null;
     }
   }
 
@@ -1144,6 +1320,46 @@ class InGame extends AppWindow {
   }
 
   // --- WebSocket helpers ---
+  private emitGameStartLifecycle(context: string): void {
+    if (this._gameActive) {
+      console.log('[WS][Lifecycle] game_start skipped (session already active). context=', context);
+      return;
+    }
+    this._gameActive = true;
+    this._emittedItemSignals.clear();
+    this._emittedVillain = false;
+    this._emittedLevel9 = false;
+    this.resetMatchCombatState();
+    this.resetShoppingAudioForNewMatch();
+    this.resetWhatAreYouDoingState();
+    const game_id = this._currentMatchId || 'unknown';
+    console.log('[WS][Lifecycle] Emitting game_start. context=', context, 'game_id=', game_id);
+    this.sendOp('game_start', { game_id });
+    console.log('[WS][Lifecycle] game_start emitted');
+  }
+
+  private emitGameEndLifecycle(context: string): void {
+    if (!this._gameActive) {
+      console.log('[WS][Lifecycle] game_end skipped (session not active). context=', context);
+      return;
+    }
+    console.log('[WS][Lifecycle] Emitting game_end. context=', context);
+    this.sendOp('game_end');
+    console.log('[WS][Lifecycle] game_end emitted');
+    this._gameActive = false;
+    this._emittedItemSignals.clear();
+    this._emittedVillain = false;
+    this._emittedLevel9 = false;
+    this.resetMatchCombatState();
+    this.resetShoppingAudioForNewMatch();
+    this.resetWhatAreYouDoingState();
+  }
+
+  private resetMatchCombatState(): void {
+    this._deathCount = 0;
+    this._consecutiveKills = 0;
+  }
+
   private connectWebSocket(): void {
     try {
       // Use IPv4 literal: "localhost" may resolve to ::1 first; Flask often binds IPv4 only.
@@ -1189,24 +1405,66 @@ class InGame extends AppWindow {
     this._wsClient.sendOp(op, payload);
   }
 
-  /** Every LoL GEP `kill` event → WebSocket `{ op: "event", name: "kill", multikill, ... }`. */
+  /** Every LoL GEP `kill` event → WebSocket `{ op: "event", name: "kill", multikill, killstreak, ... }`. */
   private emitKillOnWebSocket(rawData: unknown): void {
     const fields = parseKillEventData(rawData);
     if (!this._gameActive) {
-      console.log('[WS][Event][Kill] Game not active. Emitting fallback game_start before kill. game_id=', this._currentMatchId || 'unknown');
-      this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
-      this._gameActive = true;
+      console.log('[WS][Event][Kill] Game not active. Emitting fallback game_start before kill.');
+      this.emitGameStartLifecycle('gep.kill_fallback');
     }
-    const payload: KillEventWSPayload = { name: 'kill', ...fields, ts: Date.now() };
+    this._consecutiveKills += 1;
+    const payload: KillEventWSPayload = {
+      name: 'kill',
+      ...fields,
+      killstreak: this._consecutiveKills,
+      ts: Date.now(),
+    };
     console.log('[WS][Event][Kill] Emitting kill event:', JSON.stringify({ op: 'event', ...payload }));
+    this.sendOp('event', payload);
+  }
+
+  /** LoL GEP `death` event (local player) → WebSocket `{ op: "event", name: "death", ... }`. */
+  private emitDeathOnWebSocket(rawData: unknown): void {
+    const { gep_death_count } = parseDeathEventData(rawData);
+    if (!this._gameActive) {
+      console.log('[WS][Event][Death] Game not active. Emitting fallback game_start before death.');
+      this.emitGameStartLifecycle('gep.death_fallback');
+    }
+    if (gep_death_count > 0) {
+      this._deathCount = gep_death_count;
+    } else {
+      this._deathCount += 1;
+    }
+    this._consecutiveKills = 0;
+    const payload: DeathEventWSPayload = {
+      name: 'death',
+      death_count: this._deathCount,
+      gep_death_count,
+      ts: Date.now(),
+    };
+    console.log('[WS][Event][Death] Emitting death event:', JSON.stringify({ op: 'event', ...payload }));
+    this.sendOp('event', payload);
+  }
+
+  /** LoL GEP `respawn` event (local player) → WebSocket `{ op: "event", name: "respawn", ... }`. */
+  private emitRespawnOnWebSocket(): void {
+    if (!this._gameActive) {
+      console.log('[WS][Event][Respawn] Game not active. Emitting fallback game_start before respawn.');
+      this.emitGameStartLifecycle('gep.respawn_fallback');
+    }
+    const payload: RespawnEventWSPayload = {
+      name: 'respawn',
+      death_count: this._deathCount,
+      ts: Date.now(),
+    };
+    console.log('[WS][Event][Respawn] Emitting respawn event:', JSON.stringify({ op: 'event', ...payload }));
     this.sendOp('event', payload);
   }
 
   private sendEventOncePerMatch(name: string): void {
     if (!this._gameActive) {
-      console.log('[WS][Event] Game not marked active. Emitting fallback game_start before event:', name, 'game_id=', this._currentMatchId || 'unknown');
-      this.sendOp('game_start', { game_id: this._currentMatchId || 'unknown' });
-      this._gameActive = true;
+      console.log('[WS][Event] Game not marked active. Emitting fallback game_start before event:', name);
+      this.emitGameStartLifecycle(`gep.event_fallback.${name}`);
     }
     console.log('[WS][Event] Emitting event:', name);
     this.sendOp('event', { name });

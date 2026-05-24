@@ -14,10 +14,17 @@ export interface AudioSettings {
     reminderFile: string; // e.g., 'idiot_song_001.mp3'
 }
 
+/** Manual toggles; desktop UI can update the same persisted keys later. */
+export interface FeatureSettings {
+    /** High-gold (icarus) + item purchase/reminder cues. Ward / whatareyoudoing are separate. */
+    shoppingAudioEnabled: boolean;
+}
+
 export interface AppSettings {
     thresholds: ThresholdSettings;
     intervals: IntervalSettings;
     audio: AudioSettings;
+    features: FeatureSettings;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -31,6 +38,9 @@ const DEFAULT_SETTINGS: AppSettings = {
     audio: {
         highGoldFile: 'icarus_song_001.mp3',
         reminderFile: 'idiot_song_001.mp3',
+    },
+    features: {
+        shoppingAudioEnabled: true,
     },
 };
 
@@ -60,6 +70,7 @@ export class SettingsManager {
             thresholds: { ...this._settings.thresholds, ...(partial.thresholds || {}) },
             intervals: { ...this._settings.intervals, ...(partial.intervals || {}) },
             audio: { ...this._settings.audio, ...(partial.audio || {}) },
+            features: { ...this._settings.features, ...(partial.features || {}) },
         };
         this._persist();
     }
@@ -82,8 +93,13 @@ export class SettingsManager {
             if (typeof localStorage !== 'undefined') {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
-                    const parsed = JSON.parse(raw);
-                    return parsed as AppSettings;
+                    const parsed = JSON.parse(raw) as Partial<AppSettings>;
+                    return {
+                        thresholds: { ...DEFAULT_SETTINGS.thresholds, ...parsed.thresholds },
+                        intervals: { ...DEFAULT_SETTINGS.intervals, ...parsed.intervals },
+                        audio: { ...DEFAULT_SETTINGS.audio, ...parsed.audio },
+                        features: { ...DEFAULT_SETTINGS.features, ...parsed.features },
+                    };
                 }
             }
         } catch (_) { /* ignore */ }

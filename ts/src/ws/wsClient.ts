@@ -15,7 +15,26 @@ export type KillEventWSPayload = {
   gep_kill_type_count: number;
   /** GEP `totalKills` for the match; `0` if missing. */
   gep_total_champion_kills_match: number;
+  /** Consecutive champion kills since last death (local player). */
+  killstreak: number;
   /** Unix ms at emission (same convention as `ping`). */
+  ts: number;
+};
+
+/** LoL GEP `death` event → WebSocket `event` payload (local player only). */
+export type DeathEventWSPayload = {
+  name: 'death';
+  /** Deaths this match from GEP `count`; `0` if missing. */
+  death_count: number;
+  gep_death_count: number;
+  ts: number;
+};
+
+/** LoL GEP `respawn` event → WebSocket `event` payload (local player only). */
+export type RespawnEventWSPayload = {
+  name: 'respawn';
+  /** Deaths so far this match (unchanged since last death). */
+  death_count: number;
   ts: number;
 };
 

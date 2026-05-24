@@ -32,6 +32,7 @@ export const PRICE = {
     codex: 850,
     seal: 350,
     mejais: 1500,
+    stormsurge: 2800
 };
 
 export const COMPONENTS = {
@@ -78,16 +79,73 @@ export const ITEMS: Record<string, ItemDef> = {
         components: [COMPONENTS.BLIGHTING_JEWEL, COMPONENTS.BLASTING_WAND],
         audioCue: 'getvoidstaff.mp3', requiresComponentCheck: true,
     },
+    STORMSURGE: {
+        id: 4646, name: 'Storm Surge', cost: PRICE.stormsurge,
+        components: [COMPONENTS.HEXTECH_ALTERNATOR, COMPONENTS.AETHER_WISP],
+        audioCue: 'getstormsurge.mp3', requiresComponentCheck: true
+    }
 };
 
 export const ITEM_PRIORITY: ItemDef[] = [
     ITEMS.LICH_BANE,
+    ITEMS.STORMSURGE,
     ITEMS.RABADONS,
     ITEMS.BANSHEES,
     ITEMS.ZHONYAS,
     ITEMS.SHADOWFLAME,
     ITEMS.VOID_STAFF,
 ];
+
+/** Component ids required by an item (multiset). */
+export function getItemComponentIds(item: ItemDef): Set<number> {
+    const ids = new Set<number>();
+    for (const comp of item.components) {
+        ids.add(comp.id);
+    }
+    return ids;
+}
+
+export function itemsShareComponent(a: ItemDef, b: ItemDef): boolean {
+    const bIds = getItemComponentIds(b);
+    for (const id of getItemComponentIds(a)) {
+        if (bIds.has(id)) return true;
+    }
+    return false;
+}
+
+/**
+ * True when a higher-priority item shares components with `candidate`, the player is on that
+ * branch (owns any of its components), does not own the finished item, and cannot afford it yet
+ * while `candidate` is affordable — so we should not cue the lower-priority item.
+ */
+export function shouldDeferToHigherPriorityItem(
+    candidate: ItemDef,
+    ownedCounts: Map<number, number>,
+    playerGold: number
+): boolean {
+    const candidateIndex = ITEM_PRIORITY.findIndex(i => i.id === candidate.id);
+    if (candidateIndex <= 0) return false;
+
+    const candidateRemaining = calculateRemainingCost(candidate, ownedCounts);
+    const candidateAffordable = playerGold >= candidateRemaining;
+    if (!candidateAffordable) return false;
+
+    for (let i = 0; i < candidateIndex; i++) {
+        const higher = ITEM_PRIORITY[i];
+        if (!itemsShareComponent(higher, candidate)) continue;
+        if ((ownedCounts.get(higher.id) || 0) > 0) continue;
+
+        const onHigherBranch = higher.components.some(c => (ownedCounts.get(c.id) || 0) > 0);
+        if (!onHigherBranch) continue;
+
+        const higherRemaining = calculateRemainingCost(higher, ownedCounts);
+        const higherAffordable = playerGold >= higherRemaining;
+        if (!higherAffordable) {
+            return true;
+        }
+    }
+    return false;
+}
 
 export function calculateRemainingCost(item: ItemDef, ownedCounts: Map<number, number>): number {
     let remainingCost = item.cost;
@@ -122,6 +180,7 @@ export const DEFAULT_PURCHASE_EVENT_MAP: PurchaseEventMapping = {
     3102: 'banshees',
     3041: 'mejais',
     3157: 'zhonyas',
+    4646: 'stormsurge'
     // 4645: 'shadowflame',
     // 3135: 'voidstaff',
 };
