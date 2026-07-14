@@ -1,11 +1,13 @@
-body {
-  background-color: #333333;
+body.in-game {
   margin: 0px;
   display: flex;
   flex-direction: column;
   font-size: 14px;
   min-height: 100vh;
-  overflow: hidden;
+}
+
+body.in-game:not(.compact-mode) {
+  background-color: #333333;
 }
 
 main {
@@ -139,16 +141,7 @@ button.logCopy:hover {
   color: #ffffff;
 }
 
-#compactWidget {
+body.compact-mode .app-header {
   flex-direction: column;
-  gap: 6px;
-  padding: 6px;
-  flex: 1 1 auto;
-}
-
-.compact-button {
-  font-family: "Roboto Mono", sans-serif;
-  font-size: 13px;
-  padding: 6px 8px;
-  cursor: pointer;
+  align-items: stretch;
 }

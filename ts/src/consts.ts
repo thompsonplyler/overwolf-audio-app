@@ -71,7 +71,8 @@ export const kGamesFeatures = new Map<number, string[]>([
       'announcer',
       'counters',
       'damage',
-      'heal'
+      'heal',
+      'team_frames',
     ]
   ],
   // Escape From Tarkov

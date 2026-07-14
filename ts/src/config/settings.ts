@@ -2,21 +2,31 @@
 
 export interface ThresholdSettings {
     highGoldThreshold: number; // e.g., 3000
+    /** Gold at which the once-per-match first-shop reminder arms. */
+    firstShopGoldThreshold: number; // e.g., 1600
+    /** Stop high-gold loop after this many DEFAULT_PURCHASE_EVENT_MAP milestones this match. */
+    highGoldDisableAfterItemMilestones: number; // e.g., 5
 }
 
 export interface IntervalSettings {
     highGoldIntervalSec: number; // e.g., 60
     targetReminderDelaySec: number; // e.g., 30
+    /** Game seconds after first reaching first-shop gold before reminder plays. */
+    firstShopReminderDelaySec: number; // e.g., 20
 }
 
 export interface AudioSettings {
     highGoldFile: string; // e.g., 'icarus_song_001.mp3'
     reminderFile: string; // e.g., 'idiot_song_001.mp3'
+    /** First time reaching first-shop gold without shopping (go back to base). */
+    firstShopReminderFile: string; // e.g., 'whatareyoudoing_1.mp3'
+    /** Still below level threshold after the late-game cutoff (e.g. not level 4 by 3:01). */
+    lowLevelLateGameFile: string; // e.g., 'whatareyoudoing_1.mp3'
 }
 
 /** Manual toggles; desktop UI can update the same persisted keys later. */
 export interface FeatureSettings {
-    /** High-gold (icarus) + item purchase/reminder cues. Ward / whatareyoudoing are separate. */
+    /** High-gold (icarus) + item purchase/reminder cues. Ward / first-shop / low-level late-game are separate. */
     shoppingAudioEnabled: boolean;
 }
 
@@ -30,14 +40,19 @@ export interface AppSettings {
 const DEFAULT_SETTINGS: AppSettings = {
     thresholds: {
         highGoldThreshold: 3000,
+        firstShopGoldThreshold: 1600,
+        highGoldDisableAfterItemMilestones: 5,
     },
     intervals: {
         highGoldIntervalSec: 60,
-        targetReminderDelaySec: 30,
+        targetReminderDelaySec: 45,
+        firstShopReminderDelaySec: 20,
     },
     audio: {
         highGoldFile: 'icarus_song_001.mp3',
         reminderFile: 'idiot_song_001.mp3',
+        firstShopReminderFile: 'whatareyoudoing_1.mp3',
+        lowLevelLateGameFile: 'whatareyoudoing_1.mp3',
     },
     features: {
         shoppingAudioEnabled: true,
@@ -45,6 +60,13 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 const STORAGE_KEY = 'ow_app_settings';
+
+export type AppSettingsUpdate = {
+    thresholds?: Partial<ThresholdSettings>;
+    intervals?: Partial<IntervalSettings>;
+    audio?: Partial<AudioSettings>;
+    features?: Partial<FeatureSettings>;
+};
 
 export class SettingsManager {
     private static _instance: SettingsManager | null = null;
@@ -65,7 +87,7 @@ export class SettingsManager {
         return this._settings;
     }
 
-    public update(partial: Partial<AppSettings>): void {
+    public update(partial: AppSettingsUpdate): void {
         this._settings = {
             thresholds: { ...this._settings.thresholds, ...(partial.thresholds || {}) },
             intervals: { ...this._settings.intervals, ...(partial.intervals || {}) },

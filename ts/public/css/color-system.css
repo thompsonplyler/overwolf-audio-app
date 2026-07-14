@@ -1,0 +1,28 @@
+/**
+ * App color system (shared by in-game HUD, desktop UI, etc.)
+ * Source: project color palette — backgrounds, accents, text.
+ */
+:root {
+  /* Backgrounds */
+  --color-bg-deep: #0e0b18;
+  --color-bg-surface: #1a1528;
+  --color-bg-raised: #241c35;
+  --color-bg-muted: #2d1e4b;
+  --color-border-subtle: #3c2d6e;
+  --color-border-strong: #5a3c8c;
+
+  /* Primary accents */
+  --color-accent-electric-blue: #145adc;
+  --color-accent-blue-bright: #1e6ef0;
+  --color-accent-neon-cyan: #28dcfa;
+  --color-accent-hot-red: #ff002d;
+  --color-accent-magenta: #dc28b4;
+  --color-accent-mid-purple: #643c82;
+
+  /* Text */
+  --color-text-primary: #e1f0ff;
+  --color-text-secondary: #a0a8d0;
+  --color-text-muted: #5a6080;
+  --color-text-cyan: #28dcfa;
+  --color-text-blue: #1e6ef0;
+}

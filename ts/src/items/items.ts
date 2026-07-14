@@ -180,8 +180,8 @@ export const DEFAULT_PURCHASE_EVENT_MAP: PurchaseEventMapping = {
     3102: 'banshees',
     3041: 'mejais',
     3157: 'zhonyas',
-    4646: 'stormsurge'
+    4646: 'stormsurge',
+    3135: 'voidstaff'
     // 4645: 'shadowflame',
-    // 3135: 'voidstaff',
 };
 

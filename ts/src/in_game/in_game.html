@@ -5,7 +5,9 @@
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="../../css/general.css" />
   <link rel="stylesheet" href="../../css/header.css" />
+  <link rel="stylesheet" href="../../css/color-system.css" />
   <link rel="stylesheet" href="../../css/ingame.css" />
+  <link rel="stylesheet" href="../../css/ingame-hud.css" />
   <link rel="stylesheet" href="../../css/modal.css" />
   <title>Overwolf Sample App - In-Game page</title>
 </head>
@@ -19,8 +21,85 @@
       Show/Hide Hotkey:
       <kbd id="hotkey"></kbd>
     </h1>
-    <button id="toggleLogsDisplayBtn" style="margin-left: 10px; padding: 5px;">Hide Logs</button>
-    <button id="shoppingAudioToggleBtn" type="button" style="margin-left: 10px; padding: 5px;">Mute gold/items</button>
+    <div class="ingame-hud-scaler">
+    <nav id="ingameHud" class="ingame-hud" aria-label="In-game controls">
+      <div class="ingame-hud__disc" aria-hidden="true">
+        <div class="ingame-hud__disc-core-wrap">
+          <div class="ingame-hud__disc-core"></div>
+        </div>
+        <svg class="ingame-hud__disc-halftone" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+          <defs>
+            <pattern id="ingameHudDotsBlue" width="6" height="6" patternUnits="userSpaceOnUse">
+              <circle cx="3" cy="3" r="1.25" fill="#28dcfa" />
+            </pattern>
+            <pattern id="ingameHudDotsBlend" width="6" height="6" patternUnits="userSpaceOnUse">
+              <circle cx="3" cy="3" r="1.25" fill="#8c7ae8" />
+            </pattern>
+            <pattern id="ingameHudDotsPink" width="6" height="6" patternUnits="userSpaceOnUse">
+              <circle cx="3" cy="3" r="1.25" fill="#dc28b4" />
+            </pattern>
+            <!-- Annulus bands: inner (blue dots) → mid → outer (pink dots); gaps stay empty -->
+            <clipPath id="ingameHudClipBandInner" clipPathUnits="userSpaceOnUse">
+              <path fill-rule="evenodd" d="M 120,32 A 88,88 0 1,1 119.99,32 Z M 120,42 A 78,78 0 1,0 120.01,42 Z" />
+            </clipPath>
+            <clipPath id="ingameHudClipBandMid" clipPathUnits="userSpaceOnUse">
+              <path fill-rule="evenodd" d="M 120,22 A 98,98 0 1,1 119.99,22 Z M 120,32 A 88,88 0 1,0 120.01,32 Z" />
+            </clipPath>
+            <clipPath id="ingameHudClipBandOuter" clipPathUnits="userSpaceOnUse">
+              <path fill-rule="evenodd" d="M 120,12 A 108,108 0 1,1 119.99,12 Z M 120,22 A 98,98 0 1,0 120.01,22 Z" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#ingameHudClipBandInner)">
+            <rect width="240" height="240" fill="url(#ingameHudDotsBlue)" />
+          </g>
+          <g clip-path="url(#ingameHudClipBandMid)">
+            <rect width="240" height="240" fill="url(#ingameHudDotsBlend)" />
+          </g>
+          <g clip-path="url(#ingameHudClipBandOuter)">
+            <rect width="240" height="240" fill="url(#ingameHudDotsPink)" />
+          </g>
+        </svg>
+      </div>
+      <div class="ingame-hud__rows">
+        <div class="ingame-hud__row ingame-hud__row--primary">
+          <button id="letsGoBtn" type="button" class="ingame-hud__btn ingame-hud__btn--primary">
+            <span class="ingame-hud__btn-label">Let's Go!</span>
+          </button>
+        </div>
+        <div class="ingame-hud__row ingame-hud__row--more">
+          <button id="ingameMoreBtn" type="button" class="ingame-hud__btn ingame-hud__btn--more" aria-expanded="false" aria-controls="ingameHudExtra">
+            <span class="ingame-hud__btn-label">More</span>
+          </button>
+        </div>
+        <div class="ingame-hud__extra-slot">
+          <div id="ingameHudExtra" class="ingame-hud__extra">
+            <div class="ingame-hud__row">
+              <button id="toggleLogsDisplayBtn" type="button" class="ingame-hud__btn ingame-hud__btn--secondary">
+                <span class="ingame-hud__btn-label">Show logs</span>
+              </button>
+            </div>
+            <div class="ingame-hud__row">
+              <button id="shoppingAudioToggleBtn" type="button" class="ingame-hud__btn ingame-hud__btn--secondary">
+                <span class="ingame-hud__btn-label">Mute gold/items</span>
+              </button>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="highGoldIntervalInput">
+                <span class="ingame-hud__field-label">High gold repeat (sec)</span>
+                <input id="highGoldIntervalInput" type="number" class="ingame-hud__field-input" min="1" max="600" step="1" inputmode="numeric" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="targetReminderIntervalInput">
+                <span class="ingame-hud__field-label">Item reminder (sec)</span>
+                <input id="targetReminderIntervalInput" type="number" class="ingame-hud__field-input" min="1" max="600" step="1" inputmode="numeric" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    </div>
     <div class="window-controls-group">
       <button id="minimizeButton" class="window-control window-control-minimize" />
       <button id="maximizeButton" class="window-control window-control-maximize" />
@@ -53,12 +132,6 @@
     </div>
 
   </main>
-
-  <!-- ----------------------------- Compact widget --------------------------- -->
-  <div id="compactWidget" style="display: none;">
-    <button id="letsGoBtn" class="compact-button">Let's Go!</button>
-    <button id="showLogsBtn" class="compact-button">Show logs</button>
-  </div>
 
   <script>
     // Standard Google Universal Analytics code

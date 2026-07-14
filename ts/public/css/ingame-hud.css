@@ -1,0 +1,385 @@
+/**
+ * In-game HUD (compact overlay + shared button chrome).
+ * Compact mode: full design canvas scaled via .ingame-hud-scaler (see HUD_LAYOUT_SCALE in in_game.ts).
+ */
+:root {
+  --ingame-hud-artboard: 240px;
+  --ingame-hud-design-width: 248px;
+  --ingame-hud-design-height: 400px;
+  --ingame-hud-extra-slot-height: 168px;
+  --ingame-hud-scale: 0.5;
+
+  --ingame-hud-ring-inner: 65%;
+  --ingame-hud-ring-outer: 90%;
+
+  --ingame-hud-btn-radius: 10px;
+  --ingame-hud-btn-bg: rgba(14, 11, 24, 0.75);
+  --ingame-hud-btn-bg-hover: rgba(14, 11, 24, 0.9);
+  --ingame-hud-btn-border: #3c2d6e;
+  --ingame-hud-btn-border-primary: #145adc;
+  --ingame-hud-btn-text: #ffffff;
+  --ingame-hud-btn-border-hover: var(--color-accent-blue-bright);
+  --ingame-hud-lift-x: -2px;
+  --ingame-hud-lift-y: -2px;
+  --ingame-hud-shadow: 2px 2px 0 rgba(14, 11, 24, 0.85);
+  --ingame-hud-transition: 0.22s ease;
+  --ingame-hud-reveal-transition: 0.24s ease;
+  --ingame-hud-glow: 0 0 18px rgba(40, 220, 250, 0.22);
+}
+
+/* Visual footprint after scale (must match COLLAPSED_WINDOW_* in in_game.ts) */
+body.compact-mode.in-game {
+  --ingame-hud-visual-width: calc(var(--ingame-hud-design-width) * var(--ingame-hud-scale));
+  --ingame-hud-visual-height: calc(var(--ingame-hud-design-height) * var(--ingame-hud-scale));
+}
+
+/* Scales full-layout HUD without squashing the disc into a tiny box */
+body.compact-mode .ingame-hud-scaler {
+  width: var(--ingame-hud-visual-width);
+  height: var(--ingame-hud-visual-height);
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+body.compact-mode .ingame-hud {
+  width: var(--ingame-hud-design-width);
+  height: var(--ingame-hud-design-height);
+  min-height: var(--ingame-hud-design-height);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  transform: scale(var(--ingame-hud-scale));
+  transform-origin: top left;
+  overflow: visible;
+}
+
+.ingame-hud {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 2;
+  background: transparent;
+}
+
+body:not(.compact-mode) .ingame-hud {
+  width: auto;
+  min-height: 0;
+  margin-left: auto;
+  padding: 6px 8px;
+  transform: none;
+}
+
+.ingame-hud__disc {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--ingame-hud-artboard);
+  height: var(--ingame-hud-artboard);
+  transform: translateX(-50%);
+  pointer-events: none;
+  overflow: visible;
+  background: transparent;
+}
+
+body:not(.compact-mode) .ingame-hud__disc {
+  display: none;
+}
+
+.ingame-hud__disc-core-wrap {
+  position: absolute;
+  width: var(--ingame-hud-ring-inner);
+  height: var(--ingame-hud-ring-inner);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.ingame-hud__disc-core {
+  position: absolute;
+  width: var(--ingame-hud-artboard);
+  height: var(--ingame-hud-artboard);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #0e0b18;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    #0e0b18 0%,
+    #0e0b18 8%,
+    #1a1528 18%,
+    #145adc 38%,
+    #145adc 48%,
+    #28dcfa 58%,
+    #dc28b4 72%,
+    #dc28b4 88%,
+    #b82098 96%,
+    #3d2860 100%
+  );
+}
+
+.ingame-hud__disc-halftone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+  background: none;
+  background-color: transparent;
+}
+
+.ingame-hud__rows {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.compact-mode .ingame-hud__rows {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 54px;
+  padding: 0 20px 10px;
+}
+
+.ingame-hud__row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+body.compact-mode .ingame-hud__extra-slot {
+  position: relative;
+  height: var(--ingame-hud-extra-slot-height);
+  flex-shrink: 0;
+  width: 100%;
+}
+
+body.compact-mode .ingame-hud__extra {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--ingame-hud-reveal-transition),
+    visibility var(--ingame-hud-reveal-transition);
+}
+
+body.compact-mode .ingame-hud--more-open .ingame-hud__extra {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 4;
+}
+
+body.compact-mode .ingame-hud--more-open .ingame-hud__row--setting {
+  position: relative;
+  z-index: 4;
+}
+
+body:not(.compact-mode) .ingame-hud__row--primary,
+body:not(.compact-mode) .ingame-hud__row--more {
+  display: none;
+}
+
+body:not(.compact-mode) .ingame-hud__extra-slot {
+  height: auto;
+}
+
+body:not(.compact-mode) .ingame-hud__extra {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.ingame-hud__btn {
+  appearance: none;
+  border: 1px solid var(--ingame-hud-btn-border);
+  border-radius: var(--ingame-hud-btn-radius);
+  background: var(--ingame-hud-btn-bg);
+  color: var(--ingame-hud-btn-text);
+  cursor: pointer;
+  font-family: "Roboto Mono", sans-serif;
+  line-height: 1.25;
+  padding: 8px 14px;
+  width: 100%;
+  max-width: 168px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  transition:
+    background-color var(--ingame-hud-transition),
+    border-color var(--ingame-hud-transition),
+    color var(--ingame-hud-transition),
+    box-shadow var(--ingame-hud-transition);
+}
+
+.ingame-hud__btn:hover,
+.ingame-hud__btn:focus-visible {
+  background: var(--ingame-hud-btn-bg-hover);
+  border-color: var(--ingame-hud-btn-border-hover);
+  color: var(--ingame-hud-btn-text);
+  box-shadow: var(--ingame-hud-glow);
+}
+
+.ingame-hud__btn-label {
+  display: inline-block;
+  transition:
+    transform var(--ingame-hud-transition),
+    text-shadow var(--ingame-hud-transition),
+    color var(--ingame-hud-transition);
+}
+
+.ingame-hud__btn:hover .ingame-hud__btn-label,
+.ingame-hud__btn:focus-visible .ingame-hud__btn-label {
+  transform: translate(var(--ingame-hud-lift-x), var(--ingame-hud-lift-y));
+  text-shadow: var(--ingame-hud-shadow);
+}
+
+.ingame-hud__btn--primary {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-color: var(--ingame-hud-btn-border-primary);
+}
+
+.ingame-hud__btn--more {
+  font-size: 11px;
+  padding: 5px 12px;
+  max-width: 96px;
+}
+
+.ingame-hud__btn--secondary {
+  font-size: 12px;
+  padding: 7px 12px;
+  max-width: 168px;
+}
+
+.ingame-hud__row--setting {
+  width: 100%;
+}
+
+.ingame-hud__field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  max-width: 168px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.ingame-hud__field-label {
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 10px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.02em;
+}
+
+.ingame-hud__field-input {
+  appearance: auto;
+  border: 1px solid var(--ingame-hud-btn-border);
+  border-radius: var(--ingame-hud-btn-radius);
+  background: var(--ingame-hud-btn-bg);
+  color: var(--ingame-hud-btn-text);
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 12px;
+  line-height: 1.25;
+  padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+  user-select: text;
+  pointer-events: auto;
+  position: relative;
+  z-index: 3;
+  transition:
+    background-color var(--ingame-hud-transition),
+    border-color var(--ingame-hud-transition),
+    box-shadow var(--ingame-hud-transition);
+}
+
+.ingame-hud__field-input:hover,
+.ingame-hud__field-input:focus-visible {
+  background: var(--ingame-hud-btn-bg-hover);
+  border-color: var(--ingame-hud-btn-border-hover);
+  box-shadow: var(--ingame-hud-glow);
+  outline: none;
+}
+
+html:has(body.compact-mode.in-game) {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+}
+
+body.compact-mode.in-game {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  width: var(--ingame-hud-visual-width);
+  height: var(--ingame-hud-visual-height);
+  min-height: 0;
+  overflow: visible;
+}
+
+body.compact-mode.in-game .app-header {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  width: var(--ingame-hud-visual-width);
+  height: var(--ingame-hud-visual-height);
+  min-height: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+body.compact-mode.in-game .ingame-hud-scaler,
+body.compact-mode.in-game .ingame-hud,
+body.compact-mode.in-game .ingame-hud__disc {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+}
+
+body.compact-mode.in-game .ingame-hud__disc {
+  overflow: visible;
+}
+
+body:not(.compact-mode).in-game .app-header {
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+body:not(.compact-mode).in-game {
+  background-color: var(--color-bg-deep);
+  width: auto;
+  height: auto;
+}

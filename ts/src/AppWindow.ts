@@ -6,8 +6,10 @@ export class AppWindow {
   protected currWindow: OWWindow;
   protected mainWindow: OWWindow;
   protected maximized: boolean = false;
+  private _windowName: string;
 
   constructor(windowName) {
+    this._windowName = windowName;
     this.mainWindow = new OWWindow('background');
     this.currWindow = new OWWindow(windowName);
 
@@ -42,7 +44,18 @@ export class AppWindow {
     return await this.currWindow.getWindowState();
   }
 
-  private async setDrag(elem) {
-    this.currWindow.dragMove(elem);
+  private setDrag(elem: HTMLElement | null): void {
+    if (!elem) {
+      return;
+    }
+    elem.classList.add('draggable');
+    elem.addEventListener('mousedown', (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('input, textarea, select, button, label, a, [data-no-drag]')) {
+        return;
+      }
+      e.preventDefault();
+      overwolf.windows.dragMove(this._windowName);
+    });
   }
 }

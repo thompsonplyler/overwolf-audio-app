@@ -49,6 +49,14 @@
   cursor: grab;
 }
 
+.app-header.draggable input,
+.app-header.draggable textarea,
+.app-header.draggable select,
+.app-header.draggable label {
+  user-select: text;
+  cursor: auto;
+}
+
 .app-header.draggable:active {
   cursor: grabbing;
 }

@@ -39,20 +39,88 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 
 // Item priority now imported from items module
 
-// Define target dimensions for the "small button" state
-const COLLAPSED_WINDOW_WIDTH = 150; // Example width, adjust as needed
-const COLLAPSED_WINDOW_HEIGHT = 110; // Two stacked buttons in compact widget (Let's Go! / GLHF! + Show logs)
+// Compact HUD: full design layout, scaled visually (see .ingame-hud-scaler in CSS)
+const HUD_DESIGN_WIDTH = 248;
+const HUD_DESIGN_HEIGHT = 400;
+const HUD_DESIGN_ARTBOARD = 240;
+/** 0.5 ≈ half of ~210px on-screen disc; tunable via HUD_LAYOUT_SCALE */
+const HUD_LAYOUT_SCALE = 0.5;
+/** Disc center on 1920×1080 — bottom row, just left of champion portrait (see layout screenshot) */
+const HUD_DISC_CENTER_X = 500;
+const HUD_DISC_CENTER_Y = 1060;
+
+const COLLAPSED_WINDOW_WIDTH = Math.round(HUD_DESIGN_WIDTH * HUD_LAYOUT_SCALE);
+/** Compact HUD — fixed size; More panel toggles visibility only (no resize). */
+const COLLAPSED_WINDOW_HEIGHT = Math.round(HUD_DESIGN_HEIGHT * HUD_LAYOUT_SCALE);
+const HUD_DISC_DIAMETER_PX = Math.round(HUD_DESIGN_ARTBOARD * HUD_LAYOUT_SCALE);
 
 // Late game, low level audio sting (3:01+, level < 4, repeats every 60s game time)
 const WHATAREYOUDOING_GAME_TIME_SEC = 181; // 3:01 on match_clock
 const WHATAREYOUDOING_INTERVAL_SEC = 60;
-const WHATAREYOUDOING_AUDIO_FILE = 'whatareyoudoing_1.mp3';
+const WHATAREYOUDOING_LEVEL_THRESHOLD = 4;
+
+type FirstShopReminderState = 'idle' | 'waiting' | 'resolved';
+
+/** Fountain starting-items shop always happens before this (game seconds). */
+const FIRST_SHOP_BASELINE_WINDOW_SEC = 15;
+
+function normalizeInventoryForSnapshot(items: unknown[]): string {
+  if (!Array.isArray(items)) return '[]';
+  const parts = items
+    .map((raw) => {
+      const it = raw as { itemID?: unknown; itemId?: unknown; count?: unknown };
+      const id = Number(it.itemID ?? it.itemId);
+      const cnt = Number(it.count);
+      if (!Number.isFinite(id) || id <= 0 || !Number.isFinite(cnt) || cnt <= 0) return null;
+      return `${id}:${cnt}`;
+    })
+    .filter((p): p is string => p !== null)
+    .sort();
+  return JSON.stringify(parts);
+}
+
+function tryParseGoldValue(raw: unknown): number | null {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    const direct = Number(trimmed);
+    if (!isNaN(direct)) return direct;
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        return tryParseGoldValue(JSON.parse(trimmed));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+  if (typeof raw === 'object') {
+    const rec = raw as Record<string, unknown>;
+    if (rec.gold !== undefined) return tryParseGoldValue(rec.gold);
+    if (rec.total_gold !== undefined) return tryParseGoldValue(rec.total_gold);
+  }
+  return null;
+}
+
+function applyGoldIfChanged(currentGold: number, playerState: { gold: number }): boolean {
+  if (!Number.isFinite(currentGold) || currentGold === playerState.gold) {
+    return false;
+  }
+  playerState.gold = currentGold;
+  return true;
+}
 
 /**
  * When true: once per in-game window lifetime, logs the entire `onInfoUpdates` payload as expanded JSON
  * (parses string blobs like live_client_data.active_player). Set false after you capture logs.
  */
 const DUMP_FULL_INFO_UPDATES_ONCE = false;
+
+/** Log GEP events + summoner-spell info changes to find Flash usage signals. Set false after testing. */
+const PROBE_FLASH_SUMMONER_SPELLS = true;
+
+const FLASH_PROBE_EVENT_IGNORE = new Set(['match_clock']);
 
 function circularReplacer(): (this: unknown, key: string, value: unknown) => unknown {
   const seen = new WeakSet<object>();
@@ -73,6 +141,84 @@ function tryParseJsonString(s: string): unknown {
   } catch {
     return s;
   }
+}
+
+/** Walk an object tree and collect paths whose keys look spell/cooldown related. */
+function collectSpellCooldownPaths(
+  obj: unknown,
+  prefix = '',
+  out: string[] = [],
+  depth = 0,
+): string[] {
+  if (obj == null || depth > 10) return out;
+  if (typeof obj === 'string') {
+    const trimmed = obj.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      collectSpellCooldownPaths(tryParseJsonString(trimmed), prefix, out, depth + 1);
+    }
+    return out;
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) => collectSpellCooldownPaths(item, `${prefix}[${i}]`, out, depth + 1));
+    return out;
+  }
+  if (typeof obj !== 'object') return out;
+
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (/flash|summoner|spell|cooldown|abilityready|ult_cd/i.test(key)) {
+      out.push(`${path}=${JSON.stringify(value)}`);
+    }
+    collectSpellCooldownPaths(value, path, out, depth + 1);
+  }
+  return out;
+}
+
+function extractSummonerSpellsFromActivePlayer(liveClientData: Record<string, unknown>): unknown {
+  const raw = liveClientData.active_player;
+  let ap: Record<string, unknown> | null = null;
+  if (typeof raw === 'string') {
+    const parsed = tryParseJsonString(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ap = parsed as Record<string, unknown>;
+  } else if (raw && typeof raw === 'object') {
+    ap = raw as Record<string, unknown>;
+  }
+  return ap?.summonerSpells ?? null;
+}
+
+function extractLocalPlayerSummonerSpells(
+  liveClientData: Record<string, unknown>,
+  summonerName: string | null,
+): unknown {
+  const fromActive = extractSummonerSpellsFromActivePlayer(liveClientData);
+  if (fromActive) return fromActive;
+
+  const raw = liveClientData.all_players;
+  let players: unknown[] | null = null;
+  if (typeof raw === 'string') {
+    const parsed = tryParseJsonString(raw);
+    if (Array.isArray(parsed)) players = parsed;
+  } else if (Array.isArray(raw)) {
+    players = raw;
+  }
+  if (!players || !summonerName) return null;
+
+  const me = players.find(
+    (p) => p && typeof p === 'object' && (p as { summonerName?: string }).summonerName === summonerName,
+  ) as { summonerSpells?: unknown } | undefined;
+  return me?.summonerSpells ?? null;
+}
+
+function parseLiveClientEventsBlob(liveClientData: Record<string, unknown>): unknown[] {
+  const raw = liveClientData.events;
+  if (typeof raw === 'string') {
+    const parsed = tryParseJsonString(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const events = (parsed as { Events?: unknown[] }).Events;
+      if (Array.isArray(events)) return events;
+    }
+  }
+  return [];
 }
 
 /** LoL GEP kill event `label` → normalized multikill tier for WebSocket consumers. */
@@ -191,6 +337,8 @@ class InGame extends AppWindow {
   private _mainElement: HTMLElement;
   private _toggleLogsDisplayBtn: HTMLButtonElement;
   private _shoppingAudioToggleBtn: HTMLButtonElement | null = null;
+  private _highGoldIntervalInput: HTMLInputElement | null = null;
+  private _targetReminderIntervalInput: HTMLInputElement | null = null;
   private _areLogsVisible: boolean = false;
 
   // --- Header elements to toggle ---
@@ -199,10 +347,11 @@ class InGame extends AppWindow {
   private _headerHotkeyText: HTMLHeadingElement;
   private _windowControlsGroup: HTMLDivElement;
 
-  // --- Compact widget (visible only in compact mode) ---
-  private _compactWidget: HTMLDivElement;
+  private _ingameHud: HTMLElement | null = null;
+  private _ingameHudExtra: HTMLElement | null = null;
+  private _ingameMoreBtn: HTMLButtonElement | null = null;
   private _letsGoBtn: HTMLButtonElement;
-  private _showLogsBtn: HTMLButtonElement;
+  private _ingameMoreExpanded: boolean = false;
   // Per-session: true after the first Let's Go! click, never resets until window reload
   private _hasActivated: boolean = false;
 
@@ -229,6 +378,22 @@ class InGame extends AppWindow {
   // Game time when the late-game low-level sting was last played
   private _lastWhatAreYouDoingCueTime: number | null = null;
 
+  /**
+   * Hoarding reminder: play once if gold reaches threshold without ever decreasing
+   * after the fountain starting-items spend.
+   */
+  private _firstShopReminderState: FirstShopReminderState = 'idle';
+  private _firstShopReminderArmedAtGameTime: number | null = null;
+  private _startingSpendBaselineLocked: boolean = false;
+  private _firstShopReminderDisqualified: boolean = false;
+  /** Peak gold from active_player since starting-spend baseline; only this source drives disqualify. */
+  private _peakGoldSinceStartingSpend: number | null = null;
+  private _earlyWindowPeakGold: number | null = null;
+  private _inventorySnapshotBeforeBaseline: string = '[]';
+  private _sawNonEmptyInventoryBefore: boolean = false;
+  /** Latest active_player.currentGold; fallback gold paths must not affect first-shop logic. */
+  private _latestActivePlayerGold: number | null = null;
+
   // State for all players' data
   private _allPlayersState: any[] = [];
   private _lastLoggedAllPlayersString: string = ''; // Track changes to this array
@@ -251,6 +416,8 @@ class InGame extends AppWindow {
   /** Consecutive champion kills since last death (local player). */
   private _consecutiveKills: number = 0;
   private _didFullInfoLeviathanDump: boolean = false;
+  private _flashProbeLastSummonerSpellsJson: string = '';
+  private _flashProbeSeenLiveClientEventIds: Set<number> = new Set<number>();
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -269,10 +436,13 @@ class InGame extends AppWindow {
     this._headerHotkeyText = document.querySelector('#header > .hotkey-text') as HTMLHeadingElement;
     this._windowControlsGroup = document.querySelector('#header > .window-controls-group') as HTMLDivElement;
 
-    this._compactWidget = document.getElementById('compactWidget') as HTMLDivElement;
+    this._ingameHud = document.getElementById('ingameHud');
+    this._ingameHudExtra = document.getElementById('ingameHudExtra');
+    this._ingameMoreBtn = document.getElementById('ingameMoreBtn') as HTMLButtonElement;
     this._letsGoBtn = document.getElementById('letsGoBtn') as HTMLButtonElement;
-    this._showLogsBtn = document.getElementById('showLogsBtn') as HTMLButtonElement;
     this._shoppingAudioToggleBtn = document.getElementById('shoppingAudioToggleBtn') as HTMLButtonElement;
+    this._highGoldIntervalInput = document.getElementById('highGoldIntervalInput') as HTMLInputElement;
+    this._targetReminderIntervalInput = document.getElementById('targetReminderIntervalInput') as HTMLInputElement;
 
     console.log('Constructor: All base elements queried.');
     // _updateUIVisibility will be called in run() after initial size is forced.
@@ -344,7 +514,9 @@ class InGame extends AppWindow {
       this.setToggleHotkeyText();
       this.setToggleHotkeyBehavior();
       this.setupToggleLogsDisplay();
+      this.setupIngameHudMore();
       this.setupShoppingAudioToggle();
+      this.setupIntervalSettings();
 
       // Initialize WebSocket connection for outbound events
       this.connectWebSocket();
@@ -392,9 +564,13 @@ class InGame extends AppWindow {
 
   private onInfoUpdates(info) {
     this.maybeDumpFullLiveGameInfo(info);
+    if (PROBE_FLASH_SUMMONER_SPELLS) {
+      this.probeFlashSummonerInfoUpdates(info);
+    }
 
     let goldChanged = false;
     let itemsChanged = false;
+    let activePlayerGoldThisUpdate: number | null = null;
     let nameFound = false; // Flag for the *entire* all_players array
     let allPlayersChanged = false; // Flag for the *entire* all_players array
     let teamFound = false; // Flag for initial team discovery
@@ -487,6 +663,10 @@ class InGame extends AppWindow {
           // Update Gold (check for NaN)
           if (activePlayerData.currentGold !== undefined) {
             const currentGoldNum = Number(activePlayerData.currentGold); // Convert safely
+            if (!isNaN(currentGoldNum)) {
+              this._latestActivePlayerGold = currentGoldNum;
+              activePlayerGoldThisUpdate = currentGoldNum;
+            }
             if (!isNaN(currentGoldNum) && currentGoldNum !== this._playerState.gold) {
               this._playerState.gold = currentGoldNum;
               goldChanged = true;
@@ -516,6 +696,21 @@ class InGame extends AppWindow {
         // Some clients may already have parsed objects
         try {
           const ap: any = liveClientData.active_player;
+          if (!this._playerState.summonerName && ap.summonerName) {
+            this._playerState.summonerName = ap.summonerName;
+            nameFound = true;
+          }
+          if (ap.currentGold !== undefined) {
+            const currentGoldNum = Number(ap.currentGold);
+            if (!isNaN(currentGoldNum)) {
+              this._latestActivePlayerGold = currentGoldNum;
+              activePlayerGoldThisUpdate = currentGoldNum;
+            }
+            if (!isNaN(currentGoldNum) && currentGoldNum !== this._playerState.gold) {
+              this._playerState.gold = currentGoldNum;
+              goldChanged = true;
+            }
+          }
           const detectedLevelRaw = ap?.level ?? ap?.championStats?.level;
           const detectedLevel = Number(detectedLevelRaw);
           console.log('[WS][Event][Level][active_player:object] raw=', JSON.stringify(detectedLevelRaw), 'parsed=', detectedLevel);
@@ -606,25 +801,25 @@ class InGame extends AppWindow {
         }
       }
 
-      // --- Fallback Gold Check (game_info) --- 
+      // --- Fallback Gold Check (game_info, gold feature, nested info) ---
       if (!goldChanged) {
-        // ... (get gameInfoGoldString) ...
-        const gameInfoGoldString = info?.game_info?.gold;
-        if (typeof gameInfoGoldString === 'string') {
-          try {
-            const innerGoldData = JSON.parse(gameInfoGoldString);
-            const currentGoldString = innerGoldData?.gold;
-            if (currentGoldString !== undefined) {
-              const currentGold = parseInt(currentGoldString); // parseInt handles potential non-numbers
-              if (!isNaN(currentGold) && currentGold !== this._playerState.gold) { // Check isNaN
-                this._playerState.gold = currentGold;
-                goldChanged = true;
-                console.log("Updated gold from game_info:", this._playerState.gold);
-              }
-            }
-          } catch (parseError) {
-            // Log the string that failed parsing
-            console.error("[game_info gold parse ERROR] Failed to parse string:", gameInfoGoldString, "Error:", parseError);
+        const infoRec = info as Record<string, unknown>;
+        const innerInfo = infoRec?.info as Record<string, unknown> | undefined;
+        const goldCandidates: unknown[] = [
+          infoRec?.gold,
+          innerInfo?.gold,
+          infoRec?.game_info,
+          innerInfo?.game_info,
+        ];
+        if (infoRec?.game_info && typeof infoRec.game_info === 'object') {
+          goldCandidates.push((infoRec.game_info as Record<string, unknown>).gold);
+        }
+        for (const candidate of goldCandidates) {
+          const parsedGold = tryParseGoldValue(candidate);
+          if (parsedGold !== null && applyGoldIfChanged(parsedGold, this._playerState)) {
+            goldChanged = true;
+            console.log('[Gold] Updated from fallback path:', this._playerState.gold);
+            break;
           }
         }
       }
@@ -645,7 +840,12 @@ class InGame extends AppWindow {
           if (owns) {
             console.log('[WS][Event] Detected acquisition of item', itemId, '. Emitting', eventName, 'once for this match.');
             this.sendEventOncePerMatch(eventName);
+            const prevMilestoneCount = this._emittedItemSignals.size;
             this._emittedItemSignals.add(itemId);
+            const milestoneLimit = settings.getSettings().thresholds.highGoldDisableAfterItemMilestones;
+            if (prevMilestoneCount < milestoneLimit && this._emittedItemSignals.size >= milestoneLimit) {
+              this.onItemMilestonesChanged();
+            }
           }
         }
       }
@@ -673,7 +873,12 @@ class InGame extends AppWindow {
       }
     }
 
-    // --- 3. Call Audio Cue Checks --- 
+    // --- 3. Call Audio Cue Checks ---
+    this.updateFirstShopGoldTracking(itemsChanged, activePlayerGoldThisUpdate);
+    if (this.canRunFirstShopReminderCheck()) {
+      this.checkFirstShopReminder();
+    }
+
     const canRunAudioChecks =
       this._playerState.summonerName &&
       this._playerState.items &&
@@ -712,6 +917,50 @@ class InGame extends AppWindow {
     }
   }
 
+  /** Logging-only: hunt for Flash / summoner-spell signals in GEP info updates. */
+  private probeFlashSummonerInfoUpdates(info: unknown): void {
+    if (!info || typeof info !== 'object') return;
+    const rec = info as Record<string, unknown>;
+
+    const spellPaths = collectSpellCooldownPaths(rec);
+    if (spellPaths.length) {
+      console.warn('[FlashProbe][Info] spell/cooldown paths:', spellPaths.join(' | '));
+    }
+
+    const lcd = rec.live_client_data;
+    if (lcd && typeof lcd === 'object') {
+      const lcdRec = lcd as Record<string, unknown>;
+      const spells = extractLocalPlayerSummonerSpells(lcdRec, this._playerState.summonerName);
+      if (spells != null) {
+        const json = JSON.stringify(spells);
+        if (json !== this._flashProbeLastSummonerSpellsJson) {
+          console.warn('[FlashProbe][Info] summonerSpells changed:', json);
+          this._flashProbeLastSummonerSpellsJson = json;
+        }
+      }
+
+      for (const ev of parseLiveClientEventsBlob(lcdRec)) {
+        if (!ev || typeof ev !== 'object') continue;
+        const eventRec = ev as { EventID?: number; EventName?: string; EventTime?: number };
+        const id = eventRec.EventID;
+        if (id == null || this._flashProbeSeenLiveClientEventIds.has(id)) continue;
+        this._flashProbeSeenLiveClientEventIds.add(id);
+        const name = eventRec.EventName ?? 'unknown';
+        if (/flash|summoner|spell|ability|cooldown/i.test(name) || name !== 'GameStart') {
+          console.warn('[FlashProbe][LiveClientEvent]', JSON.stringify(eventRec));
+        }
+      }
+    }
+
+    const inner = rec.info;
+    if (inner && typeof inner === 'object') {
+      for (const [feature, payload] of Object.entries(inner as Record<string, unknown>)) {
+        if (!/abilit|summoner|spell|team_frames/i.test(feature)) continue;
+        console.warn(`[FlashProbe][Info][${feature}]`, JSON.stringify(payload));
+      }
+    }
+  }
+
   // Special events will be highlighted in the event log
   private onNewEvents(e) {
     // --- Handle match_clock event --- 
@@ -721,6 +970,14 @@ class InGame extends AppWindow {
         console.log('[Events] Incoming names:', names);
       } catch (_) { }
       for (const event of e.events) {
+        if (
+          PROBE_FLASH_SUMMONER_SPELLS &&
+          event?.name &&
+          !FLASH_PROBE_EVENT_IGNORE.has(event.name)
+        ) {
+          console.warn('[FlashProbe][GEP-Event]', event.name, event.data);
+        }
+
         if (event.name === 'match_clock') {
           try {
             const newGameTime = parseInt(event.data);
@@ -733,6 +990,21 @@ class InGame extends AppWindow {
               if (!this._gameActive) {
                 this.emitGameStartLifecycle('gep.match_clock');
               }
+              if (
+                newGameTime >= FIRST_SHOP_BASELINE_WINDOW_SEC &&
+                !this._startingSpendBaselineLocked &&
+                this.canRunFirstShopReminderCheck()
+              ) {
+                const inv = normalizeInventoryForSnapshot(this._playerState.items);
+                if (inv !== '[]') {
+                  this.lockFirstShopBaseline(
+                    this._latestActivePlayerGold ?? this._playerState.gold,
+                    inv,
+                  );
+                }
+              }
+              this.updateFirstShopGoldTracking(false, null);
+              this.checkFirstShopReminder();
             }
           } catch (err) {
             console.error("Error parsing match_clock data:", event.data, err);
@@ -970,7 +1242,7 @@ class InGame extends AppWindow {
           console.log(`[TargetCheck] Reminder check: ${currentGameTime} >= (${this._currentTargetSuggestionTime} + ${delay}) -> ${reminderDue}`);
           if (reminderDue) {
             console.log(`[TargetCheck] >>> PLAYING REMINDER (Target: ${this._currentTargetItemId}) <<<`);
-            this.playAudio('idiot_song_001.mp3');
+            this.playAudio(settings.getSettings().audio.reminderFile);
             this._currentTargetSuggestionTime = currentGameTime; // Reset timer
             console.log("[TargetCheck] Reminder played, reminder timer reset.");
           } else {
@@ -1019,6 +1291,25 @@ class InGame extends AppWindow {
     return settings.getSettings().features.shoppingAudioEnabled;
   }
 
+  /** True when enough purchase-map milestones acquired to suppress high-gold loop for this match. */
+  private isHighGoldSuppressedByItemMilestones(): boolean {
+    const limit = settings.getSettings().thresholds.highGoldDisableAfterItemMilestones;
+    return this._emittedItemSignals.size >= limit;
+  }
+
+  private onItemMilestonesChanged(): void {
+    if (!this.isHighGoldSuppressedByItemMilestones()) {
+      return;
+    }
+    if (this._lastHighGoldCueTime !== null) {
+      console.log('[HighGold] Milestone threshold reached. Clearing high-gold timer.');
+      this._lastHighGoldCueTime = null;
+    }
+    console.log(
+      `[HighGold] ${this._emittedItemSignals.size} item milestones acquired (limit ${settings.getSettings().thresholds.highGoldDisableAfterItemMilestones}). High gold cues disabled for this match.`
+    );
+  }
+
   private resetShoppingAudioForNewMatch(): void {
     settings.update({ features: { shoppingAudioEnabled: true } });
     this._lastHighGoldCueTime = null;
@@ -1028,10 +1319,20 @@ class InGame extends AppWindow {
     console.log('[ShoppingAudio] Reset to enabled for new match.');
   }
 
+  private setHudButtonLabel(button: HTMLElement | null, text: string): void {
+    if (!button) return;
+    const label = button.querySelector('.ingame-hud__btn-label');
+    if (label) {
+      label.textContent = text;
+    } else {
+      button.textContent = text;
+    }
+  }
+
   private updateShoppingAudioToggleLabel(): void {
     if (!this._shoppingAudioToggleBtn) return;
     const on = this.isShoppingAudioEnabled();
-    this._shoppingAudioToggleBtn.textContent = on ? 'Mute gold/items' : 'Unmute gold/items';
+    this.setHudButtonLabel(this._shoppingAudioToggleBtn, on ? 'Mute gold/items' : 'Unmute gold/items');
     this._shoppingAudioToggleBtn.title = on
       ? 'Stop high-gold and item purchase reminders (wards unchanged)'
       : 'Resume high-gold and item purchase reminders';
@@ -1056,9 +1357,257 @@ class InGame extends AppWindow {
     });
   }
 
+  private static readonly INTERVAL_SETTING_MIN_SEC = 1;
+  private static readonly INTERVAL_SETTING_MAX_SEC = 600;
+
+  private clampIntervalSeconds(raw: number): number | null {
+    if (!Number.isFinite(raw)) return null;
+    const rounded = Math.round(raw);
+    if (rounded < InGame.INTERVAL_SETTING_MIN_SEC || rounded > InGame.INTERVAL_SETTING_MAX_SEC) {
+      return null;
+    }
+    return rounded;
+  }
+
+  private syncIntervalSettingsInputs(): void {
+    const { highGoldIntervalSec, targetReminderDelaySec } = settings.getSettings().intervals;
+    if (this._highGoldIntervalInput) {
+      this._highGoldIntervalInput.value = String(highGoldIntervalSec);
+    }
+    if (this._targetReminderIntervalInput) {
+      this._targetReminderIntervalInput.value = String(targetReminderDelaySec);
+    }
+  }
+
+  private bindIntervalSettingInput(
+    input: HTMLInputElement | null,
+    settingKey: 'highGoldIntervalSec' | 'targetReminderDelaySec',
+    logLabel: string,
+  ): void {
+    if (!input) {
+      console.warn(`[Settings] ${settingKey} input not found in DOM.`);
+      return;
+    }
+
+    const commit = (): void => {
+      const parsed = this.clampIntervalSeconds(Number(input.value));
+      if (parsed === null) {
+        this.syncIntervalSettingsInputs();
+        return;
+      }
+      if (parsed === settings.getSettings().intervals[settingKey]) {
+        input.value = String(parsed);
+        return;
+      }
+      if (settingKey === 'highGoldIntervalSec') {
+        settings.update({ intervals: { highGoldIntervalSec: parsed } });
+      } else {
+        settings.update({ intervals: { targetReminderDelaySec: parsed } });
+      }
+      input.value = String(parsed);
+      console.log(`[Settings] ${logLabel} updated to ${parsed}s (live)`);
+    };
+
+    input.addEventListener('change', commit);
+    input.addEventListener('blur', commit);
+  }
+
+  private setupIntervalSettings(): void {
+    this.syncIntervalSettingsInputs();
+    this.bindIntervalSettingInput(
+      this._highGoldIntervalInput,
+      'highGoldIntervalSec',
+      'High gold repeat interval',
+    );
+    this.bindIntervalSettingInput(
+      this._targetReminderIntervalInput,
+      'targetReminderDelaySec',
+      'Item reminder interval',
+    );
+  }
+
   private resetWhatAreYouDoingState(): void {
     this._lastWhatAreYouDoingCueTime = null;
     this._playerState.level = null;
+  }
+
+  private resetFirstShopReminderState(): void {
+    this._firstShopReminderState = 'idle';
+    this._firstShopReminderArmedAtGameTime = null;
+    this._startingSpendBaselineLocked = false;
+    this._firstShopReminderDisqualified = false;
+    this._peakGoldSinceStartingSpend = null;
+    this._earlyWindowPeakGold = null;
+    this._inventorySnapshotBeforeBaseline = '[]';
+    this._sawNonEmptyInventoryBefore = false;
+    this._latestActivePlayerGold = null;
+  }
+
+  private getFirstShopGoldForReminder(): number {
+    return this._latestActivePlayerGold ?? this._playerState.gold;
+  }
+
+  private lockFirstShopBaseline(gold: number, inventory: string): void {
+    if (this._startingSpendBaselineLocked) {
+      return;
+    }
+    this._startingSpendBaselineLocked = true;
+    this._peakGoldSinceStartingSpend = gold;
+    this._inventorySnapshotBeforeBaseline = inventory;
+    console.log(
+      `[FirstShop] Starting-spend baseline locked at ${gold}g (inventory=${inventory}). Any active_player gold drop after this disables the reminder.`,
+    );
+  }
+
+  private disqualifyFirstShopReminder(previousGold: number, currentGold: number): void {
+    if (this._firstShopReminderDisqualified) {
+      return;
+    }
+    this._firstShopReminderDisqualified = true;
+    console.log(
+      `[FirstShop] Disqualified: gold decreased after starting spend (${previousGold} -> ${currentGold}). Reminder will not play.`,
+    );
+    if (this._firstShopReminderState === 'waiting') {
+      this._firstShopReminderState = 'resolved';
+      this._firstShopReminderArmedAtGameTime = null;
+    }
+  }
+
+  private updateFirstShopGoldTracking(
+    itemsChanged: boolean,
+    activePlayerGold: number | null,
+  ): void {
+    if (!this.canRunFirstShopReminderCheck()) {
+      return;
+    }
+
+    const currentGameTime = this._playerState.gameTime;
+    const currentInventory = normalizeInventoryForSnapshot(this._playerState.items);
+    const hasStartingInventory = currentInventory !== '[]';
+
+    if (!this._startingSpendBaselineLocked) {
+      if (currentGameTime <= FIRST_SHOP_BASELINE_WINDOW_SEC) {
+        if (activePlayerGold !== null) {
+          if (this._earlyWindowPeakGold === null || activePlayerGold > this._earlyWindowPeakGold) {
+            this._earlyWindowPeakGold = activePlayerGold;
+          }
+        }
+
+        let shouldLock = false;
+        if (
+          activePlayerGold !== null &&
+          this._earlyWindowPeakGold !== null &&
+          activePlayerGold < this._earlyWindowPeakGold
+        ) {
+          shouldLock = true;
+        }
+        if (
+          itemsChanged &&
+          hasStartingInventory &&
+          currentInventory !== this._inventorySnapshotBeforeBaseline
+        ) {
+          shouldLock = true;
+        }
+        if (hasStartingInventory && !this._sawNonEmptyInventoryBefore) {
+          this._sawNonEmptyInventoryBefore = true;
+          shouldLock = true;
+        }
+
+        if (shouldLock) {
+          const lockGold = activePlayerGold ?? this._latestActivePlayerGold ?? this._playerState.gold;
+          this.lockFirstShopBaseline(lockGold, currentInventory);
+        }
+      } else if (hasStartingInventory) {
+        const lockGold = activePlayerGold ?? this._latestActivePlayerGold ?? this._playerState.gold;
+        this.lockFirstShopBaseline(lockGold, currentInventory);
+      }
+      return;
+    }
+
+    if (this._firstShopReminderDisqualified || activePlayerGold === null) {
+      return;
+    }
+
+    if (
+      this._peakGoldSinceStartingSpend !== null &&
+      activePlayerGold < this._peakGoldSinceStartingSpend
+    ) {
+      this.disqualifyFirstShopReminder(this._peakGoldSinceStartingSpend, activePlayerGold);
+      return;
+    }
+
+    if (
+      this._peakGoldSinceStartingSpend !== null &&
+      activePlayerGold > this._peakGoldSinceStartingSpend
+    ) {
+      this._peakGoldSinceStartingSpend = activePlayerGold;
+    }
+  }
+
+  private canRunFirstShopReminderCheck(): boolean {
+    return !!(
+      this._playerState.summonerName &&
+      !isNaN(this._playerState.gold) &&
+      this._playerState.gold >= 0 &&
+      !isNaN(this._playerState.gameTime) &&
+      this._playerState.gameTime > 0
+    );
+  }
+
+  /**
+   * Hoarding reminder: once per match, play if gold reaches threshold without ever
+   * decreasing after the fountain starting-items spend.
+   */
+  private checkFirstShopReminder(): void {
+    if (!this.canRunFirstShopReminderCheck()) {
+      if (this._firstShopReminderState !== 'resolved' && this._playerState.gold >= settings.getSettings().thresholds.firstShopGoldThreshold - 100) {
+        console.log('[FirstShop] Check skipped — prerequisites not met:', {
+          summonerName: this._playerState.summonerName,
+          gold: this._playerState.gold,
+          gameTime: this._playerState.gameTime,
+          state: this._firstShopReminderState,
+        });
+      }
+      return;
+    }
+    if (this._firstShopReminderState === 'resolved') {
+      return;
+    }
+    if (this._firstShopReminderDisqualified) {
+      this._firstShopReminderState = 'resolved';
+      return;
+    }
+    if (!this._startingSpendBaselineLocked) {
+      return;
+    }
+
+    const playerGold = this.getFirstShopGoldForReminder();
+    const currentGameTime = this._playerState.gameTime;
+
+    const firstShopGoldThreshold = settings.getSettings().thresholds.firstShopGoldThreshold;
+
+    if (this._firstShopReminderState === 'idle') {
+      if (playerGold < firstShopGoldThreshold) {
+        return;
+      }
+      this._firstShopReminderState = 'waiting';
+      this._firstShopReminderArmedAtGameTime = currentGameTime;
+      const delaySec = settings.getSettings().intervals.firstShopReminderDelaySec;
+      console.log(
+        `[FirstShop] Armed at ${currentGameTime}s with ${playerGold}g. Will play in ${delaySec}s (gold has not decreased since starting spend).`,
+      );
+    }
+
+    if (this._firstShopReminderState !== 'waiting' || this._firstShopReminderArmedAtGameTime === null) {
+      return;
+    }
+
+    const dueAt = this._firstShopReminderArmedAtGameTime + settings.getSettings().intervals.firstShopReminderDelaySec;
+    if (currentGameTime >= dueAt) {
+      console.log(`[FirstShop] >>> PLAYING FIRST SHOP REMINDER <<< (${playerGold}g at ${currentGameTime}s)`);
+      this.playAudio(settings.getSettings().audio.firstShopReminderFile);
+      this._firstShopReminderState = 'resolved';
+    }
   }
 
   // --- High Gold Check Logic --- 
@@ -1068,6 +1617,12 @@ class InGame extends AppWindow {
    */
   private checkHighGold(): boolean {
     if (!this.isShoppingAudioEnabled()) {
+      return false;
+    }
+    if (this.isHighGoldSuppressedByItemMilestones()) {
+      if (this._lastHighGoldCueTime !== null) {
+        this._lastHighGoldCueTime = null;
+      }
       return false;
     }
     if (!this._playerState || isNaN(this._playerState.gold) || isNaN(this._playerState.gameTime) || this._playerState.gameTime <= 0) {
@@ -1126,7 +1681,7 @@ class InGame extends AppWindow {
 
     const currentGameTime = this._playerState.gameTime;
     const isLateAndLowLevel =
-      currentGameTime >= WHATAREYOUDOING_GAME_TIME_SEC && level < 4;
+      currentGameTime >= WHATAREYOUDOING_GAME_TIME_SEC && level < WHATAREYOUDOING_LEVEL_THRESHOLD;
 
     console.log(
       `[WhatAreYouDoing] gameTime=${currentGameTime}s level=${level} active=${isLateAndLowLevel}`
@@ -1143,7 +1698,7 @@ class InGame extends AppWindow {
 
       if (timeCheckPassed) {
         console.log('[WhatAreYouDoing] >>> PLAYING LATE LOW LEVEL CUE <<<');
-        this.playAudio(WHATAREYOUDOING_AUDIO_FILE);
+        this.playAudio(settings.getSettings().audio.lowLevelLateGameFile);
         this._lastWhatAreYouDoingCueTime = currentGameTime;
       }
     } else if (this._lastWhatAreYouDoingCueTime !== null) {
@@ -1207,6 +1762,67 @@ class InGame extends AppWindow {
     console.log("[WardCheck] Finished check.");
   }
 
+  private setupIngameHudMore(): void {
+    if (!this._ingameMoreBtn) {
+      console.warn('setupIngameHudMore: ingameMoreBtn not found.');
+      return;
+    }
+    this._ingameMoreBtn.addEventListener('click', () => {
+      this._setIngameMoreExpanded(!this._ingameMoreExpanded);
+    });
+    this._setIngameMoreExpanded(false);
+  }
+
+  private _setIngameMoreExpanded(open: boolean): void {
+    this._ingameMoreExpanded = open;
+    if (this._ingameHud) {
+      this._ingameHud.classList.toggle('ingame-hud--more-open', open);
+    }
+    if (this._ingameMoreBtn) {
+      this._ingameMoreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      this.setHudButtonLabel(this._ingameMoreBtn, open ? 'Less' : 'More');
+    }
+  }
+
+  /** Pin compact window so disc center matches HUD_DISC_CENTER_* on 1920×1080 */
+  private _positionCompactWindow(retry = 0): void {
+    if (this._areLogsVisible || !this._currentWindowId) {
+      return;
+    }
+    const left = Math.round(HUD_DISC_CENTER_X - COLLAPSED_WINDOW_WIDTH / 2);
+    const top = Math.round(HUD_DISC_CENTER_Y - HUD_DISC_DIAMETER_PX / 2);
+    overwolf.windows.changePosition(this._currentWindowId, left, top, (result) => {
+      if (result && result.success) {
+        console.log(`[HUD] Compact position (${left}, ${top}) for disc center (${HUD_DISC_CENTER_X}, ${HUD_DISC_CENTER_Y})`);
+      } else {
+        console.error('[HUD] Failed to set compact window position', result);
+        if (retry < 2) {
+          window.setTimeout(() => this._positionCompactWindow(retry + 1), 150);
+        }
+      }
+    });
+  }
+
+  private _applyCompactWindowLayout(): void {
+    if (this._areLogsVisible || !this._currentWindowId) {
+      return;
+    }
+    const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
+      window_id: this._currentWindowId,
+      width: COLLAPSED_WINDOW_WIDTH,
+      height: COLLAPSED_WINDOW_HEIGHT,
+      auto_dpi_resize: true,
+    };
+    overwolf.windows.changeSize(sizeParams, (result) => {
+      if (result && result.success) {
+        console.log(`[HUD] Compact size ${COLLAPSED_WINDOW_WIDTH}x${COLLAPSED_WINDOW_HEIGHT} (scale=${HUD_LAYOUT_SCALE})`);
+        window.setTimeout(() => this._positionCompactWindow(), 50);
+      } else {
+        console.error('[HUD] Failed to set compact window size', result);
+      }
+    });
+  }
+
   private setupToggleLogsDisplay(): void {
     if (this._toggleLogsDisplayBtn) {
       this._toggleLogsDisplayBtn.addEventListener('click', () => {
@@ -1223,7 +1839,7 @@ class InGame extends AppWindow {
       this._letsGoBtn.addEventListener('click', () => {
         if (!this._hasActivated) {
           this._hasActivated = true;
-          this._letsGoBtn.innerText = 'GLHF!';
+          this.setHudButtonLabel(this._letsGoBtn, 'GLHF!');
           console.log("Lets Go button clicked: _hasActivated=true. Audio gating gesture registered.");
         } else {
           console.log('Lets Go button clicked while already activated. No-op.');
@@ -1232,17 +1848,6 @@ class InGame extends AppWindow {
       console.log('setupToggleLogsDisplay: Click listener added to letsGoBtn.');
     } else {
       console.error('setupToggleLogsDisplay: _letsGoBtn is not defined.');
-    }
-
-    if (this._showLogsBtn) {
-      this._showLogsBtn.addEventListener('click', () => {
-        this._areLogsVisible = !this._areLogsVisible;
-        console.log(`Show logs (compact widget) clicked: _areLogsVisible is now ${this._areLogsVisible}`);
-        this._updateUIVisibility();
-      });
-      console.log('setupToggleLogsDisplay: Click listener added to showLogsBtn.');
-    } else {
-      console.error('setupToggleLogsDisplay: _showLogsBtn is not defined.');
     }
 
     // Listen for both hotkeys
@@ -1264,34 +1869,38 @@ class InGame extends AppWindow {
     let targetHeight: number;
     let logMessageSuffix: string;
 
+    document.body.classList.toggle('compact-mode', !this._areLogsVisible);
+
     if (this._areLogsVisible) {
       if (this._mainElement) this._mainElement.style.display = 'flex';
-      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Hide Logs';
+      this.setHudButtonLabel(this._toggleLogsDisplayBtn, 'Hide Logs');
+      if (this._ingameHud) this._ingameHud.classList.remove('ingame-hud--more-open');
       if (this._headerIcon) this._headerIcon.style.display = '';
       if (this._headerTitle) this._headerTitle.style.display = '';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = '';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = '';
-      if (this._compactWidget) this._compactWidget.style.display = 'none';
 
       targetWidth = this._originalWindowWidth;
       targetHeight = this._originalWindowHeight;
       logMessageSuffix = 'UI expanded, window restoring to original size.';
     } else {
       if (this._mainElement) this._mainElement.style.display = 'none';
-      if (this._toggleLogsDisplayBtn) this._toggleLogsDisplayBtn.innerText = 'Show logs';
+      this.setHudButtonLabel(this._toggleLogsDisplayBtn, 'Show logs');
+      this._setIngameMoreExpanded(false);
       if (this._headerIcon) this._headerIcon.style.display = 'none';
       if (this._headerTitle) this._headerTitle.style.display = 'none';
       if (this._headerHotkeyText) this._headerHotkeyText.style.display = 'none';
       if (this._windowControlsGroup) this._windowControlsGroup.style.display = 'none';
-      if (this._compactWidget) this._compactWidget.style.display = 'flex';
-      if (this._letsGoBtn) this._letsGoBtn.innerText = this._hasActivated ? 'GLHF!' : "Let's Go!";
+      this.setHudButtonLabel(this._letsGoBtn, this._hasActivated ? 'GLHF!' : "Let's Go!");
 
       targetWidth = COLLAPSED_WINDOW_WIDTH;
       targetHeight = COLLAPSED_WINDOW_HEIGHT;
       logMessageSuffix = 'UI collapsed, window shrinking.';
     }
 
-    if (this._currentWindowId && typeof targetWidth === 'number' && typeof targetHeight === 'number' &&
+    if (!this._areLogsVisible) {
+      this._applyCompactWindowLayout();
+    } else if (this._currentWindowId && typeof targetWidth === 'number' && typeof targetHeight === 'number' &&
       typeof this._originalWindowWidth === 'number' && typeof this._originalWindowHeight === 'number') {
       const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
         window_id: this._currentWindowId,
@@ -1315,8 +1924,6 @@ class InGame extends AppWindow {
         originalHeight: this._originalWindowHeight
       });
     }
-
-    if (this._toggleLogsDisplayBtn) console.log(`_updateUIVisibility - Button text is now: ${this._toggleLogsDisplayBtn.innerText}`);
   }
 
   // --- WebSocket helpers ---
@@ -1332,6 +1939,9 @@ class InGame extends AppWindow {
     this.resetMatchCombatState();
     this.resetShoppingAudioForNewMatch();
     this.resetWhatAreYouDoingState();
+    this.resetFirstShopReminderState();
+    this._flashProbeLastSummonerSpellsJson = '';
+    this._flashProbeSeenLiveClientEventIds.clear();
     const game_id = this._currentMatchId || 'unknown';
     console.log('[WS][Lifecycle] Emitting game_start. context=', context, 'game_id=', game_id);
     this.sendOp('game_start', { game_id });
@@ -1353,6 +1963,9 @@ class InGame extends AppWindow {
     this.resetMatchCombatState();
     this.resetShoppingAudioForNewMatch();
     this.resetWhatAreYouDoingState();
+    this.resetFirstShopReminderState();
+    this._flashProbeLastSummonerSpellsJson = '';
+    this._flashProbeSeenLiveClientEventIds.clear();
   }
 
   private resetMatchCombatState(): void {
