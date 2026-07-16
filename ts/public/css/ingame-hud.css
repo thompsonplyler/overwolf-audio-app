@@ -5,9 +5,11 @@
 :root {
   --ingame-hud-artboard: 240px;
   --ingame-hud-design-width: 248px;
-  --ingame-hud-design-height: 400px;
-  --ingame-hud-extra-slot-height: 168px;
+  --ingame-hud-design-height: 620px;
+  --ingame-hud-extra-slot-height: 390px;
   --ingame-hud-scale: 0.5;
+  /** 200% of the base scale — applied while the "More" panel is open (see .hud-more-open below). */
+  --ingame-hud-scale-expanded: 1;
 
   --ingame-hud-ring-inner: 65%;
   --ingame-hud-ring-outer: 90%;
@@ -27,10 +29,16 @@
   --ingame-hud-glow: 0 0 18px rgba(40, 220, 250, 0.22);
 }
 
-/* Visual footprint after scale (must match COLLAPSED_WINDOW_* in in_game.ts) */
+/* Visual footprint after scale (must match COLLAPSED_WINDOW_*/EXPANDED_WINDOW_* in in_game.ts) */
 body.compact-mode.in-game {
   --ingame-hud-visual-width: calc(var(--ingame-hud-design-width) * var(--ingame-hud-scale));
   --ingame-hud-visual-height: calc(var(--ingame-hud-design-height) * var(--ingame-hud-scale));
+}
+
+/* "More" panel open: whole HUD renders at 200% of its normal compact scale (set on <body> so it
+   cascades down into .ingame-hud-scaler, which is an ancestor of #ingameHud in the DOM). */
+body.compact-mode.hud-more-open {
+  --ingame-hud-scale: var(--ingame-hud-scale-expanded);
 }
 
 /* Scales full-layout HUD without squashing the disc into a tiny box */
@@ -329,6 +337,46 @@ body:not(.compact-mode) .ingame-hud__extra {
   border-color: var(--ingame-hud-btn-border-hover);
   box-shadow: var(--ingame-hud-glow);
   outline: none;
+}
+
+.ingame-hud__field-input--range {
+  padding: 8px 6px;
+  accent-color: var(--color-accent-blue-bright, #28dcfa);
+  cursor: pointer;
+}
+
+.ingame-hud__row--cue {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ingame-hud__row--cue .ingame-hud__field {
+  flex: 1 1 auto;
+  max-width: 130px;
+  margin: 0;
+}
+
+.ingame-hud__checkbox-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  flex: 0 0 auto;
+  padding-bottom: 6px;
+}
+
+.ingame-hud__checkbox-field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent-blue-bright, #28dcfa);
+  cursor: pointer;
 }
 
 html:has(body.compact-mode.in-game) {

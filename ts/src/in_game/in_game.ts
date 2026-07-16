@@ -11,7 +11,7 @@ import { kHotkeys, kWindowNames, kGamesFeatures, kGameClassIds } from "../consts
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 
 import WindowState = overwolf.windows.WindowStateEx;
-import { SettingsManager } from "../config/settings";
+import { SettingsManager, AudioCueId, AUDIO_CUE_LABELS } from "../config/settings";
 import { playAudioFile } from "../audio/audio";
 import {
   ITEM_PRIORITY,
@@ -41,18 +41,25 @@ const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholde
 
 // Compact HUD: full design layout, scaled visually (see .ingame-hud-scaler in CSS)
 const HUD_DESIGN_WIDTH = 248;
-const HUD_DESIGN_HEIGHT = 400;
+// Includes the "More" extra panel's reserved space (see --ingame-hud-extra-slot-height in ingame-hud.css).
+const HUD_DESIGN_HEIGHT = 620;
 const HUD_DESIGN_ARTBOARD = 240;
 /** 0.5 ≈ half of ~210px on-screen disc; tunable via HUD_LAYOUT_SCALE */
 const HUD_LAYOUT_SCALE = 0.5;
+/** While the "More" panel is open, the whole HUD renders at 200% of its normal compact scale. */
+const HUD_LAYOUT_SCALE_EXPANDED = HUD_LAYOUT_SCALE * 2;
 /** Disc center on 1920×1080 — bottom row, just left of champion portrait (see layout screenshot) */
 const HUD_DISC_CENTER_X = 500;
 const HUD_DISC_CENTER_Y = 1060;
 
 const COLLAPSED_WINDOW_WIDTH = Math.round(HUD_DESIGN_WIDTH * HUD_LAYOUT_SCALE);
-/** Compact HUD — fixed size; More panel toggles visibility only (no resize). */
+/** Compact HUD — fixed size; More panel toggles visibility and, since it also scales the HUD 200%, the window size. */
 const COLLAPSED_WINDOW_HEIGHT = Math.round(HUD_DESIGN_HEIGHT * HUD_LAYOUT_SCALE);
 const HUD_DISC_DIAMETER_PX = Math.round(HUD_DESIGN_ARTBOARD * HUD_LAYOUT_SCALE);
+
+const EXPANDED_WINDOW_WIDTH = Math.round(HUD_DESIGN_WIDTH * HUD_LAYOUT_SCALE_EXPANDED);
+const EXPANDED_WINDOW_HEIGHT = Math.round(HUD_DESIGN_HEIGHT * HUD_LAYOUT_SCALE_EXPANDED);
+const HUD_DISC_DIAMETER_PX_EXPANDED = Math.round(HUD_DESIGN_ARTBOARD * HUD_LAYOUT_SCALE_EXPANDED);
 
 // Late game, low level audio sting (3:01+, level < 4, repeats every 60s game time)
 const WHATAREYOUDOING_GAME_TIME_SEC = 181; // 3:01 on match_clock
@@ -339,6 +346,12 @@ class InGame extends AppWindow {
   private _shoppingAudioToggleBtn: HTMLButtonElement | null = null;
   private _highGoldIntervalInput: HTMLInputElement | null = null;
   private _targetReminderIntervalInput: HTMLInputElement | null = null;
+  private _masterVolumeInput: HTMLInputElement | null = null;
+  private _masterMuteBtn: HTMLButtonElement | null = null;
+  private _lowLevelVolumeInput: HTMLInputElement | null = null;
+  private _lowLevelMuteCheckbox: HTMLInputElement | null = null;
+  private _firstShopVolumeInput: HTMLInputElement | null = null;
+  private _firstShopMuteCheckbox: HTMLInputElement | null = null;
   private _areLogsVisible: boolean = false;
 
   // --- Header elements to toggle ---
@@ -443,6 +456,12 @@ class InGame extends AppWindow {
     this._shoppingAudioToggleBtn = document.getElementById('shoppingAudioToggleBtn') as HTMLButtonElement;
     this._highGoldIntervalInput = document.getElementById('highGoldIntervalInput') as HTMLInputElement;
     this._targetReminderIntervalInput = document.getElementById('targetReminderIntervalInput') as HTMLInputElement;
+    this._masterVolumeInput = document.getElementById('masterVolumeInput') as HTMLInputElement;
+    this._masterMuteBtn = document.getElementById('masterMuteBtn') as HTMLButtonElement;
+    this._lowLevelVolumeInput = document.getElementById('lowLevelVolumeInput') as HTMLInputElement;
+    this._lowLevelMuteCheckbox = document.getElementById('lowLevelMuteCheckbox') as HTMLInputElement;
+    this._firstShopVolumeInput = document.getElementById('firstShopVolumeInput') as HTMLInputElement;
+    this._firstShopMuteCheckbox = document.getElementById('firstShopMuteCheckbox') as HTMLInputElement;
 
     console.log('Constructor: All base elements queried.');
     // _updateUIVisibility will be called in run() after initial size is forced.
@@ -517,6 +536,7 @@ class InGame extends AppWindow {
       this.setupIngameHudMore();
       this.setupShoppingAudioToggle();
       this.setupIntervalSettings();
+      this.setupVolumeControls();
 
       // Initialize WebSocket connection for outbound events
       this.connectWebSocket();
@@ -1225,7 +1245,7 @@ class InGame extends AppWindow {
         console.log(`[TargetCheck] NEW Target identified: ${potentialTargetItemId}. Old: ${this._currentTargetItemId}. Playing initial cue.`);
         const newTargetDef = ITEM_PRIORITY.find(i => i.id === potentialTargetItemId);
         if (newTargetDef) {
-          this.playAudio(newTargetDef.audioCue);
+          this.playAudio(newTargetDef.audioCue, 'itemTarget');
           this._currentTargetItemId = potentialTargetItemId;
           this._currentTargetSuggestionTime = currentGameTime;
         } else {
@@ -1242,7 +1262,7 @@ class InGame extends AppWindow {
           console.log(`[TargetCheck] Reminder check: ${currentGameTime} >= (${this._currentTargetSuggestionTime} + ${delay}) -> ${reminderDue}`);
           if (reminderDue) {
             console.log(`[TargetCheck] >>> PLAYING REMINDER (Target: ${this._currentTargetItemId}) <<<`);
-            this.playAudio(settings.getSettings().audio.reminderFile);
+            this.playAudio(settings.getSettings().audio.reminderFile, 'itemReminder');
             this._currentTargetSuggestionTime = currentGameTime; // Reset timer
             console.log("[TargetCheck] Reminder played, reminder timer reset.");
           } else {
@@ -1268,8 +1288,9 @@ class InGame extends AppWindow {
   }
 
   // Modify playAudio function
-  private playAudio(fileName: string): void {
-    playAudioFile(fileName);
+  private playAudio(fileName: string, cueId: AudioCueId): void {
+    const volume = settings.getEffectiveCueVolume(cueId);
+    playAudioFile(fileName, volume);
   }
 
   private recordPlayerLevel(level: number, source: string): void {
@@ -1424,6 +1445,82 @@ class InGame extends AppWindow {
       'targetReminderDelaySec',
       'Item reminder interval',
     );
+  }
+
+  private syncVolumeControlsInputs(): void {
+    const v = settings.getSettings().volume;
+    if (this._masterVolumeInput) {
+      this._masterVolumeInput.value = String(Math.round(v.masterVolume * 100));
+    }
+    this.setHudButtonLabel(this._masterMuteBtn, v.masterMuted ? 'Unmute all SFX' : 'Mute all SFX');
+    if (this._lowLevelVolumeInput) {
+      this._lowLevelVolumeInput.value = String(Math.round(v.cues.lowLevelLateGame.volume * 100));
+    }
+    if (this._lowLevelMuteCheckbox) {
+      this._lowLevelMuteCheckbox.checked = v.cues.lowLevelLateGame.muted;
+    }
+    if (this._firstShopVolumeInput) {
+      this._firstShopVolumeInput.value = String(Math.round(v.cues.firstShopReminder.volume * 100));
+    }
+    if (this._firstShopMuteCheckbox) {
+      this._firstShopMuteCheckbox.checked = v.cues.firstShopReminder.muted;
+    }
+  }
+
+  /** Wires a 0-100 range input to a cue's volume. Reusable for any cue in AUDIO_CUE_IDS. */
+  private bindCueVolumeInput(input: HTMLInputElement | null, cueId: AudioCueId): void {
+    if (!input) {
+      console.warn(`[Volume] ${cueId} volume input not found in DOM.`);
+      return;
+    }
+    input.addEventListener('input', () => {
+      const pct = Math.max(0, Math.min(100, Number(input.value)));
+      settings.update({ volume: { cues: { [cueId]: { volume: pct / 100 } } } });
+      console.log(`[Volume] ${AUDIO_CUE_LABELS[cueId]} volume set to ${pct}%`);
+    });
+  }
+
+  /** Wires a mute checkbox to a cue's muted flag. Reusable for any cue in AUDIO_CUE_IDS. */
+  private bindCueMuteCheckbox(checkbox: HTMLInputElement | null, cueId: AudioCueId): void {
+    if (!checkbox) {
+      console.warn(`[Volume] ${cueId} mute checkbox not found in DOM.`);
+      return;
+    }
+    checkbox.addEventListener('change', () => {
+      settings.update({ volume: { cues: { [cueId]: { muted: checkbox.checked } } } });
+      console.log(`[Volume] ${AUDIO_CUE_LABELS[cueId]} muted=${checkbox.checked}`);
+    });
+  }
+
+  private setupVolumeControls(): void {
+    this.syncVolumeControlsInputs();
+
+    if (this._masterVolumeInput) {
+      const input = this._masterVolumeInput;
+      input.addEventListener('input', () => {
+        const pct = Math.max(0, Math.min(100, Number(input.value)));
+        settings.update({ volume: { masterVolume: pct / 100 } });
+        console.log(`[Volume] Master volume set to ${pct}%`);
+      });
+    } else {
+      console.warn('[Volume] masterVolumeInput not found in DOM.');
+    }
+
+    if (this._masterMuteBtn) {
+      this._masterMuteBtn.addEventListener('click', () => {
+        const next = !settings.getSettings().volume.masterMuted;
+        settings.update({ volume: { masterMuted: next } });
+        this.setHudButtonLabel(this._masterMuteBtn, next ? 'Unmute all SFX' : 'Mute all SFX');
+        console.log(`[Volume] Master muted=${next}`);
+      });
+    } else {
+      console.warn('[Volume] masterMuteBtn not found in DOM.');
+    }
+
+    this.bindCueVolumeInput(this._lowLevelVolumeInput, 'lowLevelLateGame');
+    this.bindCueMuteCheckbox(this._lowLevelMuteCheckbox, 'lowLevelLateGame');
+    this.bindCueVolumeInput(this._firstShopVolumeInput, 'firstShopReminder');
+    this.bindCueMuteCheckbox(this._firstShopMuteCheckbox, 'firstShopReminder');
   }
 
   private resetWhatAreYouDoingState(): void {
@@ -1605,7 +1702,7 @@ class InGame extends AppWindow {
     const dueAt = this._firstShopReminderArmedAtGameTime + settings.getSettings().intervals.firstShopReminderDelaySec;
     if (currentGameTime >= dueAt) {
       console.log(`[FirstShop] >>> PLAYING FIRST SHOP REMINDER <<< (${playerGold}g at ${currentGameTime}s)`);
-      this.playAudio(settings.getSettings().audio.firstShopReminderFile);
+      this.playAudio(settings.getSettings().audio.firstShopReminderFile, 'firstShopReminder');
       this._firstShopReminderState = 'resolved';
     }
   }
@@ -1648,7 +1745,7 @@ class InGame extends AppWindow {
 
       if (timeCheckPassed) {
         console.log(`[HighGold] >>> PLAYING HIGH GOLD CUE <<< (Time check passed)`); // Add reason
-        this.playAudio(settings.getSettings().audio.highGoldFile);
+        this.playAudio(settings.getSettings().audio.highGoldFile, 'highGold');
         this._lastHighGoldCueTime = currentGameTime;
       } else {
         console.log("[HighGold] Time check failed (on cooldown)."); // Log cooldown state
@@ -1698,7 +1795,7 @@ class InGame extends AppWindow {
 
       if (timeCheckPassed) {
         console.log('[WhatAreYouDoing] >>> PLAYING LATE LOW LEVEL CUE <<<');
-        this.playAudio(settings.getSettings().audio.lowLevelLateGameFile);
+        this.playAudio(settings.getSettings().audio.lowLevelLateGameFile, 'lowLevelLateGame');
         this._lastWhatAreYouDoingCueTime = currentGameTime;
       }
     } else if (this._lastWhatAreYouDoingCueTime !== null) {
@@ -1742,11 +1839,11 @@ class InGame extends AppWindow {
       if (currentCount > previousCount) {
         console.log(`[WardCheck] >>> ${champName} PURCHASED/GAINED WARD <<<`);
         const audioFile = ENEMY_WARD_PURCHASED_AUDIO.replace('<champion_name>', champName);
-        this.playAudio(audioFile);
+        this.playAudio(audioFile, 'wardPurchased');
       } else if (currentCount < previousCount) {
         console.log(`[WardCheck] >>> ${champName} PLACED/LOST WARD <<<`);
         const audioFile = ENEMY_WARD_PLACED_AUDIO.replace('<champion_name>', champName);
-        this.playAudio(audioFile);
+        this.playAudio(audioFile, 'wardPlaced');
       }
 
       // Update the stored count for the next check
@@ -1778,10 +1875,23 @@ class InGame extends AppWindow {
     if (this._ingameHud) {
       this._ingameHud.classList.toggle('ingame-hud--more-open', open);
     }
+    // Drives --ingame-hud-scale (see .hud-more-open in ingame-hud.css): whole HUD renders at 200% while open.
+    document.body.classList.toggle('hud-more-open', open);
     if (this._ingameMoreBtn) {
       this._ingameMoreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       this.setHudButtonLabel(this._ingameMoreBtn, open ? 'Less' : 'More');
     }
+    // Window pixel size must match the new visual scale, or the expanded HUD gets clipped/unclickable
+    // outside the window's bounds.
+    this._applyCompactWindowLayout();
+  }
+
+  /** Window width/height/disc-diameter for the current compact scale (normal vs. "More" open at 200%). */
+  private _compactLayoutDimensions(): { width: number; height: number; discDiameter: number } {
+    if (this._ingameMoreExpanded) {
+      return { width: EXPANDED_WINDOW_WIDTH, height: EXPANDED_WINDOW_HEIGHT, discDiameter: HUD_DISC_DIAMETER_PX_EXPANDED };
+    }
+    return { width: COLLAPSED_WINDOW_WIDTH, height: COLLAPSED_WINDOW_HEIGHT, discDiameter: HUD_DISC_DIAMETER_PX };
   }
 
   /** Pin compact window so disc center matches HUD_DISC_CENTER_* on 1920×1080 */
@@ -1789,8 +1899,9 @@ class InGame extends AppWindow {
     if (this._areLogsVisible || !this._currentWindowId) {
       return;
     }
-    const left = Math.round(HUD_DISC_CENTER_X - COLLAPSED_WINDOW_WIDTH / 2);
-    const top = Math.round(HUD_DISC_CENTER_Y - HUD_DISC_DIAMETER_PX / 2);
+    const { width, discDiameter } = this._compactLayoutDimensions();
+    const left = Math.round(HUD_DISC_CENTER_X - width / 2);
+    const top = Math.round(HUD_DISC_CENTER_Y - discDiameter / 2);
     overwolf.windows.changePosition(this._currentWindowId, left, top, (result) => {
       if (result && result.success) {
         console.log(`[HUD] Compact position (${left}, ${top}) for disc center (${HUD_DISC_CENTER_X}, ${HUD_DISC_CENTER_Y})`);
@@ -1807,15 +1918,16 @@ class InGame extends AppWindow {
     if (this._areLogsVisible || !this._currentWindowId) {
       return;
     }
+    const { width, height } = this._compactLayoutDimensions();
     const sizeParams: overwolf.windows.ChangeWindowSizeParams = {
       window_id: this._currentWindowId,
-      width: COLLAPSED_WINDOW_WIDTH,
-      height: COLLAPSED_WINDOW_HEIGHT,
+      width,
+      height,
       auto_dpi_resize: true,
     };
     overwolf.windows.changeSize(sizeParams, (result) => {
       if (result && result.success) {
-        console.log(`[HUD] Compact size ${COLLAPSED_WINDOW_WIDTH}x${COLLAPSED_WINDOW_HEIGHT} (scale=${HUD_LAYOUT_SCALE})`);
+        console.log(`[HUD] Compact size ${width}x${height} (more-open=${this._ingameMoreExpanded})`);
         window.setTimeout(() => this._positionCompactWindow(), 50);
       } else {
         console.error('[HUD] Failed to set compact window size', result);

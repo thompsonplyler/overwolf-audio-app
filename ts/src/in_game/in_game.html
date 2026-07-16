@@ -95,6 +95,37 @@
                 <input id="targetReminderIntervalInput" type="number" class="ingame-hud__field-input" min="1" max="600" step="1" inputmode="numeric" />
               </label>
             </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="masterVolumeInput">
+                <span class="ingame-hud__field-label">Master SFX volume</span>
+                <input id="masterVolumeInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
+              </label>
+            </div>
+            <div class="ingame-hud__row">
+              <button id="masterMuteBtn" type="button" class="ingame-hud__btn ingame-hud__btn--secondary">
+                <span class="ingame-hud__btn-label">Mute all SFX</span>
+              </button>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting ingame-hud__row--cue">
+              <label class="ingame-hud__field" for="lowLevelVolumeInput">
+                <span class="ingame-hud__field-label">Low level warning volume</span>
+                <input id="lowLevelVolumeInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
+              </label>
+              <label class="ingame-hud__checkbox-field" for="lowLevelMuteCheckbox">
+                <input id="lowLevelMuteCheckbox" type="checkbox" />
+                <span>Mute</span>
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting ingame-hud__row--cue">
+              <label class="ingame-hud__field" for="firstShopVolumeInput">
+                <span class="ingame-hud__field-label">Return-to-base reminder volume</span>
+                <input id="firstShopVolumeInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
+              </label>
+              <label class="ingame-hud__checkbox-field" for="firstShopMuteCheckbox">
+                <input id="firstShopMuteCheckbox" type="checkbox" />
+                <span>Mute</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
