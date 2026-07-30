@@ -24,7 +24,7 @@ export const PRICE = {
     wand: 850,
     rod: 1200,
     sheen: 900,
-    wisp: 850,
+    wisp: 900, // Aether Wisp -- was 850, wiki-confirmed 2026-07-30 as 900 (Sheen 900 + Aether Wisp 900 + Blasting Wand 850 + 250 combine = Lich Bane's 2900)
     alt: 1100,
     banshees: 3000,
     shadowflame: 3200,
@@ -183,5 +183,20 @@ export const DEFAULT_PURCHASE_EVENT_MAP: PurchaseEventMapping = {
     4646: 'stormsurge',
     3135: 'voidstaff'
     // 4645: 'shadowflame',
+};
+
+// Mejai's Soulstealer stack tracking (Glory passive). Riot wiki-confirmed rates,
+// verified 2026-07-30 -- there is no API field exposing stack count directly
+// (see the existing maybeDumpFullLiveGameInfo debug dump in in_game.ts, built
+// specifically to check for this and find nothing), so it's derived entirely
+// from kill/assist/death counting, gated on owning Dark Seal/Mejai's.
+export const MEJAI_SOULSTEALER_ITEM_ID = 3041; // = DEFAULT_PURCHASE_EVENT_MAP's 'mejais' key
+export const DARK_SEAL_ITEM_ID = COMPONENTS.DARK_SEAL.id; // 1082
+
+export type MejaiTier = 'dark_seal' | 'mejais';
+
+export const MEJAI_STACK_RATES: Record<MejaiTier, { perKill: number; perAssist: number; lossOnDeath: number; max: number }> = {
+    dark_seal: { perKill: 2, perAssist: 1, lossOnDeath: 5, max: 10 },
+    mejais: { perKill: 4, perAssist: 2, lossOnDeath: 10, max: 25 },
 };
 

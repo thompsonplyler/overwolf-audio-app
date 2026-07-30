@@ -11,13 +11,17 @@ import { kHotkeys, kWindowNames, kGamesFeatures, kGameClassIds } from "../consts
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 
 import WindowState = overwolf.windows.WindowStateEx;
-import { SettingsManager, AudioCueId, AUDIO_CUE_LABELS } from "../config/settings";
-import { playAudioFile } from "../audio/audio";
+import { SettingsManager, AudioCueId, AUDIO_CUE_LABELS, STORAGE_KEY } from "../config/settings";
+import { playAudioFile, stopAudioChannel } from "../audio/audio";
 import {
   ITEM_PRIORITY,
   calculateRemainingCost,
   DEFAULT_PURCHASE_EVENT_MAP,
   shouldDeferToHigherPriorityItem,
+  MEJAI_SOULSTEALER_ITEM_ID,
+  DARK_SEAL_ITEM_ID,
+  MEJAI_STACK_RATES,
+  MejaiTier,
 } from "../items/items";
 import { DeathEventWSPayload, KillEventWSPayload, RespawnEventWSPayload, WSClient } from "../ws/wsClient";
 
@@ -421,6 +425,10 @@ class InGame extends AppWindow {
   private _wsPingInterval: number | null = null;
   private _currentMatchId: string | null = null;
   private _gameActive: boolean = false;
+  /** Wall-clock anchor (ms) used to derive gameTime when the GEP 'match_clock' event never arrives (observed in Practice Tool). */
+  private _localGameTimeAnchorMs: number | null = null;
+  /** Once a real match_clock event lands, it becomes authoritative and the local wall-clock fallback stops overwriting gameTime. */
+  private _matchClockEverReceived: boolean = false;
   private _emittedItemSignals: Set<number> = new Set<number>();
   private _emittedVillain: boolean = false;
   private _emittedLevel9: boolean = false;
@@ -431,6 +439,13 @@ class InGame extends AppWindow {
   private _didFullInfoLeviathanDump: boolean = false;
   private _flashProbeLastSummonerSpellsJson: string = '';
   private _flashProbeSeenLiveClientEventIds: Set<number> = new Set<number>();
+
+  // Mejai's Soulstealer stack tracking (see items.ts MEJAI_STACK_RATES). 'none'
+  // until Dark Seal is purchased; stacks carry over on the upgrade to 'mejais'.
+  private _mejaiTier: MejaiTier | 'none' = 'none';
+  private _mejaiStacks: number = 0;
+  /** Mutual-exclusion guard: once ANY of mejai_0/mejai_s/mejai_25 fires, the other two are permanently disabled for this match. */
+  private _mejaiCueFired: boolean = false;
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -538,6 +553,16 @@ class InGame extends AppWindow {
       this.setupIntervalSettings();
       this.setupVolumeControls();
 
+      // Desktop and in-game share localStorage (same origin); pick up volume/interval changes
+      // made on the desktop window live, without needing a restart. Mute checkboxes are session-only
+      // and unaffected by this — they don't come from the persisted store.
+      window.addEventListener('storage', (e) => {
+        if (e.key === null || e.key === STORAGE_KEY) {
+          this.syncVolumeControlsInputs();
+          this.syncIntervalSettingsInputs();
+        }
+      });
+
       // Initialize WebSocket connection for outbound events
       this.connectWebSocket();
 
@@ -586,6 +611,17 @@ class InGame extends AppWindow {
     this.maybeDumpFullLiveGameInfo(info);
     if (PROBE_FLASH_SUMMONER_SPELLS) {
       this.probeFlashSummonerInfoUpdates(info);
+    }
+
+    // Fallback game clock: some sessions (observed in Practice Tool) never emit a GEP
+    // 'match_clock' event, which is otherwise the only source for gameTime. Without this,
+    // gameTime stays 0 forever and every audio check silently no-ops (canRunAudioChecks
+    // requires gameTime > 0). Real match_clock events, if they arrive, take over as authoritative.
+    if (this._gameActive && !this._matchClockEverReceived) {
+      if (this._localGameTimeAnchorMs === null) {
+        this._localGameTimeAnchorMs = Date.now();
+      }
+      this._playerState.gameTime = Math.floor((Date.now() - this._localGameTimeAnchorMs) / 1000);
     }
 
     let goldChanged = false;
@@ -873,7 +909,19 @@ class InGame extends AppWindow {
       console.warn('[WS][Event] Item-signal detection error:', e);
     }
 
-    // --- 2. Update UI Log --- 
+    // Mejai's Soulstealer tier/sell detection -- separate from the generic
+    // DEFAULT_PURCHASE_EVENT_MAP loop above (that loop only ever fires the
+    // one-time 'mejais' purchase celebration; this tracks the ongoing stack
+    // count across the Dark Seal -> Mejai's lifecycle).
+    try {
+      if (itemsChanged && this._gameActive && Array.isArray(this._playerState.items)) {
+        this.updateMejaiTracking();
+      }
+    } catch (e) {
+      console.warn('[Mejai] tracking error:', e);
+    }
+
+    // --- 2. Update UI Log ---
     const goldChangedForUI = this._playerState.gold !== this._lastLoggedGold;
     const itemsChangedForUI = JSON.stringify(this._playerState.items) !== this._lastLoggedInventoryString;
     const shouldUpdateUI = goldChangedForUI || itemsChangedForUI || nameFound || allPlayersChanged || teamFound;
@@ -916,10 +964,14 @@ class InGame extends AppWindow {
         if (this._currentTargetItemId !== null) {
           this._currentTargetItemId = null;
           this._currentTargetSuggestionTime = null;
+          this.stopAudio('itemTarget');
+          this.stopAudio('itemReminder');
         }
       } else if (isHighGoldActive && this._currentTargetItemId !== null) {
         this._currentTargetItemId = null;
         this._currentTargetSuggestionTime = null;
+        this.stopAudio('itemTarget');
+        this.stopAudio('itemReminder');
       }
 
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
@@ -1007,6 +1059,7 @@ class InGame extends AppWindow {
                 console.log(`[onNewEvents] GameTime updated via match_clock: ${newGameTime}`);
               }
               this._playerState.gameTime = newGameTime;
+              this._matchClockEverReceived = true;
               if (!this._gameActive) {
                 this.emitGameStartLifecycle('gep.match_clock');
               }
@@ -1057,9 +1110,17 @@ class InGame extends AppWindow {
         }
         if (event.name === 'kill') {
           this.emitKillOnWebSocket(event.data);
+          this.applyMejaiStackDelta('kill');
         }
         if (event.name === 'death') {
           this.emitDeathOnWebSocket(event.data);
+          this.applyMejaiStackDelta('death');
+        }
+        if (event.name === 'assist') {
+          // Assists are not currently relayed over the WebSocket at all (no
+          // emitAssistOnWebSocket exists) -- they only matter here, locally,
+          // for stack math. Flask never needs to know an assist happened.
+          this.applyMejaiStackDelta('assist');
         }
         if (event.name === 'respawn') {
           this.emitRespawnOnWebSocket();
@@ -1245,6 +1306,9 @@ class InGame extends AppWindow {
         console.log(`[TargetCheck] NEW Target identified: ${potentialTargetItemId}. Old: ${this._currentTargetItemId}. Playing initial cue.`);
         const newTargetDef = ITEM_PRIORITY.find(i => i.id === potentialTargetItemId);
         if (newTargetDef) {
+          // Previous target (if any) is no longer the target — cut off its cue before starting the new one.
+          this.stopAudio('itemTarget');
+          this.stopAudio('itemReminder');
           this.playAudio(newTargetDef.audioCue, 'itemTarget');
           this._currentTargetItemId = potentialTargetItemId;
           this._currentTargetSuggestionTime = currentGameTime;
@@ -1280,6 +1344,8 @@ class InGame extends AppWindow {
         console.log(`[TargetCheck] Conditions no longer met for any item. Clearing previous target (${this._currentTargetItemId}).`);
         this._currentTargetItemId = null;
         this._currentTargetSuggestionTime = null;
+        this.stopAudio('itemTarget');
+        this.stopAudio('itemReminder');
       } else {
         // No potential target, and no previous target. Do nothing.
         // console.log("[TargetCheck] No current or potential target. Doing nothing.");
@@ -1290,7 +1356,12 @@ class InGame extends AppWindow {
   // Modify playAudio function
   private playAudio(fileName: string, cueId: AudioCueId): void {
     const volume = settings.getEffectiveCueVolume(cueId);
-    playAudioFile(fileName, volume);
+    playAudioFile(fileName, volume, cueId);
+  }
+
+  /** Stops a cue's in-flight playback, e.g. once the condition that triggered it is no longer true. */
+  private stopAudio(cueId: AudioCueId): void {
+    stopAudioChannel(cueId);
   }
 
   private recordPlayerLevel(level: number, source: string): void {
@@ -1309,7 +1380,7 @@ class InGame extends AppWindow {
   }
 
   private isShoppingAudioEnabled(): boolean {
-    return settings.getSettings().features.shoppingAudioEnabled;
+    return settings.isShoppingAudioEffectivelyEnabled();
   }
 
   /** True when enough purchase-map milestones acquired to suppress high-gold loop for this match. */
@@ -1325,19 +1396,26 @@ class InGame extends AppWindow {
     if (this._lastHighGoldCueTime !== null) {
       console.log('[HighGold] Milestone threshold reached. Clearing high-gold timer.');
       this._lastHighGoldCueTime = null;
+      this.stopAudio('highGold');
     }
     console.log(
       `[HighGold] ${this._emittedItemSignals.size} item milestones acquired (limit ${settings.getSettings().thresholds.highGoldDisableAfterItemMilestones}). High gold cues disabled for this match.`
     );
   }
 
+  /**
+   * Clears all in-game "this match only" mute overrides (shopping audio toggle, master mute,
+   * per-cue mutes) at the start/end of a match. Never touches the persisted/desktop settings —
+   * a mute set from the desktop window is a standing preference and must survive this reset.
+   */
   private resetShoppingAudioForNewMatch(): void {
-    settings.update({ features: { shoppingAudioEnabled: true } });
+    settings.resetSessionOverrides();
     this._lastHighGoldCueTime = null;
     this._currentTargetItemId = null;
     this._currentTargetSuggestionTime = null;
     this.updateShoppingAudioToggleLabel();
-    console.log('[ShoppingAudio] Reset to enabled for new match.');
+    this.syncVolumeControlsInputs();
+    console.log('[ShoppingAudio] Session mute overrides reset for new match.');
   }
 
   private setHudButtonLabel(button: HTMLElement | null, text: string): void {
@@ -1355,8 +1433,8 @@ class InGame extends AppWindow {
     const on = this.isShoppingAudioEnabled();
     this.setHudButtonLabel(this._shoppingAudioToggleBtn, on ? 'Mute gold/items' : 'Unmute gold/items');
     this._shoppingAudioToggleBtn.title = on
-      ? 'Stop high-gold and item purchase reminders (wards unchanged)'
-      : 'Resume high-gold and item purchase reminders';
+      ? 'Stop high-gold and item purchase reminders for this match only (wards unchanged; desktop settings unaffected)'
+      : 'Resume high-gold and item purchase reminders for this match';
   }
 
   private setupShoppingAudioToggle(): void {
@@ -1367,14 +1445,17 @@ class InGame extends AppWindow {
     this.updateShoppingAudioToggleLabel();
     this._shoppingAudioToggleBtn.addEventListener('click', () => {
       const next = !this.isShoppingAudioEnabled();
-      settings.update({ features: { shoppingAudioEnabled: next } });
+      // Session-only: this is a per-match mute. It must not write to the persisted setting the
+      // desktop window shows, and it must not be able to turn the family back on if the desktop
+      // has it disabled as a standing preference.
+      settings.setSessionShoppingAudioMuted(!next);
       if (!next) {
         this._lastHighGoldCueTime = null;
         this._currentTargetItemId = null;
         this._currentTargetSuggestionTime = null;
       }
       this.updateShoppingAudioToggleLabel();
-      console.log('[ShoppingAudio] Toggled shoppingAudioEnabled=', next);
+      console.log('[ShoppingAudio] Session override toggled, effectively enabled=', this.isShoppingAudioEnabled());
     });
   }
 
@@ -1452,22 +1533,24 @@ class InGame extends AppWindow {
     if (this._masterVolumeInput) {
       this._masterVolumeInput.value = String(Math.round(v.masterVolume * 100));
     }
-    this.setHudButtonLabel(this._masterMuteBtn, v.masterMuted ? 'Unmute all SFX' : 'Mute all SFX');
+    // Mute checkboxes/button reflect the in-game SESSION override, not the persisted (desktop) value —
+    // the in-game HUD only ever mutes for the current match.
+    this.setHudButtonLabel(this._masterMuteBtn, settings.isSessionMasterMuted() ? 'Unmute all SFX' : 'Mute all SFX');
     if (this._lowLevelVolumeInput) {
       this._lowLevelVolumeInput.value = String(Math.round(v.cues.lowLevelLateGame.volume * 100));
     }
     if (this._lowLevelMuteCheckbox) {
-      this._lowLevelMuteCheckbox.checked = v.cues.lowLevelLateGame.muted;
+      this._lowLevelMuteCheckbox.checked = settings.isSessionCueMuted('lowLevelLateGame');
     }
     if (this._firstShopVolumeInput) {
       this._firstShopVolumeInput.value = String(Math.round(v.cues.firstShopReminder.volume * 100));
     }
     if (this._firstShopMuteCheckbox) {
-      this._firstShopMuteCheckbox.checked = v.cues.firstShopReminder.muted;
+      this._firstShopMuteCheckbox.checked = settings.isSessionCueMuted('firstShopReminder');
     }
   }
 
-  /** Wires a 0-100 range input to a cue's volume. Reusable for any cue in AUDIO_CUE_IDS. */
+  /** Wires a 0-100 range input to a cue's volume. Reusable for any cue in AUDIO_CUE_IDS. Persisted — shared with desktop. */
   private bindCueVolumeInput(input: HTMLInputElement | null, cueId: AudioCueId): void {
     if (!input) {
       console.warn(`[Volume] ${cueId} volume input not found in DOM.`);
@@ -1480,15 +1563,18 @@ class InGame extends AppWindow {
     });
   }
 
-  /** Wires a mute checkbox to a cue's muted flag. Reusable for any cue in AUDIO_CUE_IDS. */
+  /**
+   * Wires a mute checkbox to a cue's SESSION-only muted flag (this match only). Reusable for any
+   * cue in AUDIO_CUE_IDS. Deliberately does not call settings.update() — see resetShoppingAudioForNewMatch.
+   */
   private bindCueMuteCheckbox(checkbox: HTMLInputElement | null, cueId: AudioCueId): void {
     if (!checkbox) {
       console.warn(`[Volume] ${cueId} mute checkbox not found in DOM.`);
       return;
     }
     checkbox.addEventListener('change', () => {
-      settings.update({ volume: { cues: { [cueId]: { muted: checkbox.checked } } } });
-      console.log(`[Volume] ${AUDIO_CUE_LABELS[cueId]} muted=${checkbox.checked}`);
+      settings.setSessionCueMuted(cueId, checkbox.checked);
+      console.log(`[Volume] ${AUDIO_CUE_LABELS[cueId]} session-muted=${checkbox.checked} (this match only)`);
     });
   }
 
@@ -1508,10 +1594,10 @@ class InGame extends AppWindow {
 
     if (this._masterMuteBtn) {
       this._masterMuteBtn.addEventListener('click', () => {
-        const next = !settings.getSettings().volume.masterMuted;
-        settings.update({ volume: { masterMuted: next } });
+        const next = !settings.isSessionMasterMuted();
+        settings.setSessionMasterMuted(next);
         this.setHudButtonLabel(this._masterMuteBtn, next ? 'Unmute all SFX' : 'Mute all SFX');
-        console.log(`[Volume] Master muted=${next}`);
+        console.log(`[Volume] Master session-muted=${next} (this match only)`);
       });
     } else {
       console.warn('[Volume] masterMuteBtn not found in DOM.');
@@ -1719,6 +1805,7 @@ class InGame extends AppWindow {
     if (this.isHighGoldSuppressedByItemMilestones()) {
       if (this._lastHighGoldCueTime !== null) {
         this._lastHighGoldCueTime = null;
+        this.stopAudio('highGold');
       }
       return false;
     }
@@ -1756,6 +1843,7 @@ class InGame extends AppWindow {
       if (this._lastHighGoldCueTime !== null) {
         console.log(`[HighGold] Gold dropped below threshold. Resetting timer.`);
         this._lastHighGoldCueTime = null; // Reset timer if gold drops
+        this.stopAudio('highGold');
       }
       return false;
     }
@@ -1801,6 +1889,7 @@ class InGame extends AppWindow {
     } else if (this._lastWhatAreYouDoingCueTime !== null) {
       console.log('[WhatAreYouDoing] Condition cleared. Resetting timer.');
       this._lastWhatAreYouDoingCueTime = null;
+      this.stopAudio('lowLevelLateGame');
     }
   }
 
@@ -2045,6 +2134,9 @@ class InGame extends AppWindow {
       return;
     }
     this._gameActive = true;
+    this._localGameTimeAnchorMs = Date.now();
+    this._matchClockEverReceived = false;
+    this._playerState.gameTime = 0;
     this._emittedItemSignals.clear();
     this._emittedVillain = false;
     this._emittedLevel9 = false;
@@ -2069,6 +2161,8 @@ class InGame extends AppWindow {
     this.sendOp('game_end');
     console.log('[WS][Lifecycle] game_end emitted');
     this._gameActive = false;
+    this._localGameTimeAnchorMs = null;
+    this._matchClockEverReceived = false;
     this._emittedItemSignals.clear();
     this._emittedVillain = false;
     this._emittedLevel9 = false;
@@ -2128,6 +2222,71 @@ class InGame extends AppWindow {
       return;
     }
     this._wsClient.sendOp(op, payload);
+  }
+
+  /** Detects Dark Seal (1082) / Mejai's Soulstealer (3041) purchase and Mejai's sale,
+   * from the same items array the DEFAULT_PURCHASE_EVENT_MAP loop above already reads. */
+  private updateMejaiTracking(): void {
+    const items = this._playerState.items;
+    if (!Array.isArray(items)) return;
+    const owns = (id: number) => items.some((it: any) => it && Number(it.itemID) === id && Number(it.count) > 0);
+
+    const hasMejais = owns(MEJAI_SOULSTEALER_ITEM_ID);
+    const hasDarkSeal = owns(DARK_SEAL_ITEM_ID);
+
+    // Sold: was tracking at the 'mejais' tier, item no longer owned. Selling a
+    // completed item doesn't refund Dark Seal, so this cleanly ends tracking.
+    if (this._mejaiTier === 'mejais' && !hasMejais) {
+      if (!this._mejaiCueFired) {
+        console.log('[Mejai] Detected Mejai\'s Soulstealer sold. Emitting mejai_s.');
+        this.sendEventOncePerMatch('mejai_s');
+        this._mejaiCueFired = true;
+      }
+      return;
+    }
+
+    if (hasMejais && this._mejaiTier !== 'mejais') {
+      this._mejaiTier = 'mejais';
+      console.log('[Mejai] Tier upgraded to mejais (stacks carried over):', this._mejaiStacks);
+    } else if (hasDarkSeal && this._mejaiTier === 'none') {
+      this._mejaiTier = 'dark_seal';
+      console.log('[Mejai] Started tracking stacks at Dark Seal tier.');
+    }
+  }
+
+  /** Applies the kill/assist/death stack delta for whichever tier is currently tracked.
+   * No-ops before Dark Seal is bought, and after any of the three mejai_* cues has fired
+   * (per the confirmed mutual-exclusion rule -- whichever condition is hit first wins). */
+  private applyMejaiStackDelta(kind: 'kill' | 'assist' | 'death'): void {
+    if (this._mejaiTier === 'none' || this._mejaiCueFired) return;
+    const rates = MEJAI_STACK_RATES[this._mejaiTier];
+
+    if (kind === 'kill') {
+      this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + rates.perKill);
+    } else if (kind === 'assist') {
+      this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + rates.perAssist);
+    } else {
+      this._mejaiStacks = Math.max(0, this._mejaiStacks - rates.lossOnDeath);
+    }
+    console.log(`[Mejai] ${kind} -> tier=${this._mejaiTier} stacks=${this._mejaiStacks}/${rates.max}`);
+    this.checkMejaiThresholds();
+  }
+
+  /** Fires at most one of mejai_0 / mejai_25 -- only reachable once actually at the
+   * 'mejais' tier (0 while still on Dark Seal alone isn't a "Mejai's" story; 25 is only
+   * reachable at this tier anyway since Dark Seal caps at 10). mejai_s (sold) is handled
+   * in updateMejaiTracking() instead, since it isn't a stack-delta event. */
+  private checkMejaiThresholds(): void {
+    if (this._mejaiCueFired || this._mejaiTier !== 'mejais') return;
+    if (this._mejaiStacks <= 0) {
+      console.log('[Mejai] Stacks hit 0. Emitting mejai_0.');
+      this.sendEventOncePerMatch('mejai_0');
+      this._mejaiCueFired = true;
+    } else if (this._mejaiStacks >= MEJAI_STACK_RATES.mejais.max) {
+      console.log('[Mejai] Stacks hit max (25). Emitting mejai_25.');
+      this.sendEventOncePerMatch('mejai_25');
+      this._mejaiCueFired = true;
+    }
   }
 
   /** Every LoL GEP `kill` event → WebSocket `{ op: "event", name: "kill", multikill, killstreak, ... }`. */
