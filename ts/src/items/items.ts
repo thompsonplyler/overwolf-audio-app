@@ -12,6 +12,13 @@ export interface ItemDef {
     components: ItemComponentDef[];
     audioCue: string;
     requiresComponentCheck: boolean;
+    /** Distinct component types that must be owned before this item is a target-check
+     * candidate at all (default 1). Only needed for an item that shares components across
+     * more than one otherwise-unrelated branch — e.g. Cosmic Drive shares Aether Wisp with
+     * Lich Bane/Storm Surge AND Fiendish Codex with Banshee's Veil, so owning just one
+     * incidental shared component (bought for a *different* item) must not make it a
+     * candidate on its own. */
+    minOwnedComponents?: number;
 }
 
 export const PRICE = {
@@ -32,7 +39,9 @@ export const PRICE = {
     codex: 850,
     seal: 350,
     mejais: 1500,
-    stormsurge: 2800
+    stormsurge: 2800,
+    kindlegem: 800, // wiki-confirmed 2026-08-08
+    cosmicdrive: 3000 // wiki-confirmed 2026-08-08
 };
 
 export const COMPONENTS = {
@@ -45,7 +54,8 @@ export const COMPONENTS = {
     BLASTING_WAND: { id: 1026, cost: PRICE.wand },
     HEXTECH_ALTERNATOR: { id: 3145, cost: PRICE.alt },
     VERDANT_BARRIER: { id: 4632, cost: PRICE.verdant },
-    DARK_SEAL: { id: 1082, cost: PRICE.seal }
+    DARK_SEAL: { id: 1082, cost: PRICE.seal },
+    KINDLEGEM: { id: 3067, cost: PRICE.kindlegem }
 } as const;
 
 export const ITEMS: Record<string, ItemDef> = {
@@ -83,16 +93,26 @@ export const ITEMS: Record<string, ItemDef> = {
         id: 4646, name: 'Storm Surge', cost: PRICE.stormsurge,
         components: [COMPONENTS.HEXTECH_ALTERNATOR, COMPONENTS.AETHER_WISP],
         audioCue: 'getstormsurge.mp3', requiresComponentCheck: true
+    },
+    COSMIC_DRIVE: {
+        id: 4629, name: 'Cosmic Drive', cost: PRICE.cosmicdrive,
+        components: [COMPONENTS.KINDLEGEM, COMPONENTS.AETHER_WISP, COMPONENTS.FIENDISH_CODEX],
+        audioCue: 'getcosmicdrive.mp3', requiresComponentCheck: true, minOwnedComponents: 2
     }
 };
 
+// Priority order on shared-component branches (earlier = higher priority — see
+// shouldDeferToHigherPriorityItem). Cosmic Drive sits between Lich Bane and Storm
+// Surge on the Aether Wisp branch; Shadowflame sits above Zhonya's on the
+// Needlessly Large Rod branch (both requested 2026-08-08).
 export const ITEM_PRIORITY: ItemDef[] = [
     ITEMS.LICH_BANE,
+    ITEMS.COSMIC_DRIVE,
     ITEMS.STORMSURGE,
     ITEMS.RABADONS,
     ITEMS.BANSHEES,
-    ITEMS.ZHONYAS,
     ITEMS.SHADOWFLAME,
+    ITEMS.ZHONYAS,
     ITEMS.VOID_STAFF,
 ];
 
@@ -181,7 +201,8 @@ export const DEFAULT_PURCHASE_EVENT_MAP: PurchaseEventMapping = {
     3041: 'mejais',
     3157: 'zhonyas',
     4646: 'stormsurge',
-    3135: 'voidstaff'
+    3135: 'voidstaff',
+    4629: 'cosmicdrive'
     // 4645: 'shadowflame',
 };
 

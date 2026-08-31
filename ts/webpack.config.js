@@ -10,7 +10,8 @@ module.exports = env => ({
         background: './src/background/background.ts',
         desktop: './src/desktop/desktop.ts',
         in_game: './src/in_game/in_game.ts',
-        clicker: './src/clicker/clicker.ts'
+        clicker: './src/clicker/clicker.ts',
+        vignette: './src/vignette/vignette.ts'
     },
     devtool: 'inline-source-map',
     module: {
@@ -33,7 +34,14 @@ module.exports = env => ({
         new CleanWebpackPlugin,
         new CopyPlugin({
             patterns: [
-                { from: "public", to: "./", globOptions: { ignore: ["**/toggler_button.html"] } }
+                // public/manifest.json is a stale, uncustomized copy of the original
+                // Overwolf sample-app template (wrong manifest_version, placeholder
+                // metadata, missing this app's real windows/hotkeys/game targeting) --
+                // excluded here so it can never again get copied into dist/manifest.json
+                // in place of the real one below. Found live 2026-08-31: a build
+                // silently replaced the real dist/manifest.json with this stale file.
+                { from: "public", to: "./", globOptions: { ignore: ["**/toggler_button.html", "**/manifest.json"] } },
+                { from: "manifest.json", to: "manifest.json" }
             ],
         }),
         new HtmlWebpackPlugin({
@@ -55,6 +63,11 @@ module.exports = env => ({
             template: './src/clicker/clicker.html',
             filename: 'clicker.html',
             chunks: ['clicker']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/vignette/vignette.html',
+            filename: 'vignette.html',
+            chunks: ['vignette']
         }),
         new OverwolfPlugin(env)
     ]

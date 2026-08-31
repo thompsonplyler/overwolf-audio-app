@@ -1,0 +1,56 @@
+/* "Mic Vignette Settings" panel — shared between the desktop and in-game
+   windows via back/'s /api/mic-vignette/settings. Structurally mirrors
+   desktop-audio.css's field/row pattern, themed identically. */
+
+.vignette-settings {
+  background-color: #3a3a3a;
+  color: #d5d5d5;
+  padding: 24px 32px 32px;
+  font-family: "Roboto", sans-serif;
+}
+
+.vignette-settings__title {
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.vignette-settings__hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9a9a9a;
+  max-width: 640px;
+  margin-bottom: 20px;
+}
+
+.vignette-settings__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 10px 0;
+  border-bottom: 1px solid #505050;
+}
+
+.vignette-settings__row:last-child {
+  border-bottom: none;
+}
+
+.vignette-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  max-width: 320px;
+}
+
+.vignette-settings__field-label {
+  font-size: 12px;
+  color: #c2c2c2;
+}
+
+.vignette-settings__field-input--range {
+  width: 100%;
+  accent-color: #ff3232;
+}

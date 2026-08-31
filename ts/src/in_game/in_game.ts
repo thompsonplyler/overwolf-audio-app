@@ -13,6 +13,7 @@ import RunningGameInfo = overwolf.games.RunningGameInfo;
 import WindowState = overwolf.windows.WindowStateEx;
 import { SettingsManager, AudioCueId, AUDIO_CUE_LABELS, STORAGE_KEY } from "../config/settings";
 import { playAudioFile, stopAudioChannel } from "../audio/audio";
+import { setupVignetteSettingsPanel } from "../vignette/vignetteSettingsPanel";
 import {
   ITEM_PRIORITY,
   calculateRemainingCost,
@@ -442,10 +443,25 @@ class InGame extends AppWindow {
 
   // Mejai's Soulstealer stack tracking (see items.ts MEJAI_STACK_RATES). 'none'
   // until Dark Seal is purchased; stacks carry over on the upgrade to 'mejais'.
+  // All of this is reset in resetMatchCombatState() every game_start/game_end --
+  // InGame is a long-lived singleton (InGame.instance().run(), one instance for
+  // the whole Overwolf session), so without that reset these fields leak stale
+  // values into the next match. Confirmed as the real cause of the "fires early,
+  // around 22 stacks" bug report, 2026-08-25 -- there was no reset here at all.
   private _mejaiTier: MejaiTier | 'none' = 'none';
   private _mejaiStacks: number = 0;
-  /** Mutual-exclusion guard: once ANY of mejai_0/mejai_s/mejai_25 fires, the other two are permanently disabled for this match. */
+  /** Mutual-exclusion guard: once ANY of mejai_0/mejai_s/mejai_25/mejai_instant_death
+   * fires, the others are disabled for this match (mejai_25_death is the one
+   * deliberate exception -- see applyMejaiStackDelta). */
   private _mejaiCueFired: boolean = false;
+  /** Kills+assists landed since Mejai's Soulstealer itself (not Dark Seal) was
+   * bought -- reset on the Dark Seal->Mejai's upgrade. Used for mejai_instant_death:
+   * still 0 when the player dies. */
+  private _mejaiKillsAssistsSincePurchase: number = 0;
+  /** Set once stacks hit 25. Lets a later death still fire mejai_25_death even
+   * though _mejaiCueFired is already true from mejai_25 itself. */
+  private _mejaiReachedMax: boolean = false;
+  private _mejai25DeathFired: boolean = false;
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -552,6 +568,7 @@ class InGame extends AppWindow {
       this.setupShoppingAudioToggle();
       this.setupIntervalSettings();
       this.setupVolumeControls();
+      setupVignetteSettingsPanel('ingameVignette');
 
       // Desktop and in-game share localStorage (same origin); pick up volume/interval changes
       // made on the desktop window live, without needing a restart. Mute checkboxes are session-only
@@ -955,19 +972,33 @@ class InGame extends AppWindow {
 
     if (canRunAudioChecks) {
       const shoppingAudioOn = this.isShoppingAudioEnabled();
-      const isHighGoldActive = shoppingAudioOn ? this.checkHighGold() : false;
-      console.log(`[AudioCheck Pre-Cond] shoppingAudioOn=${shoppingAudioOn} isHighGoldActive=${isHighGoldActive}`);
 
-      if (shoppingAudioOn && !isHighGoldActive) {
+      // A purchase (or sale/combine) just happened -- silence the high-gold nag
+      // immediately regardless of remaining gold. checkHighGold() below only clears
+      // it once gold drops back at/under threshold, which doesn't cover "still above
+      // threshold but you just acted on it"; this cuts it off on the spot instead.
+      if (itemsChanged && this._lastHighGoldCueTime !== null) {
+        this._lastHighGoldCueTime = null;
+        this.stopAudio('highGold');
+      }
+
+      if (shoppingAudioOn) {
+        // Item-target cues ("go get your Lich Bane") take priority over the generic
+        // high-gold nag -- run the target check first, and only let the high-gold
+        // cue play when nothing specific is actionable right now. Previously the
+        // high-gold check ran first and skipped checkTargetItem() outright whenever
+        // gold was above threshold, which is exactly the state you're in while
+        // saving up for a cheap-component item like Lich Bane -- its cue would get
+        // silently skipped for the whole accumulation window.
         this.checkTargetItem();
-      } else if (!shoppingAudioOn) {
-        if (this._currentTargetItemId !== null) {
-          this._currentTargetItemId = null;
-          this._currentTargetSuggestionTime = null;
-          this.stopAudio('itemTarget');
-          this.stopAudio('itemReminder');
+        const hasActiveItemTarget = this._currentTargetItemId !== null;
+        const isHighGoldActive = hasActiveItemTarget ? false : this.checkHighGold();
+        if (hasActiveItemTarget && this._lastHighGoldCueTime !== null) {
+          this._lastHighGoldCueTime = null;
+          this.stopAudio('highGold');
         }
-      } else if (isHighGoldActive && this._currentTargetItemId !== null) {
+        console.log(`[AudioCheck Pre-Cond] shoppingAudioOn=${shoppingAudioOn} hasActiveItemTarget=${hasActiveItemTarget} isHighGoldActive=${isHighGoldActive}`);
+      } else if (this._currentTargetItemId !== null) {
         this._currentTargetItemId = null;
         this._currentTargetSuggestionTime = null;
         this.stopAudio('itemTarget');
@@ -975,7 +1006,7 @@ class InGame extends AppWindow {
       }
 
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
-      // this.checkWardStatus(); 
+      // this.checkWardStatus();
       this.checkEnemyWardChanges(); // Call the new ward check function
       this.checkLowLevelLateGame();
     } else {
@@ -1273,9 +1304,12 @@ class InGame extends AppWindow {
 
       let ownsAnyComponent = false;
       if (itemDef.requiresComponentCheck) {
-        ownsAnyComponent = itemDef.components.some(comp => (playerItemCounts.get(comp.id) || 0) > 0);
+        const requiredDistinctComponents = itemDef.minOwnedComponents ?? 1;
+        const distinctComponentIds = new Set(itemDef.components.map(comp => comp.id));
+        const ownedDistinctCount = [...distinctComponentIds].filter(id => (playerItemCounts.get(id) || 0) > 0).length;
+        ownsAnyComponent = ownedDistinctCount >= requiredDistinctComponents;
         if (!ownsAnyComponent) {
-          console.log(`[TargetCheck] -> ${itemDef.name}: Component required but not owned. Skipping.`);
+          console.log(`[TargetCheck] -> ${itemDef.name}: Owns ${ownedDistinctCount}/${requiredDistinctComponents} required distinct components. Skipping.`);
           continue; // Skip if component required but not owned
         }
       }
@@ -2177,6 +2211,12 @@ class InGame extends AppWindow {
   private resetMatchCombatState(): void {
     this._deathCount = 0;
     this._consecutiveKills = 0;
+    this._mejaiTier = 'none';
+    this._mejaiStacks = 0;
+    this._mejaiCueFired = false;
+    this._mejaiKillsAssistsSincePurchase = 0;
+    this._mejaiReachedMax = false;
+    this._mejai25DeathFired = false;
   }
 
   private connectWebSocket(): void {
@@ -2247,6 +2287,7 @@ class InGame extends AppWindow {
 
     if (hasMejais && this._mejaiTier !== 'mejais') {
       this._mejaiTier = 'mejais';
+      this._mejaiKillsAssistsSincePurchase = 0;
       console.log('[Mejai] Tier upgraded to mejais (stacks carried over):', this._mejaiStacks);
     } else if (hasDarkSeal && this._mejaiTier === 'none') {
       this._mejaiTier = 'dark_seal';
@@ -2255,17 +2296,35 @@ class InGame extends AppWindow {
   }
 
   /** Applies the kill/assist/death stack delta for whichever tier is currently tracked.
-   * No-ops before Dark Seal is bought, and after any of the three mejai_* cues has fired
-   * (per the confirmed mutual-exclusion rule -- whichever condition is hit first wins). */
+   * No-ops before Dark Seal is bought, and after any of the mejai_* cues has fired
+   * (per the confirmed mutual-exclusion rule -- whichever condition is hit first wins),
+   * with one deliberate exception: a death after already hitting 25 stacks still fires
+   * mejai_25_death, since that's a distinct follow-up moment, not a competing one. */
   private applyMejaiStackDelta(kind: 'kill' | 'assist' | 'death'): void {
-    if (this._mejaiTier === 'none' || this._mejaiCueFired) return;
+    if (this._mejaiTier === 'none') return;
+    if (this._mejaiCueFired) {
+      if (kind === 'death' && this._mejaiReachedMax && !this._mejai25DeathFired) {
+        this._mejai25DeathFired = true;
+        console.log('[Mejai] Died after reaching 25 stacks. Emitting mejai_25_death.');
+        this.sendEventOncePerMatch('mejai_25_death');
+      }
+      return;
+    }
     const rates = MEJAI_STACK_RATES[this._mejaiTier];
 
-    if (kind === 'kill') {
-      this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + rates.perKill);
-    } else if (kind === 'assist') {
-      this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + rates.perAssist);
+    if (kind === 'kill' || kind === 'assist') {
+      if (this._mejaiTier === 'mejais') this._mejaiKillsAssistsSincePurchase++;
+      const gain = kind === 'kill' ? rates.perKill : rates.perAssist;
+      this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + gain);
     } else {
+      // Died having bought Mejai's Soulstealer, never landed a kill or assist since --
+      // its own distinct cue instead of the ordinary stack-loss handling below.
+      if (this._mejaiTier === 'mejais' && this._mejaiKillsAssistsSincePurchase === 0) {
+        console.log('[Mejai] Died with zero kills/assists since buying Mejai\'s Soulstealer. Emitting mejai_instant_death.');
+        this.sendEventOncePerMatch('mejai_instant_death');
+        this._mejaiCueFired = true;
+        return;
+      }
       this._mejaiStacks = Math.max(0, this._mejaiStacks - rates.lossOnDeath);
     }
     console.log(`[Mejai] ${kind} -> tier=${this._mejaiTier} stacks=${this._mejaiStacks}/${rates.max}`);
@@ -2283,6 +2342,7 @@ class InGame extends AppWindow {
       this.sendEventOncePerMatch('mejai_0');
       this._mejaiCueFired = true;
     } else if (this._mejaiStacks >= MEJAI_STACK_RATES.mejais.max) {
+      this._mejaiReachedMax = true;
       console.log('[Mejai] Stacks hit max (25). Emitting mejai_25.');
       this.sendEventOncePerMatch('mejai_25');
       this._mejaiCueFired = true;

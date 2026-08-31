@@ -186,6 +186,7 @@ body.compact-mode .ingame-hud__extra {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  overflow-y: auto;
   transition:
     opacity var(--ingame-hud-reveal-transition),
     visibility var(--ingame-hud-reveal-transition);

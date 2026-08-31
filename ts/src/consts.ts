@@ -240,7 +240,8 @@ export const kGameClassIds = Array.from(kGamesFeatures.keys());
 
 export const kWindowNames = {
   inGame: 'in_game',
-  desktop: 'desktop'
+  desktop: 'desktop',
+  vignette: 'vignette'
 };
 
 export const kHotkeys = {

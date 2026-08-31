@@ -1,0 +1,99 @@
+/* Desktop "Audio Cue Settings" panel — persisted defaults shared with the in-game overlay.
+   Structurally mirrors the in-game HUD's More panel (field = label + range input, checkbox-field
+   = mute toggle) but themed for the desktop window instead of the compact in-game overlay. */
+
+.audio-settings {
+  background-color: #3a3a3a;
+  color: #d5d5d5;
+  padding: 24px 32px 32px;
+  font-family: "Roboto", sans-serif;
+}
+
+.audio-settings__title {
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.audio-settings__hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9a9a9a;
+  max-width: 640px;
+  margin-bottom: 20px;
+}
+
+.audio-settings__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #505050;
+}
+
+.audio-settings__row--master {
+  align-items: center;
+}
+
+.audio-settings__row:last-child {
+  border-bottom: none;
+}
+
+.audio-settings__cue-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.audio-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  max-width: 320px;
+}
+
+.audio-settings__field-label {
+  font-size: 12px;
+  color: #c2c2c2;
+}
+
+.audio-settings__field-input--range {
+  width: 100%;
+  accent-color: #28dcfa;
+}
+
+.audio-settings__checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #c2c2c2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.audio-settings__checkbox-field input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #28dcfa;
+}
+
+.audio-settings__btn {
+  appearance: none;
+  border: 1px solid #6a6a6a;
+  background: #4a4a4a;
+  color: #d5d5d5;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.audio-settings__btn:hover,
+.audio-settings__btn:focus-visible {
+  background: #565656;
+  border-color: #28dcfa;
+}

@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="css/header.css" />
   <link rel="stylesheet" href="css/desktop.css" />
   <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/desktop-audio.css" />
+  <link rel="stylesheet" href="css/vignette-settings.css" />
   <title>Overwolf Sample App - Desktop page</title>
 </head>
 
@@ -25,62 +27,74 @@
 
   <!-- --------------------------------- Main -------------------------------- -->
   <main>
-    <div class="desktopTop">
-      <h1>Overwolf Sample App</h1>
-      <p>
-        Welcome to the Overwolf tutorial app for developers.<br />
-        Learn how to build an app by using one!
+    <!-- ------------------------- Audio Cue Settings ------------------------ -->
+    <section id="audioSettingsPanel" class="audio-settings">
+      <h2 class="audio-settings__title">Audio Cue Settings</h2>
+      <p class="audio-settings__hint">
+        These are your saved defaults — they apply every match. Muting a cue here keeps it muted
+        until you unmute it here. Mutes toggled in the in-game overlay only last for that one
+        match and never change these settings.
       </p>
-      <div id="version"></div>
-    </div>
-    <div class="desktopBottom">
-      <!-- Launch a game! -->
-      <div id="left">
-        <h1>
-          Launch a game and the In-Game window will pop-up automatically!
-        </h1>
+
+      <div class="audio-settings__row audio-settings__row--master">
+        <label class="audio-settings__field" for="desktopMasterVolumeInput">
+          <span class="audio-settings__field-label">Master SFX volume</span>
+          <input id="desktopMasterVolumeInput" type="range" class="audio-settings__field-input audio-settings__field-input--range" min="0" max="100" step="1" />
+        </label>
+        <button id="desktopMasterMuteBtn" type="button" class="audio-settings__btn">Mute all SFX</button>
       </div>
-      <!-- Launch a game! -->
-      <div id="middle">
-        What can you learn with this sample app?
-        <br /><br />
-        1. How to listen to real-time game events and how to identify specific
-        events like match start/end, kill, and death.
-        <br /><br />
-        2. How to use a transparent background window as a service bus, that
-        acts as the main controller of your app.
-        <br /><br />
-        3. How to use Hotkeys that show/hide your app while you are in-game.
+
+      <div id="cueSettingsList" class="audio-settings__cue-list"></div>
+    </section>
+
+    <!-- ------------------------- Vignette Settings ------------------------ -->
+    <section id="vignetteSettingsPanel" class="vignette-settings">
+      <h2 class="vignette-settings__title">Mic Vignette Settings</h2>
+      <p class="vignette-settings__hint">
+        Shared with the in-game overlay -- changing a value here or in-game updates both.
+      </p>
+
+      <div class="vignette-settings__row">
+        <label class="vignette-settings__field" for="desktopVignetteGrowSecondsInput">
+          <span class="vignette-settings__field-label">Time to fill (seconds)</span>
+          <input id="desktopVignetteGrowSecondsInput" type="number" class="vignette-settings__field-input" min="1" max="120" step="1" />
+        </label>
+        <label class="vignette-settings__field" for="desktopVignetteRecedeSecondsInput">
+          <span class="vignette-settings__field-label">Recede speed (seconds)</span>
+          <input id="desktopVignetteRecedeSecondsInput" type="number" class="vignette-settings__field-input" min="0.1" max="30" step="0.1" />
+        </label>
       </div>
-      <!-- picture -->
-      <div id="right">
-        <div style="text-align: center">
-          <div style="display: inline-block">
-            <img src="img/cool_wolf.png" />
-          </div>
-        </div>
+
+      <div class="vignette-settings__row">
+        <label class="vignette-settings__field" for="desktopVignetteSpeakThresholdInput">
+          <span class="vignette-settings__field-label">Speak threshold</span>
+          <input id="desktopVignetteSpeakThresholdInput" type="range" class="vignette-settings__field-input vignette-settings__field-input--range" min="0" max="1" step="0.01" />
+        </label>
+        <label class="vignette-settings__field" for="desktopVignetteMaxLevelInput">
+          <span class="vignette-settings__field-label">Max darkness</span>
+          <input id="desktopVignetteMaxLevelInput" type="range" class="vignette-settings__field-input vignette-settings__field-input--range" min="0" max="1" step="0.01" />
+        </label>
       </div>
-    </div>
+
+      <div class="vignette-settings__row">
+        <label class="vignette-settings__field" for="desktopVignetteRestingRadiusInput">
+          <span class="vignette-settings__field-label">Resting radius (%)</span>
+          <input id="desktopVignetteRestingRadiusInput" type="range" class="vignette-settings__field-input vignette-settings__field-input--range" min="0" max="100" step="1" />
+        </label>
+        <label class="vignette-settings__field" for="desktopVignetteMaxRadiusInput">
+          <span class="vignette-settings__field-label">Max radius (% at full encroach)</span>
+          <input id="desktopVignetteMaxRadiusInput" type="range" class="vignette-settings__field-input vignette-settings__field-input--range" min="0" max="100" step="1" />
+        </label>
+      </div>
+
+      <div class="vignette-settings__row">
+        <label class="vignette-settings__field" for="desktopVignetteFeatherInput">
+          <span class="vignette-settings__field-label">Feather amount (%)</span>
+          <input id="desktopVignetteFeatherInput" type="range" class="vignette-settings__field-input vignette-settings__field-input--range" min="0" max="100" step="1" />
+        </label>
+      </div>
+    </section>
   </main>
-
-  <script>
-    // Standard Google Universal Analytics code
-    (function (i, s, o, g, r, a, m) {
-      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-        (i[r].q = i[r].q || []).push(arguments)
-      },
-        i[r].l = 1 * new Date(); a = s.createElement(o),
-          m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-      // Note: https protocol here
-    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-
-    ga('create', 'UA-144253676-3', 'auto');
-
-    // Removes failing protocol check. @see: http://stackoverflow.com/a/22152353/1958200
-    ga('set', 'checkProtocolTask', function () { });
-    ga('require', 'displayfeatures');
-    ga('send', 'pageview', '/desktop.html');
-  </script>
 </body>
 
 </html>

@@ -1,7 +1,16 @@
 {
-    "author": "Overwolf",
-    "version": "1.0.0",
-    "minimum-overwolf-version": "0.148.0",
+    "meta": {
+        "name": "GMT Overlay Companion",
+        "description": "Custom in-game overlay companion for League of Legends streaming.",
+        "author": "Overwolf",
+        "version": "1.0.0",
+        "minimum-overwolf-version": "0.148.0",
+        "dock_button_title": "GMT Overlay",
+        "icon": "icons/IconMouseOver.png",
+        "icon_gray": "icons/IconMouseNormal.png",
+        "launcher_icon": "icons/desktop-icon.ico",
+        "window_icon": "icons/IconMouseOver.png"
+    },
     "manifest_version": 2,
     "type": "WebApp",
     "permissions": [
@@ -52,14 +61,21 @@
                     "height": 50
                 },
                 "start_visible": true
+            },
+            "vignette": {
+                "file": "vignette.html",
+                "transparent": true,
+                "clickthrough": true,
+                "resizable": false,
+                "show_in_taskbar": false,
+                "size": {
+                    "width": 1920,
+                    "height": 1080
+                }
             }
         },
         "game_events": [
-            {
-                "game_id": 5426,
-                "name": "match_clock",
-                "required": true
-            }
+            5426
         ],
         "launch_events": [
             {
@@ -116,12 +132,6 @@
                 "action-type": "toggle",
                 "target_window": "clicker",
                 "hotkey": "Ctrl+G"
-            }
-        },
-        "extra-objects": {
-            "com-overwolf-procmgr-ext": {
-                "file": "ProcMgr-ext.dll",
-                "class": "ProcMgr_ext.ProcMgr"
             }
         }
     }

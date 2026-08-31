@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vignette</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        :root {
+            /* Radii driven live from /api/mic-vignette's settings (see
+               vignette.ts's applySettings) -- these are just startup
+               defaults before the first poll lands. Percentages are of
+               distance-to-farthest-corner (radial-gradient's own default
+               sizing), not viewport width/height directly. */
+            --clear-radius: 45%;
+            --feather-radius: 79%;
+        }
+
+        #vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            /* ellipse (radial-gradient's default shape) follows the screen's
+               own aspect ratio, so the dark region grows in the shape of the
+               screen rather than a circle floating inside a rectangle --
+               closer to how a real damage vignette reads.
+
+               Evelynn-themed palette (fixed, not user-configurable): pink
+               (e53ccb) right at the inner edge, through purple (481365),
+               to near-opaque black at the outer edge. The middle stop's
+               position is computed as the midpoint between --clear-radius
+               and --feather-radius so it stays proportional as either
+               setting changes. */
+            background: radial-gradient(
+                ellipse at center,
+                rgba(229, 60, 203, 0) var(--clear-radius),
+                rgba(229, 60, 203, 0.75) calc((var(--clear-radius) + var(--feather-radius)) / 2),
+                rgba(72, 19, 101, 0.9) var(--feather-radius),
+                rgba(0, 0, 0, 0.97) 100%
+            );
+        }
+    </style>
+</head>
+
+<body>
+    <div id="vignette"></div>
+    <script src="js/vignette.js"></script>
+</body>
+
+</html>

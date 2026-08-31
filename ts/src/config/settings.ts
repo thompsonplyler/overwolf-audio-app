@@ -13,6 +13,8 @@ export interface IntervalSettings {
     targetReminderDelaySec: number; // e.g., 30
     /** Game seconds after first reaching first-shop gold before reminder plays. */
     firstShopReminderDelaySec: number; // e.g., 20
+    /** Max gap between a kill/assist and a subsequent ultimate cast for the combo cue to fire. */
+    ultimateAfterKillWindowSec: number; // e.g., 6
 }
 
 export interface AudioSettings {
@@ -22,6 +24,8 @@ export interface AudioSettings {
     firstShopReminderFile: string; // e.g., 'whatareyoudoing_1.mp3'
     /** Still below level threshold after the late-game cutoff (e.g. not level 4 by 3:01). */
     lowLevelLateGameFile: string; // e.g., 'whatareyoudoing_1.mp3'
+    /** Ultimate used shortly after a kill/assist — same "idiot" cue family as the other misplay reminders. */
+    ultimateAfterKillFile: string; // e.g., 'whatareyoudoing_1.mp3'
 }
 
 /** Manual toggles; desktop UI can update the same persisted keys later. */
@@ -42,7 +46,8 @@ export type AudioCueId =
     | 'firstShopReminder'
     | 'lowLevelLateGame'
     | 'wardPurchased'
-    | 'wardPlaced';
+    | 'wardPlaced'
+    | 'ultimateAfterKill';
 
 export const AUDIO_CUE_IDS: AudioCueId[] = [
     'highGold',
@@ -52,6 +57,7 @@ export const AUDIO_CUE_IDS: AudioCueId[] = [
     'lowLevelLateGame',
     'wardPurchased',
     'wardPlaced',
+    'ultimateAfterKill',
 ];
 
 /** Human-readable label per cue, for any settings UI that lists them. */
@@ -63,6 +69,7 @@ export const AUDIO_CUE_LABELS: Record<AudioCueId, string> = {
     lowLevelLateGame: 'Low level warning',
     wardPurchased: 'Enemy ward purchased',
     wardPlaced: 'Enemy ward placed',
+    ultimateAfterKill: 'Ultimate after kill/assist',
 };
 
 export interface CueVolumeSetting {
@@ -102,12 +109,14 @@ const DEFAULT_SETTINGS: AppSettings = {
         highGoldIntervalSec: 60,
         targetReminderDelaySec: 45,
         firstShopReminderDelaySec: 20,
+        ultimateAfterKillWindowSec: 6,
     },
     audio: {
         highGoldFile: 'icarus_song_001.mp3',
         reminderFile: 'idiot_song_001.mp3',
         firstShopReminderFile: 'whatareyoudoing_1.mp3',
         lowLevelLateGameFile: 'whatareyoudoing_1.mp3',
+        ultimateAfterKillFile: 'whatareyoudoing_1.mp3',
     },
     features: {
         shoppingAudioEnabled: true,
@@ -119,7 +128,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     },
 };
 
-const STORAGE_KEY = 'ow_app_settings';
+export const STORAGE_KEY = 'ow_app_settings';
 
 export type AppSettingsUpdate = {
     thresholds?: Partial<ThresholdSettings>;
@@ -137,8 +146,32 @@ export class SettingsManager {
     private static _instance: SettingsManager | null = null;
     private _settings: AppSettings;
 
+    /**
+     * In-game-only, never-persisted mute overrides. These exist so the in-game overlay can
+     * silence a cue for the rest of the current match (e.g. a mute button, or an automatic
+     * "too much gold this match" cutoff) WITHOUT touching the shared/persisted settings the
+     * desktop window edits — muting in-game must never make a cue show as muted on desktop.
+     * Desktop-set mutes, conversely, persist and apply everywhere (including here) since they
+     * flow through the normal `volume`/`features` fields below.
+     */
+    private _sessionMasterMuted: boolean = false;
+    private _sessionCueMuted: Partial<Record<AudioCueId, boolean>> = {};
+    private _sessionShoppingAudioMuted: boolean = false;
+
     private constructor() {
         this._settings = this._load() || DEFAULT_SETTINGS;
+        if (typeof window !== 'undefined') {
+            // Same-origin windows (desktop + in-game) share localStorage; this lets an
+            // already-open window pick up settings changes made in the other one live.
+            window.addEventListener('storage', (e) => {
+                if (e.key === STORAGE_KEY) {
+                    const loaded = this._load();
+                    if (loaded) {
+                        this._settings = loaded;
+                    }
+                }
+            });
+        }
     }
 
     public static instance(): SettingsManager {
@@ -173,15 +206,54 @@ export class SettingsManager {
         this._persist();
     }
 
-    /** Effective 0..1 playback volume for a cue: 0 if either master or the cue itself is muted. */
+    /** Effective 0..1 playback volume for a cue: 0 if muted, persisted or session-only (in-game). */
     public getEffectiveCueVolume(cueId: AudioCueId): number {
         const v = this._settings.volume;
         const cue = v.cues[cueId] ?? { volume: 1, muted: false };
-        if (v.masterMuted || cue.muted) {
+        if (v.masterMuted || cue.muted || this._sessionMasterMuted || this._sessionCueMuted[cueId]) {
             return 0;
         }
         const clamp = (n: number) => Math.max(0, Math.min(1, n));
         return clamp(v.masterVolume) * clamp(cue.volume);
+    }
+
+    /** Session-only (not persisted) master mute — for the in-game overlay's "this match only" mute. */
+    public setSessionMasterMuted(muted: boolean): void {
+        this._sessionMasterMuted = muted;
+    }
+
+    public isSessionMasterMuted(): boolean {
+        return this._sessionMasterMuted;
+    }
+
+    /** Session-only (not persisted) per-cue mute — for the in-game overlay's "this match only" mutes. */
+    public setSessionCueMuted(cueId: AudioCueId, muted: boolean): void {
+        this._sessionCueMuted[cueId] = muted;
+    }
+
+    public isSessionCueMuted(cueId: AudioCueId): boolean {
+        return !!this._sessionCueMuted[cueId];
+    }
+
+    /** Session-only override for the "gold/item" cue family toggle (see FeatureSettings.shoppingAudioEnabled). */
+    public setSessionShoppingAudioMuted(muted: boolean): void {
+        this._sessionShoppingAudioMuted = muted;
+    }
+
+    public isSessionShoppingAudioMuted(): boolean {
+        return this._sessionShoppingAudioMuted;
+    }
+
+    /** True only when both the persisted (desktop) setting AND the in-game session override allow it. */
+    public isShoppingAudioEffectivelyEnabled(): boolean {
+        return this._settings.features.shoppingAudioEnabled && !this._sessionShoppingAudioMuted;
+    }
+
+    /** Clears all in-game session overrides. Call at the start/end of each match so mutes don't leak into the next one. */
+    public resetSessionOverrides(): void {
+        this._sessionMasterMuted = false;
+        this._sessionCueMuted = {};
+        this._sessionShoppingAudioMuted = false;
     }
 
     public reset(): void {

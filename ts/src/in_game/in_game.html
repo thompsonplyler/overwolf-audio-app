@@ -102,7 +102,7 @@
               </label>
             </div>
             <div class="ingame-hud__row">
-              <button id="masterMuteBtn" type="button" class="ingame-hud__btn ingame-hud__btn--secondary">
+              <button id="masterMuteBtn" type="button" class="ingame-hud__btn ingame-hud__btn--secondary" title="Mutes for this match only. Does not change your saved desktop settings.">
                 <span class="ingame-hud__btn-label">Mute all SFX</span>
               </button>
             </div>
@@ -111,7 +111,7 @@
                 <span class="ingame-hud__field-label">Low level warning volume</span>
                 <input id="lowLevelVolumeInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
               </label>
-              <label class="ingame-hud__checkbox-field" for="lowLevelMuteCheckbox">
+              <label class="ingame-hud__checkbox-field" for="lowLevelMuteCheckbox" title="This match only">
                 <input id="lowLevelMuteCheckbox" type="checkbox" />
                 <span>Mute</span>
               </label>
@@ -121,9 +121,54 @@
                 <span class="ingame-hud__field-label">Return-to-base reminder volume</span>
                 <input id="firstShopVolumeInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
               </label>
-              <label class="ingame-hud__checkbox-field" for="firstShopMuteCheckbox">
+              <label class="ingame-hud__checkbox-field" for="firstShopMuteCheckbox" title="This match only">
                 <input id="firstShopMuteCheckbox" type="checkbox" />
                 <span>Mute</span>
+              </label>
+            </div>
+            <div class="ingame-hud__row">
+              <span class="ingame-hud__field-label">Mic Vignette Settings</span>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteGrowSecondsInput">
+                <span class="ingame-hud__field-label">Time to fill (sec)</span>
+                <input id="ingameVignetteGrowSecondsInput" type="number" class="ingame-hud__field-input" min="1" max="120" step="1" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteRecedeSecondsInput">
+                <span class="ingame-hud__field-label">Recede speed (sec)</span>
+                <input id="ingameVignetteRecedeSecondsInput" type="number" class="ingame-hud__field-input" min="0.1" max="30" step="0.1" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteSpeakThresholdInput">
+                <span class="ingame-hud__field-label">Speak threshold</span>
+                <input id="ingameVignetteSpeakThresholdInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="1" step="0.01" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteMaxLevelInput">
+                <span class="ingame-hud__field-label">Max darkness</span>
+                <input id="ingameVignetteMaxLevelInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="1" step="0.01" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteRestingRadiusInput">
+                <span class="ingame-hud__field-label">Resting radius (%)</span>
+                <input id="ingameVignetteRestingRadiusInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteMaxRadiusInput">
+                <span class="ingame-hud__field-label">Max radius (% at full encroach)</span>
+                <input id="ingameVignetteMaxRadiusInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
+              </label>
+            </div>
+            <div class="ingame-hud__row ingame-hud__row--setting">
+              <label class="ingame-hud__field" for="ingameVignetteFeatherInput">
+                <span class="ingame-hud__field-label">Feather amount (%)</span>
+                <input id="ingameVignetteFeatherInput" type="range" class="ingame-hud__field-input ingame-hud__field-input--range" min="0" max="100" step="1" />
               </label>
             </div>
           </div>
