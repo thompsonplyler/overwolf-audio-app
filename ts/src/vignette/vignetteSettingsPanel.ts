@@ -10,6 +10,7 @@
 const BACKEND_BASE = 'http://127.0.0.1:5001';
 
 interface MicVignetteSettings {
+  enabled: boolean;
   speak_threshold: number;
   grow_seconds: number;
   recede_seconds: number;
@@ -54,6 +55,16 @@ function bindNumberInput(id: string, initialValue: number, onChange: (value: num
   });
 }
 
+function bindCheckboxInput(id: string, initialValue: boolean, onChange: (value: boolean) => void): void {
+  const input = document.getElementById(id) as HTMLInputElement | null;
+  if (!input) {
+    console.warn(`[VignetteSettings] ${id} not found in DOM.`);
+    return;
+  }
+  input.checked = initialValue;
+  input.addEventListener('change', () => onChange(input.checked));
+}
+
 /** Wires a settings panel whose input IDs are `${idPrefix}<Field>Input`
  * (e.g. "desktopVignetteGrowSecondsInput", "ingameVignetteGrowSecondsInput").
  * Fetches current values from back/ once and binds each input to POST its
@@ -65,6 +76,7 @@ export async function setupVignetteSettingsPanel(idPrefix: string): Promise<void
     return;
   }
 
+  bindCheckboxInput(`${idPrefix}EnabledInput`, settings.enabled, v => postSettings({ enabled: v }));
   bindNumberInput(`${idPrefix}GrowSecondsInput`, settings.grow_seconds, v => postSettings({ grow_seconds: v }));
   bindNumberInput(`${idPrefix}RecedeSecondsInput`, settings.recede_seconds, v => postSettings({ recede_seconds: v }));
   bindNumberInput(`${idPrefix}SpeakThresholdInput`, settings.speak_threshold, v => postSettings({ speak_threshold: v }));

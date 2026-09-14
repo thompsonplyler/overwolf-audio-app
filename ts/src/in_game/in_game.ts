@@ -76,6 +76,13 @@ type FirstShopReminderState = 'idle' | 'waiting' | 'resolved';
 /** Fountain starting-items shop always happens before this (game seconds). */
 const FIRST_SHOP_BASELINE_WINDOW_SEC = 15;
 
+/** Assist events carry no GEP running-total field to de-dup against (unlike
+ * kill/death -- see applyMejaiStackDelta), so a real distinct assist for the
+ * SAME local player landing within this window of the previous one is
+ * treated as a duplicate delivery instead. A genuine second assist requires
+ * a second champion death, which can't happen this fast. */
+const MEJAI_ASSIST_DEDUP_WINDOW_MS = 500;
+
 function normalizeInventoryForSnapshot(items: unknown[]): string {
   if (!Array.isArray(items)) return '[]';
   const parts = items
@@ -462,6 +469,23 @@ class InGame extends AppWindow {
    * though _mejaiCueFired is already true from mejai_25 itself. */
   private _mejaiReachedMax: boolean = false;
   private _mejai25DeathFired: boolean = false;
+  /** De-dup guards against GEP redelivering an identical raw kill/death/assist
+   * event -- reported live again 2026-09-12 (threshold firing at a real
+   * stack count of ~22, not 25) despite the 2026-08-31 cross-match-reset fix
+   * above, so the cross-match leak wasn't the whole story. Kill/death dedup
+   * anchors on Riot's own running totals (gep_total_champion_kills_match /
+   * gep_death_count, already trusted elsewhere in this file for the same
+   * reason -- see emitDeathOnWebSocket) rather than counting raw event
+   * arrivals: only the ACTUAL increase in that total is applied as a stack
+   * delta, so a redelivered event with an unchanged total contributes
+   * nothing, and a missed event's worth of increase still gets caught up
+   * correctly rather than silently lost. Assists carry no equivalent GEP
+   * total (see the comment on the 'assist' dispatch below), so they only
+   * get a short arrival-time debounce -- weaker, but real distinct assists
+   * for the same local player can't land within it. */
+  private _mejaiLastKillTotal: number = 0;
+  private _mejaiLastDeathTotal: number = 0;
+  private _mejaiLastAssistAtMs: number = 0;
 
   private constructor() {
     super(kWindowNames.inGame);
@@ -977,8 +1001,13 @@ class InGame extends AppWindow {
       // immediately regardless of remaining gold. checkHighGold() below only clears
       // it once gold drops back at/under threshold, which doesn't cover "still above
       // threshold but you just acted on it"; this cuts it off on the spot instead.
+      // Reset to *now*, not null -- null means "never cued" to checkHighGold(),
+      // which made it treat the very next tick as a fresh threshold-cross and
+      // replay the cue immediately if gold was still above threshold post-purchase
+      // (reported live: the cue firing twice back to back). Resetting to the
+      // current time instead just restarts the normal interval cooldown.
       if (itemsChanged && this._lastHighGoldCueTime !== null) {
-        this._lastHighGoldCueTime = null;
+        this._lastHighGoldCueTime = this._playerState.gameTime;
         this.stopAudio('highGold');
       }
 
@@ -994,7 +1023,7 @@ class InGame extends AppWindow {
         const hasActiveItemTarget = this._currentTargetItemId !== null;
         const isHighGoldActive = hasActiveItemTarget ? false : this.checkHighGold();
         if (hasActiveItemTarget && this._lastHighGoldCueTime !== null) {
-          this._lastHighGoldCueTime = null;
+          this._lastHighGoldCueTime = this._playerState.gameTime;
           this.stopAudio('highGold');
         }
         console.log(`[AudioCheck Pre-Cond] shoppingAudioOn=${shoppingAudioOn} hasActiveItemTarget=${hasActiveItemTarget} isHighGoldActive=${isHighGoldActive}`);
@@ -1141,11 +1170,11 @@ class InGame extends AppWindow {
         }
         if (event.name === 'kill') {
           this.emitKillOnWebSocket(event.data);
-          this.applyMejaiStackDelta('kill');
+          this.applyMejaiStackDelta('kill', parseKillEventData(event.data).gep_total_champion_kills_match);
         }
         if (event.name === 'death') {
           this.emitDeathOnWebSocket(event.data);
-          this.applyMejaiStackDelta('death');
+          this.applyMejaiStackDelta('death', parseDeathEventData(event.data).gep_death_count);
         }
         if (event.name === 'assist') {
           // Assists are not currently relayed over the WebSocket at all (no
@@ -2217,6 +2246,9 @@ class InGame extends AppWindow {
     this._mejaiKillsAssistsSincePurchase = 0;
     this._mejaiReachedMax = false;
     this._mejai25DeathFired = false;
+    this._mejaiLastKillTotal = 0;
+    this._mejaiLastDeathTotal = 0;
+    this._mejaiLastAssistAtMs = 0;
   }
 
   private connectWebSocket(): void {
@@ -2299,9 +2331,41 @@ class InGame extends AppWindow {
    * No-ops before Dark Seal is bought, and after any of the mejai_* cues has fired
    * (per the confirmed mutual-exclusion rule -- whichever condition is hit first wins),
    * with one deliberate exception: a death after already hitting 25 stacks still fires
-   * mejai_25_death, since that's a distinct follow-up moment, not a competing one. */
-  private applyMejaiStackDelta(kind: 'kill' | 'assist' | 'death'): void {
+   * mejai_25_death, since that's a distinct follow-up moment, not a competing one.
+   *
+   * `gepTotal` (kill/death only) is Riot's own running total for that stat --
+   * `occurrences` is computed as the ACTUAL increase since the last call,
+   * never assumed to be exactly 1. This is what makes a redelivered
+   * duplicate event a no-op (the total didn't move) while a genuinely missed
+   * event still gets fully caught up (the total jumped by more than 1)
+   * instead of silently under- or over-counting either way. */
+  private applyMejaiStackDelta(kind: 'kill' | 'assist' | 'death', gepTotal?: number): void {
     if (this._mejaiTier === 'none') return;
+
+    let occurrences = 1;
+    if (kind === 'kill' && gepTotal !== undefined && gepTotal > 0) {
+      occurrences = gepTotal - this._mejaiLastKillTotal;
+      this._mejaiLastKillTotal = gepTotal;
+      if (occurrences <= 0) {
+        console.log(`[Mejai] Ignoring duplicate/stale kill event (totalKills=${gepTotal}).`);
+        return;
+      }
+    } else if (kind === 'death' && gepTotal !== undefined && gepTotal > 0) {
+      occurrences = gepTotal - this._mejaiLastDeathTotal;
+      this._mejaiLastDeathTotal = gepTotal;
+      if (occurrences <= 0) {
+        console.log(`[Mejai] Ignoring duplicate/stale death event (deathCount=${gepTotal}).`);
+        return;
+      }
+    } else if (kind === 'assist') {
+      const now = Date.now();
+      if (now - this._mejaiLastAssistAtMs < MEJAI_ASSIST_DEDUP_WINDOW_MS) {
+        console.log('[Mejai] Ignoring assist event arriving right after the previous one (likely duplicate GEP delivery).');
+        return;
+      }
+      this._mejaiLastAssistAtMs = now;
+    }
+
     if (this._mejaiCueFired) {
       if (kind === 'death' && this._mejaiReachedMax && !this._mejai25DeathFired) {
         this._mejai25DeathFired = true;
@@ -2313,8 +2377,8 @@ class InGame extends AppWindow {
     const rates = MEJAI_STACK_RATES[this._mejaiTier];
 
     if (kind === 'kill' || kind === 'assist') {
-      if (this._mejaiTier === 'mejais') this._mejaiKillsAssistsSincePurchase++;
-      const gain = kind === 'kill' ? rates.perKill : rates.perAssist;
+      if (this._mejaiTier === 'mejais') this._mejaiKillsAssistsSincePurchase += occurrences;
+      const gain = (kind === 'kill' ? rates.perKill : rates.perAssist) * occurrences;
       this._mejaiStacks = Math.min(rates.max, this._mejaiStacks + gain);
     } else {
       // Died having bought Mejai's Soulstealer, never landed a kill or assist since --
@@ -2325,9 +2389,9 @@ class InGame extends AppWindow {
         this._mejaiCueFired = true;
         return;
       }
-      this._mejaiStacks = Math.max(0, this._mejaiStacks - rates.lossOnDeath);
+      this._mejaiStacks = Math.max(0, this._mejaiStacks - rates.lossOnDeath * occurrences);
     }
-    console.log(`[Mejai] ${kind} -> tier=${this._mejaiTier} stacks=${this._mejaiStacks}/${rates.max}`);
+    console.log(`[Mejai] ${kind} (x${occurrences}) -> tier=${this._mejaiTier} stacks=${this._mejaiStacks}/${rates.max}`);
     this.checkMejaiThresholds();
   }
 

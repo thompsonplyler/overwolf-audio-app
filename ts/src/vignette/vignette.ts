@@ -4,6 +4,7 @@ const BACKEND_BASE = 'http://127.0.0.1:5001';
 const POLL_INTERVAL_MS = 200;
 
 interface MicVignetteSettings {
+  enabled: boolean;
   max_level: number;
   resting_radius_pct: number;
   max_radius_pct: number;
@@ -82,6 +83,13 @@ class Vignette {
   }
 
   private applySettings(level: number, settings: MicVignetteSettings): void {
+    const vignetteEl = document.getElementById('vignette');
+    if (!settings.enabled) {
+      if (vignetteEl) vignetteEl.style.display = 'none';
+      return;
+    }
+    if (vignetteEl) vignetteEl.style.display = '';
+
     const fraction = settings.max_level > 0 ? Math.max(0, Math.min(1, level / settings.max_level)) : 0;
     const clearRadiusPct =
       settings.resting_radius_pct - fraction * (settings.resting_radius_pct - settings.max_radius_pct);

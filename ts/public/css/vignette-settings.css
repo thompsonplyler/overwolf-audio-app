@@ -54,3 +54,18 @@
   width: 100%;
   accent-color: #ff3232;
 }
+
+.vignette-settings__checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #d5d5d5;
+  cursor: pointer;
+}
+
+.vignette-settings__checkbox-field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #ff3232;
+}

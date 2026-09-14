@@ -27,6 +27,7 @@
 
   <!-- --------------------------------- Main -------------------------------- -->
   <main>
+  <div class="settings-columns">
     <!-- ------------------------- Audio Cue Settings ------------------------ -->
     <section id="audioSettingsPanel" class="audio-settings">
       <h2 class="audio-settings__title">Audio Cue Settings</h2>
@@ -53,6 +54,13 @@
       <p class="vignette-settings__hint">
         Shared with the in-game overlay -- changing a value here or in-game updates both.
       </p>
+
+      <div class="vignette-settings__row">
+        <label class="vignette-settings__checkbox-field" for="desktopVignetteEnabledInput">
+          <input id="desktopVignetteEnabledInput" type="checkbox" />
+          <span>Enable mic vignette</span>
+        </label>
+      </div>
 
       <div class="vignette-settings__row">
         <label class="vignette-settings__field" for="desktopVignetteGrowSecondsInput">
@@ -94,6 +102,7 @@
         </label>
       </div>
     </section>
+  </div>
   </main>
 </body>
 

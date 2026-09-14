@@ -47,8 +47,8 @@
                 "resizable": true,
                 "show_in_taskbar": true,
                 "size": {
-                    "width": 1212,
-                    "height": 699
+                    "width": 1500,
+                    "height": 900
                 }
             },
             "clicker": {

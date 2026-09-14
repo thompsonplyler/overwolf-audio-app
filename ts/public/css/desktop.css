@@ -2,7 +2,7 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0px;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   font-size: 14px;
   background-color: #f6f6f6;
@@ -15,6 +15,24 @@ main {
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Side-by-side settings panels once the window is wide enough; stacks back
+   to one column below that so it still works if the window gets narrowed. */
+.settings-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (min-width: 900px) {
+  .settings-columns {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 a {
