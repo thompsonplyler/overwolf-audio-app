@@ -1726,6 +1726,10 @@ class InGame extends AppWindow {
       this._firstShopReminderState = 'resolved';
       this._firstShopReminderArmedAtGameTime = null;
     }
+    // A purchase (gold dropping below its peak) also ends the song if it already started: like every
+    // other "you messed up" cue, it stops once he does the right thing (Thompson, 2026-10-01). It used
+    // to play to the end because nothing ever stopped the 'firstShopReminder' channel.
+    this.stopAudio('firstShopReminder');
   }
 
   private updateFirstShopGoldTracking(
