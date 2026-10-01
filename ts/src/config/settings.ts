@@ -47,7 +47,8 @@ export type AudioCueId =
     | 'lowLevelLateGame'
     | 'wardPurchased'
     | 'wardPlaced'
-    | 'ultimateAfterKill';
+    | 'ultimateAfterKill'
+    | 'enemySpike';
 
 export const AUDIO_CUE_IDS: AudioCueId[] = [
     'highGold',
@@ -58,6 +59,7 @@ export const AUDIO_CUE_IDS: AudioCueId[] = [
     'wardPurchased',
     'wardPlaced',
     'ultimateAfterKill',
+    'enemySpike',
 ];
 
 /** Human-readable label per cue, for any settings UI that lists them. */
@@ -70,6 +72,7 @@ export const AUDIO_CUE_LABELS: Record<AudioCueId, string> = {
     wardPurchased: 'Enemy ward purchased',
     wardPlaced: 'Enemy ward placed',
     ultimateAfterKill: 'Ultimate after kill/assist',
+    enemySpike: 'Enemy power spike',
 };
 
 export interface CueVolumeSetting {

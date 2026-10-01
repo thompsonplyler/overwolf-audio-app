@@ -28,3 +28,4 @@ yarn-error.log*
 
 # Overwolf docs
 overwolf_docs/ 
+.spike_check/
