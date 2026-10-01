@@ -12,7 +12,9 @@ import RunningGameInfo = overwolf.games.RunningGameInfo;
 
 import WindowState = overwolf.windows.WindowStateEx;
 import { SettingsManager, AudioCueId, AUDIO_CUE_LABELS, STORAGE_KEY } from "../config/settings";
-import { playAudioFile, stopAudioChannel } from "../audio/audio";
+import { playAudioFile, playAudioUrl, stopAudioChannel } from "../audio/audio";
+import { SpikeQueue } from "../audio/spikeQueue";
+import { EnemySpikeTracker, SpikeReport } from "./enemySpikes";
 import { setupVignetteSettingsPanel } from "../vignette/vignetteSettingsPanel";
 import {
   ITEM_PRIORITY,
@@ -41,6 +43,8 @@ const settings = SettingsManager.instance();
 const CONTROL_WARD_ID = 2055;
 const ENEMY_WARD_PURCHASED_AUDIO = '<champion_name>_ward_purchased.mp3'; // Placeholder template
 const ENEMY_WARD_PLACED_AUDIO = '<champion_name>_ward_placed.mp3'; // Placeholder template
+// Enemy power-spike warnings: the backend classifies + voices; see enemySpikes.ts.
+const SPIKE_BACKEND_BASE = 'http://127.0.0.1:5001';
 
 // Item priority now imported from items module
 
@@ -426,6 +430,10 @@ class InGame extends AppWindow {
   // --- Enemy Ward State ---
   // Stores previous ward count for each enemy champion
   private _enemyWardCounts: Record<string, number> = {}; // Key: ChampionName, Value: Count
+  // --- Enemy power-spike warnings ---
+  private _enemySpikes = new EnemySpikeTracker();
+  private _spikeQueue = new SpikeQueue((url, done) =>
+    playAudioUrl(url, settings.getEffectiveCueVolume('enemySpike'), 'enemySpike', done));
 
   // --- WebSocket/Game session state ---
   private _gameListener: OWGameListener | null = null;
@@ -1037,6 +1045,7 @@ class InGame extends AppWindow {
       // NOTE: Ward checks would go here and run regardless of isHighGoldActive
       // this.checkWardStatus();
       this.checkEnemyWardChanges(); // Call the new ward check function
+      this.checkEnemySpikes();
       this.checkLowLevelLateGame();
     } else {
       // Log specific reasons for skipping
@@ -2011,6 +2020,49 @@ class InGame extends AppWindow {
     console.log("[WardCheck] Finished check.");
   }
 
+  // --- Enemy power-spike warnings (boots, upgraded boots, level 6, legendaries) ---
+  private checkEnemySpikes(): void {
+    const myTeam = this._playerState.teamId;
+    if (!myTeam || !this._allPlayersState || this._allPlayersState.length === 0) return;
+    const wasBaselined = this._enemySpikes.isBaselined;
+    const reports = this._enemySpikes.update(this._allPlayersState, myTeam);
+    if (!wasBaselined && this._enemySpikes.isBaselined) {
+      const enemies = this._allPlayersState
+        .filter(p => p.team && p.team !== myTeam && p.championName)
+        .map(p => p.championName as string);
+      console.log('[EnemySpike] baseline taken; pre-warming lines for', enemies);
+      this.postSpike('/api/enemy-spike/prewarm', { champions: enemies });
+    }
+    for (const r of reports) {
+      this.reportEnemySpike(r);
+    }
+  }
+
+  private reportEnemySpike(r: SpikeReport): void {
+    const body = r.kind === 'level'
+      ? { champion: r.champion, kind: 'level', level: r.level }
+      : { champion: r.champion, kind: 'item', item_id: r.itemId };
+    this.postSpike('/api/enemy-spike', body, data => {
+      if (data && typeof data.url === 'string') {
+        this._spikeQueue.enqueue(`${SPIKE_BACKEND_BASE}${data.url}`, String(data.text ?? ''));
+      }
+    });
+  }
+
+  /** Fire-and-forget POST to the backend; a 200 JSON body goes to onOk. Never throws into the game loop. */
+  private postSpike(path: string, body: object, onOk?: (data: any) => void): void {
+    fetch(`${SPIKE_BACKEND_BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then(async res => {
+        if (res.status === 200 && onOk) onOk(await res.json());
+        else if (res.status >= 400) console.warn(`[EnemySpike] ${path} -> ${res.status}`);
+      })
+      .catch(e => console.warn(`[EnemySpike] ${path} failed`, e));
+  }
+
   private setupIngameHudMore(): void {
     if (!this._ingameMoreBtn) {
       console.warn('setupIngameHudMore: ingameMoreBtn not found.');
@@ -2207,6 +2259,8 @@ class InGame extends AppWindow {
     this.resetShoppingAudioForNewMatch();
     this.resetWhatAreYouDoingState();
     this.resetFirstShopReminderState();
+    this._enemySpikes.reset();
+    this._spikeQueue.clear();
     this._flashProbeLastSummonerSpellsJson = '';
     this._flashProbeSeenLiveClientEventIds.clear();
     const game_id = this._currentMatchId || 'unknown';
@@ -2233,6 +2287,8 @@ class InGame extends AppWindow {
     this.resetShoppingAudioForNewMatch();
     this.resetWhatAreYouDoingState();
     this.resetFirstShopReminderState();
+    this._enemySpikes.reset();
+    this._spikeQueue.clear();
     this._flashProbeLastSummonerSpellsJson = '';
     this._flashProbeSeenLiveClientEventIds.clear();
   }
